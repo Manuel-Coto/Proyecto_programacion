@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TipoUnidadMedida.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">InventarioWebAppPRN335</a> &gt; <a href="index.source.html" class="el_package">sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity</a> &gt; <span class="el_source">TipoUnidadMedida.java</span></div><h1>TipoUnidadMedida.java</h1><pre class="source lang-java linenums">package sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+
+@Entity
+@Table(name = &quot;tipo_unidad_medida&quot;, schema = &quot;public&quot;)
+<span class="nc" id="L8">public class TipoUnidadMedida {</span>
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;id_tipo_unidad_medida&quot;, nullable = false)
+    private Integer id;
+
+    @Size(max = 155)
+    @Column(name = &quot;nombre&quot;, length = 155)
+    private String nombre;
+
+    @Column(name = &quot;activo&quot;)
+    private Boolean activo;
+
+    @Size(max = 155)
+    @Column(name = &quot;unidad_base&quot;, length = 155)
+    private String unidadBase;
+
+    @Lob
+    @Column(name = &quot;comentarios&quot;)
+    private String comentarios;
+
+    public Integer getId() {
+<span class="nc" id="L30">        return id;</span>
+    }
+
+    public void setId(Integer id) {
+<span class="nc" id="L34">        this.id = id;</span>
+<span class="nc" id="L35">    }</span>
+
+    public String getNombre() {
+<span class="nc" id="L38">        return nombre;</span>
+    }
+
+    public void setNombre(String nombre) {
+<span class="nc" id="L42">        this.nombre = nombre;</span>
+<span class="nc" id="L43">    }</span>
+
+    public Boolean getActivo() {
+<span class="nc" id="L46">        return activo;</span>
+    }
+
+    public void setActivo(Boolean activo) {
+<span class="nc" id="L50">        this.activo = activo;</span>
+<span class="nc" id="L51">    }</span>
+
+    public String getUnidadBase() {
+<span class="nc" id="L54">        return unidadBase;</span>
+    }
+
+    public void setUnidadBase(String unidadBase) {
+<span class="nc" id="L58">        this.unidadBase = unidadBase;</span>
+<span class="nc" id="L59">    }</span>
+
+    public String getComentarios() {
+<span class="nc" id="L62">        return comentarios;</span>
+    }
+
+    public void setComentarios(String comentarios) {
+<span class="nc" id="L66">        this.comentarios = comentarios;</span>
+<span class="nc" id="L67">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

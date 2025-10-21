@@ -1,0 +1,34 @@
+<!-- /WEB-INF/includes/topbar.xhtml -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:form id="topbarForm">
+        <p:menubar styleClass="topbar">
+
+            <!-- Inicio -->
+            <p:menuitem value="Inicio" url="ManejarTodo.jsf" icon="pi pi-home" />
+
+            <!-- Inventario -->
+            <p:submenu label="Inventario" icon="pi pi-box">
+                <!-- Usa url=*.jsf para evitar problemas con mapeo -->
+                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
+                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
+                <!-- Agrega más módulos aquí -->
+            </p:submenu>
+
+            <!-- Reportes -->
+            <p:submenu label="Reportes" icon="pi pi-chart-bar">
+                <p:menuitem value="Movimientos" url="RptMovimientos.jsf" icon="pi pi-list" />
+            </p:submenu>
+
+            <!-- Acciones a la derecha -->
+            <f:facet name="options">
+                <p:commandButton type="button" value="Ayuda" icon="pi pi-question-circle" styleClass="btn-oscuro" />
+            </f:facet>
+        </p:menubar>
+    </h:form>
+</html>

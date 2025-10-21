@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CaracteristicaDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">InventarioWebAppPRN335</a> &gt; <a href="index.source.html" class="el_package">sv.edu.ues.occ.ingenieria.prn335.inventario.web.control</a> &gt; <span class="el_source">CaracteristicaDAO.java</span></div><h1>CaracteristicaDAO.java</h1><pre class="source lang-java linenums">package sv.edu.ues.occ.ingenieria.prn335.inventario.web.control;
+
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
+
+import java.util.List;
+import java.util.Objects;
+
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Caracteristica;
+
+@Stateless
+public class CaracteristicaDAO extends InventarioDefaultDataAccess&lt;Caracteristica&gt; {
+
+    @PersistenceContext(unitName = &quot;inventarioPU&quot;)
+    private EntityManager em;
+
+    public CaracteristicaDAO() {
+<span class="nc" id="L21">        super(Caracteristica.class);</span>
+<span class="nc" id="L22">    }</span>
+
+    @Override
+    public EntityManager getEntityManager() {
+<span class="nc" id="L26">        return em;</span>
+    }
+
+    /* =========================
+       Consultas especializadas
+       ========================= */
+
+    /** Búsqueda por nombre (LIKE, case-insensitive). */
+    public List&lt;Caracteristica&gt; findByNombreLike(String texto, int first, int max) {
+<span class="nc" id="L35">        Objects.requireNonNull(texto, &quot;texto no puede ser null&quot;);</span>
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        if (first &lt; 0 || max &lt; 1) throw new IllegalArgumentException(&quot;first&gt;=0 y max&gt;=1&quot;);</span>
+
+<span class="nc" id="L38">        CriteriaBuilder cb = em.getCriteriaBuilder();</span>
+<span class="nc" id="L39">        CriteriaQuery&lt;Caracteristica&gt; cq = cb.createQuery(Caracteristica.class);</span>
+<span class="nc" id="L40">        Root&lt;Caracteristica&gt; root = cq.from(Caracteristica.class);</span>
+
+<span class="nc" id="L42">        cq.select(root).where(cb.like(cb.lower(root.get(&quot;nombre&quot;)), &quot;%&quot; + texto.toLowerCase() + &quot;%&quot;))</span>
+<span class="nc" id="L43">                .orderBy(cb.asc(root.get(&quot;id&quot;)));</span>
+
+<span class="nc" id="L45">        TypedQuery&lt;Caracteristica&gt; q = em.createQuery(cq);</span>
+<span class="nc" id="L46">        q.setFirstResult(first);</span>
+<span class="nc" id="L47">        q.setMaxResults(max);</span>
+<span class="nc" id="L48">        return q.getResultList();</span>
+    }
+
+    public int countByNombreLike(String texto) {
+<span class="nc" id="L52">        Objects.requireNonNull(texto, &quot;texto no puede ser null&quot;);</span>
+<span class="nc" id="L53">        CriteriaBuilder cb = em.getCriteriaBuilder();</span>
+<span class="nc" id="L54">        CriteriaQuery&lt;Long&gt; cq = cb.createQuery(Long.class);</span>
+<span class="nc" id="L55">        Root&lt;Caracteristica&gt; root = cq.from(Caracteristica.class);</span>
+
+<span class="nc" id="L57">        cq.select(cb.count(root))</span>
+<span class="nc" id="L58">                .where(cb.like(cb.lower(root.get(&quot;nombre&quot;)), &quot;%&quot; + texto.toLowerCase() + &quot;%&quot;));</span>
+
+<span class="nc" id="L60">        return em.createQuery(cq).getSingleResult().intValue();</span>
+    }
+
+    /** Lista solo activas (activo = true). */
+    public List&lt;Caracteristica&gt; findActivas() {
+<span class="nc" id="L65">        CriteriaBuilder cb = em.getCriteriaBuilder();</span>
+<span class="nc" id="L66">        CriteriaQuery&lt;Caracteristica&gt; cq = cb.createQuery(Caracteristica.class);</span>
+<span class="nc" id="L67">        Root&lt;Caracteristica&gt; root = cq.from(Caracteristica.class);</span>
+
+<span class="nc" id="L69">        cq.select(root)</span>
+<span class="nc" id="L70">                .where(cb.isTrue(root.get(&quot;activo&quot;)))</span>
+<span class="nc" id="L71">                .orderBy(cb.asc(root.get(&quot;id&quot;)));</span>
+
+<span class="nc" id="L73">        return em.createQuery(cq).getResultList();</span>
+    }
+
+    /** Por TipoUnidadMedida (id). */
+    public List&lt;Caracteristica&gt; findByTipoUnidadMedidaId(Integer idTipoUnidadMedida) {
+<span class="nc" id="L78">        Objects.requireNonNull(idTipoUnidadMedida, &quot;idTipoUnidadMedida no puede ser null&quot;);</span>
+
+<span class="nc" id="L80">        CriteriaBuilder cb = em.getCriteriaBuilder();</span>
+<span class="nc" id="L81">        CriteriaQuery&lt;Caracteristica&gt; cq = cb.createQuery(Caracteristica.class);</span>
+<span class="nc" id="L82">        Root&lt;Caracteristica&gt; root = cq.from(Caracteristica.class);</span>
+
+<span class="nc" id="L84">        cq.select(root)</span>
+<span class="nc" id="L85">                .where(cb.equal(root.get(&quot;idTipoUnidadMedida&quot;).get(&quot;id&quot;), idTipoUnidadMedida))</span>
+<span class="nc" id="L86">                .orderBy(cb.asc(root.get(&quot;id&quot;)));</span>
+
+<span class="nc" id="L88">        return em.createQuery(cq).getResultList();</span>
+    }
+
+    /** ¿Existe un nombre exacto (case-insensitive)? Útil para evitar duplicados. */
+    public boolean existsByNombre(String nombre) {
+<span class="nc bnc" id="L93" title="All 4 branches missed.">        if (nombre == null || nombre.isBlank()) return false;</span>
+
+<span class="nc" id="L95">        CriteriaBuilder cb = em.getCriteriaBuilder();</span>
+<span class="nc" id="L96">        CriteriaQuery&lt;Long&gt; cq = cb.createQuery(Long.class);</span>
+<span class="nc" id="L97">        Root&lt;Caracteristica&gt; root = cq.from(Caracteristica.class);</span>
+
+<span class="nc" id="L99">        cq.select(cb.count(root))</span>
+<span class="nc" id="L100">                .where(cb.equal(cb.lower(root.get(&quot;nombre&quot;)), nombre.toLowerCase()));</span>
+
+<span class="nc" id="L102">        Long c = em.createQuery(cq).getSingleResult();</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">        return c != null &amp;&amp; c &gt; 0;</span>
+    }
+
+    /** Activar/Desactivar. */
+    public void setActivo(Integer id, boolean activo) {
+<span class="nc" id="L108">        Objects.requireNonNull(id, &quot;id no puede ser null&quot;);</span>
+<span class="nc" id="L109">        Caracteristica c = em.find(Caracteristica.class, id);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (c != null) {</span>
+<span class="nc" id="L111">            c.setActivo(activo);</span>
+<span class="nc" id="L112">            em.merge(c);</span>
+        }
+<span class="nc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

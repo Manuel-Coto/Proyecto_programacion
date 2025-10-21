@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TipoProductoFrm.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">InventarioWebAppPRN335</a> &gt; <a href="index.source.html" class="el_package">sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet</a> &gt; <span class="el_source">TipoProductoFrm.java</span></div><h1>TipoProductoFrm.java</h1><pre class="source lang-java linenums">package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
+
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ActionEvent;
+import jakarta.faces.model.SelectItem;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+@Named
+@ViewScoped
+public class TipoProductoFrm extends DefaultFrm&lt;TipoProducto&gt; implements Serializable {
+
+    @Inject
+    FacesContext facesContext;
+
+    @Inject
+    TipoProductoDAO tipoProductoDao;
+
+    private List&lt;SelectItem&gt; tiposProductoHierarchy;
+    private Long tipoProductoPadreSeleccionado;
+
+<span class="nc" id="L31">    public TipoProductoFrm() {</span>
+<span class="nc" id="L32">        this.nombreBean = &quot;Tipo de Producto&quot;;</span>
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    protected FacesContext getFacesContext() {
+<span class="nc" id="L37">        return facesContext;</span>
+    }
+
+    @Override
+    protected InventarioDefaultDataAccess&lt;TipoProducto&gt; getDao() {
+<span class="nc" id="L42">        return tipoProductoDao;</span>
+    }
+
+    @Override
+    protected TipoProducto nuevoRegistro() {
+<span class="nc" id="L47">        TipoProducto tp = new TipoProducto();</span>
+<span class="nc" id="L48">        tp.setActivo(true);</span>
+<span class="nc" id="L49">        tipoProductoPadreSeleccionado = null;</span>
+<span class="nc" id="L50">        return tp;</span>
+    }
+
+    @Override
+    protected TipoProducto buscarRegistroPorId(Object id) {
+<span class="nc bnc" id="L55" title="All 6 branches missed.">        if (id != null &amp;&amp; id instanceof Integer buscado &amp;&amp; this.modelo.getWrappedData().isEmpty()) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            for (TipoProducto tp : (Iterable&lt;TipoProducto&gt;) tipoProductoDao.findAll()) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                if (tp.getId().equals(buscado)) {</span>
+<span class="nc" id="L58">                    return tp;</span>
+                }
+<span class="nc" id="L60">            }</span>
+        }
+<span class="nc" id="L62">        return null;</span>
+    }
+
+    @Override
+    protected String getIdAsText(TipoProducto r) {
+<span class="nc bnc" id="L67" title="All 4 branches missed.">        if (r != null &amp;&amp; r.getId() != null) {</span>
+<span class="nc" id="L68">            return r.getId().toString();</span>
+        }
+<span class="nc" id="L70">        return null;</span>
+    }
+
+    @Override
+    protected TipoProducto getIdByText(String id) {
+<span class="nc bnc" id="L75" title="All 6 branches missed.">        if (id != null &amp;&amp; this.modelo != null &amp;&amp; !this.modelo.getWrappedData().isEmpty()) {</span>
+            try {
+<span class="nc" id="L77">                Long buscado = Long.parseLong(id);</span>
+<span class="nc" id="L78">                return this.modelo.getWrappedData().stream()</span>
+<span class="nc bnc" id="L79" title="All 4 branches missed.">                        .filter(r -&gt; r.getId() != null &amp;&amp; r.getId().equals(buscado))</span>
+<span class="nc" id="L80">                        .findFirst()</span>
+<span class="nc" id="L81">                        .orElse(null);</span>
+<span class="nc" id="L82">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L83">                System.err.println(&quot;ID no es un número válido: &quot; + id);</span>
+<span class="nc" id="L84">                return null;</span>
+            }
+        }
+<span class="nc" id="L87">        return null;</span>
+    }
+
+    /**
+     * Carga solo los tipos de producto raíz (padre) para el selector
+     * IMPORTANTE: Solo muestra tipos SIN padre (tipos raíz)
+     */
+    private void cargarTiposProductoHierarchy() {
+        try {
+<span class="nc" id="L96">            tiposProductoHierarchy = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L97">            List&lt;TipoProducto&gt; todosTipos = (List&lt;TipoProducto&gt;) tipoProductoDao.findAll();</span>
+
+<span class="nc bnc" id="L99" title="All 4 branches missed.">            if (todosTipos == null || todosTipos.isEmpty()) {</span>
+<span class="nc" id="L100">                System.out.println(&quot;⚠️ No hay tipos de producto en la base de datos&quot;);</span>
+<span class="nc" id="L101">                return;</span>
+            }
+
+            // Filtrar SOLO los tipos que NO tienen padre (tipos raíz)
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            for (TipoProducto tp : todosTipos) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (tp.getIdTipoProductoPadre() == null) {</span>
+<span class="nc" id="L107">                    tiposProductoHierarchy.add(new SelectItem(tp.getId(), tp.getNombre()));</span>
+<span class="nc" id="L108">                    System.out.println(&quot;✅ Tipo raíz agregado: &quot; + tp.getNombre() + &quot; (ID: &quot; + tp.getId() + &quot;)&quot;);</span>
+                } else {
+<span class="nc" id="L110">                    System.out.println(&quot;⏭️  Ignorado (tiene padre): &quot; + tp.getNombre()</span>
+<span class="nc" id="L111">                            + &quot; -&gt; Padre ID: &quot; + tp.getIdTipoProductoPadre().getId());</span>
+                }
+<span class="nc" id="L113">            }</span>
+
+<span class="nc" id="L115">            System.out.println(&quot;📊 Total de tipos raíz cargados: &quot; + tiposProductoHierarchy.size());</span>
+
+<span class="nc" id="L117">        } catch (Exception e) {</span>
+<span class="nc" id="L118">            System.err.println(&quot;❌ Error al cargar tipos de producto: &quot; + e.getMessage());</span>
+<span class="nc" id="L119">            e.printStackTrace();</span>
+<span class="nc" id="L120">        }</span>
+<span class="nc" id="L121">    }</span>
+
+
+    @Override
+    public void btnGuardarHandler(ActionEvent actionEvent) {
+        try {
+<span class="nc" id="L127">            asignarTipoProductoPadre();</span>
+<span class="nc" id="L128">            super.btnGuardarHandler(actionEvent);</span>
+<span class="nc" id="L129">            cargarTiposProductoHierarchy();</span>
+<span class="nc" id="L130">        } catch (Exception e) {</span>
+<span class="nc" id="L131">            getFacesContext().addMessage(null,</span>
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+<span class="nc" id="L133">                            &quot;Error al guardar&quot;, e.getMessage()));</span>
+<span class="nc" id="L134">        }</span>
+<span class="nc" id="L135">    }</span>
+
+    @Override
+    public void btnModificarHandler(ActionEvent actionEvent) {
+        try {
+<span class="nc" id="L140">            asignarTipoProductoPadre();</span>
+<span class="nc" id="L141">            super.btnModificarHandler(actionEvent);</span>
+<span class="nc" id="L142">            cargarTiposProductoHierarchy();</span>
+<span class="nc" id="L143">        } catch (Exception e) {</span>
+<span class="nc" id="L144">            getFacesContext().addMessage(null,</span>
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+<span class="nc" id="L146">                            &quot;Error al modificar&quot;, e.getMessage()));</span>
+<span class="nc" id="L147">        }</span>
+<span class="nc" id="L148">    }</span>
+
+    @Override
+    public void btnCancelarHandler(ActionEvent actionEvent) {
+<span class="nc" id="L152">        super.btnCancelarHandler(actionEvent);</span>
+<span class="nc" id="L153">        tipoProductoPadreSeleccionado = null;</span>
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    public void btnNuevoHandler(ActionEvent actionEvent) {
+<span class="nc" id="L158">        tipoProductoPadreSeleccionado = null;</span>
+<span class="nc" id="L159">        tiposProductoHierarchy = null; // Limpiar cache</span>
+<span class="nc" id="L160">        cargarTiposProductoHierarchy();</span>
+<span class="nc" id="L161">        super.btnNuevoHandler(actionEvent);</span>
+<span class="nc" id="L162">    }</span>
+
+    /**
+     * Sobrescribe selectionHandler para cargar el tipo padre en el selector
+     */
+    @Override
+    public void selectionHandler(org.primefaces.event.SelectEvent&lt;TipoProducto&gt; r) {
+<span class="nc" id="L169">        super.selectionHandler(r);</span>
+<span class="nc bnc" id="L170" title="All 4 branches missed.">        if (this.registro != null &amp;&amp; this.registro.getIdTipoProductoPadre() != null) {</span>
+<span class="nc" id="L171">            tipoProductoPadreSeleccionado = this.registro.getIdTipoProductoPadre().getId();</span>
+        } else {
+<span class="nc" id="L173">            tipoProductoPadreSeleccionado = null;</span>
+        }
+<span class="nc" id="L175">    }</span>
+
+    /**
+     * Asigna el tipo padre seleccionado al registro
+     */
+    private void asignarTipoProductoPadre() {
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (this.registro != null) {</span>
+<span class="nc bnc" id="L182" title="All 4 branches missed.">            if (tipoProductoPadreSeleccionado != null &amp;&amp; tipoProductoPadreSeleccionado &gt; 0) {</span>
+                // Buscar el tipo padre en la lista de todos los tipos
+<span class="nc" id="L184">                List&lt;TipoProducto&gt; todosTipos = (List&lt;TipoProducto&gt;) tipoProductoDao.findAll();</span>
+<span class="nc" id="L185">                TipoProducto tipoPadre = todosTipos.stream()</span>
+<span class="nc" id="L186">                        .filter(tp -&gt; tp.getId().equals(tipoProductoPadreSeleccionado))</span>
+<span class="nc" id="L187">                        .findFirst()</span>
+<span class="nc" id="L188">                        .orElse(null);</span>
+<span class="nc" id="L189">                this.registro.setIdTipoProductoPadre(tipoPadre);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                System.out.println(&quot;✅ Tipo padre asignado: &quot; + (tipoPadre != null ? tipoPadre.getNombre() : &quot;ninguno&quot;));</span>
+<span class="nc" id="L191">            } else {</span>
+<span class="nc" id="L192">                this.registro.setIdTipoProductoPadre(null);</span>
+<span class="nc" id="L193">                System.out.println(&quot;✅ Tipo padre limpiado (será tipo raíz)&quot;);</span>
+            }
+        }
+<span class="nc" id="L196">    }</span>
+
+    /**
+     * Getter para los tipos de producto - siempre carga fresco
+     */
+    public List&lt;SelectItem&gt; getTiposProductoHierarchy() {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (tiposProductoHierarchy == null) {</span>
+<span class="nc" id="L203">            cargarTiposProductoHierarchy();</span>
+        }
+<span class="nc" id="L205">        return tiposProductoHierarchy;</span>
+    }
+
+    public Long getTipoProductoPadreSeleccionado() {
+<span class="nc" id="L209">        return tipoProductoPadreSeleccionado;</span>
+    }
+
+    public void setTipoProductoPadreSeleccionado(Long tipoProductoPadreSeleccionado) {
+<span class="nc" id="L213">        this.tipoProductoPadreSeleccionado = tipoProductoPadreSeleccionado;</span>
+<span class="nc" id="L214">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
