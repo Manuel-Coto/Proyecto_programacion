@@ -13,6 +13,7 @@
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/ProductoTipoProductoCaracteristica.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/TipoProductoCaracteristica.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/Proveedor.java
+/home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/ProveedorDAO.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/TipoUnidadMedidaFrm.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/Producto.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/InventarioDAOInterface.java
@@ -20,6 +21,7 @@
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/UnidadMedida.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/ProductoTipoProducto.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/TipoUnidadMedidaDAO.java
+/home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/ProveedorFrm.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/CompraDetalle.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/CaracteristicaFrm.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/TipoProductoCaracteristicaFrm.java

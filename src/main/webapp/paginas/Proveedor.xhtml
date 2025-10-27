@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{proveedorFrm.nombreBean}</title>
+
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+<h:body>
+
+    <!-- TOPBAR con URLs .jsf -->
+    <h:form id="topbarForm">
+        <p:menubar styleClass="topbar">
+            <p:submenu label="Inventario" icon="pi pi-box">
+                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
+                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
+                <p:menuitem value="Tipo Unidad Medida" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
+                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
+                <p:menuitem value="TipoProducto-Característica" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
+                <p:menuitem value="Lista de Clientes" url="Clientes.jsf" icon="pi pi-list" />
+                <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-truck" />
+            </p:submenu>
+        </p:menubar>
+    </h:form>
+
+    <h1>#{proveedorFrm.nombreBean}</h1>
+
+    <!-- LISTADO -->
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tabla-top"
+                             lazy="true"
+                             rendered="#{proveedorFrm.estado == 'NADA'}"
+                             rows="#{proveedorFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             value="#{proveedorFrm.modelo}"
+                             var="reg"
+                             selectionMode="single"
+                             selection="#{proveedorFrm.registro}"
+                             rowKey="#{reg.id}">
+
+                    <p:ajax event="rowSelect"
+                            listener="#{proveedorFrm.selectionHandler}"
+                            update=":pnlTabla :pnlDetalle :messages"/>
+
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}" /></p:column>
+                    <p:column headerText="Razón Social"><h:outputText value="#{reg.razonSocial}" /></p:column>
+                    <p:column headerText="NIT"><h:outputText value="#{reg.nit}" /></p:column>
+                    <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
+                    <p:column headerText="Observaciones"><h:outputText value="#{reg.observaciones}" /></p:column>
+                </p:dataTable>
+
+                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                                 icon="pi pi-plus"
+                                 rendered="#{proveedorFrm.estado == 'NADA'}"
+                                 actionListener="#{proveedorFrm.btnNuevoHandler}"
+                                 update=":pnlDetalle :pnlTabla :messages"/>
+
+                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                                 icon="pi pi-times"
+                                 rendered="#{proveedorFrm.estado != 'NADA'}"
+                                 actionListener="#{proveedorFrm.btnCancelarHandler}"
+                                 update=":pnlDetalle :pnlTabla :messages"/>
+            </h:form>
+
+            <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <!-- DETALLE / EDICIÓN -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{proveedorFrm.estado != 'NADA'}">
+            <h:panelGrid columns="2">
+
+                <!-- ID (autogenerado por la BD) -->
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty proveedorFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"
+                                  styleClass="id-info-text"/>
+                    <h:inputText id="txtId"
+                                 value="#{proveedorFrm.registro.id}"
+                                 rendered="#{not empty proveedorFrm.registro.id}"
+                                 disabled="true"/>
+                </h:panelGroup>
+
+                <!-- Nombre -->
+                <h:outputLabel for="txtNombre" value="Nombre:"/>
+                <h:inputTextarea id="txtNombre"
+                                 value="#{proveedorFrm.registro.nombre}"
+                                 rows="2"
+                                 required="true"
+                                 requiredMessage="El nombre es obligatorio."/>
+
+                <!-- Razón Social -->
+                <h:outputLabel for="txtRazon" value="Razón Social:"/>
+                <h:inputTextarea id="txtRazon"
+                                 value="#{proveedorFrm.registro.razonSocial}"
+                                 rows="2"/>
+
+                <!-- NIT -->
+                <h:outputLabel for="txtNit" value="NIT:"/>
+                <h:inputText id="txtNit"
+                             value="#{proveedorFrm.registro.nit}"
+                             maxlength="14"
+                             placeholder="06140101010101"/>
+
+                <!-- Activo -->
+                <h:outputLabel for="chkActivo" value="Activo:"/>
+                <h:selectBooleanCheckbox id="chkActivo"
+                                         value="#{proveedorFrm.registro.activo}"/>
+
+                <!-- Observaciones -->
+                <h:outputLabel for="txtObs" value="Observaciones:"/>
+                <h:inputTextarea id="txtObs"
+                                 value="#{proveedorFrm.registro.observaciones}"
+                                 rows="3" cols="60"
+                                 placeholder="Notas u observaciones"/>
+            </h:panelGrid>
+
+            <h:panelGrid columns="3" style="margin-top: 15px;">
+
+                <p:commandButton value="Crear" styleClass="btn-rojo"
+                                 icon="pi pi-check"
+                                 actionListener="#{proveedorFrm.btnGuardarHandler}"
+                                 rendered="#{proveedorFrm.estado == 'CREAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                                 icon="pi pi-pencil"
+                                 actionListener="#{proveedorFrm.btnModificarHandler}"
+                                 rendered="#{proveedorFrm.estado == 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                                 icon="pi pi-trash"
+                                 actionListener="#{proveedorFrm.btnEliminarHandler}"
+                                 rendered="#{proveedorFrm.estado == 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"/>
+            </h:panelGrid>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>
