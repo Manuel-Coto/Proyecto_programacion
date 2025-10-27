@@ -27,9 +27,9 @@
         <properties.postgresql
                 serverName="localhost"
                 portNumber="5432"
-                databaseName="inventarioprn335"
+                databaseName="parcial1_prn335"
                 user="postgres"
-                password="abc123"/>
+                password="fran123"/>
     </dataSource>
 
 </server>

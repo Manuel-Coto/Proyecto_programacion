@@ -1,6 +1,8 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.control;
 
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -15,7 +17,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoC
 @Stateless
 public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<TipoProductoCaracteristica> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public TipoProductoCaracteristicaDAO() {
@@ -25,6 +27,22 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
     @Override
     public EntityManager getEntityManager() {
         return em;
+    }
+
+    /* ==========================
+       Métodos con flush (CMT)
+       ========================== */
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED) // default en @Stateless, lo dejamos explícito
+    public void crearYFlush(TipoProductoCaracteristica e) {
+        em.persist(e);
+        em.flush(); // dentro de la TX del EJB
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void modificarYFlush(TipoProductoCaracteristica e) {
+        em.merge(e);
+        em.flush(); // dentro de la TX del EJB
     }
 
     /* ==========================
@@ -79,10 +97,10 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         cq.select(cb.count(root))
                 .where(cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto));
 
-        return em.createQuery(cq).getSingleResult().intValue(); // Mantengo int para calzar con tu base
+        return em.createQuery(cq).getSingleResult().intValue();
     }
 
-    /** Trae con fetch los many-to-one para evitar LazyInitialization si necesitas datos completos. */
+    /** Trae con fetch los many-to-one. */
     public List<TipoProductoCaracteristica> findByTipoProductoIdFetch(Long idTipoProducto) {
         Objects.requireNonNull(idTipoProducto, "idTipoProducto no puede ser null");
         EntityManager em = getOrFail();
@@ -90,7 +108,6 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoProductoCaracteristica> cq = cb.createQuery(TipoProductoCaracteristica.class);
         Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
-        // fetch de relaciones ManyToOne (seguro)
         root.fetch("idCaracteristica", JoinType.LEFT);
         root.fetch("idTipoProducto", JoinType.LEFT);
 
@@ -155,13 +172,12 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         CriteriaQuery<TipoProductoCaracteristica> cq = cb.createQuery(TipoProductoCaracteristica.class);
         Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
 
-        cq.select(root)
-                .where(
-                        cb.and(
-                                cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
-                                cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
-                        )
-                );
+        cq.select(root).where(
+                cb.and(
+                        cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
+                        cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
+                )
+        );
 
         List<TipoProductoCaracteristica> lista = em.createQuery(cq).setMaxResults(1).getResultList();
         return lista.isEmpty() ? Optional.empty() : Optional.of(lista.get(0));
@@ -177,13 +193,12 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
 
-        cq.select(cb.count(root))
-                .where(
-                        cb.and(
-                                cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
-                                cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
-                        )
-                );
+        cq.select(cb.count(root)).where(
+                cb.and(
+                        cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
+                        cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
+                )
+        );
 
         Long c = em.createQuery(cq).getSingleResult();
         return c != null && c > 0;
