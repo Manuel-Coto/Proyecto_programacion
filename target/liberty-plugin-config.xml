@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <liberty-plugin-config>
-    <installDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp</installDirectory>
-    <serverDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp/usr/servers/prn335_2025</serverDirectory>
-    <userDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp/usr</userDirectory>
-    <serverOutputDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp/usr/servers/prn335_2025</serverOutputDirectory>
+    <installDirectory>/home/tztyfrank/wlp_25.0.0.8</installDirectory>
+    <serverDirectory>/home/tztyfrank/wlp_25.0.0.8/usr/servers/prn335_2025</serverDirectory>
+    <userDirectory>/home/tztyfrank/wlp_25.0.0.8/usr</userDirectory>
+    <serverOutputDirectory>/home/tztyfrank/wlp_25.0.0.8/usr/servers/prn335_2025</serverOutputDirectory>
     <serverName>prn335_2025</serverName>
-    <configDirectory>/home/manuel/IdeaProjects/InventarioWebApp/src/main/liberty/config</configDirectory>
-    <configFile>/home/manuel/IdeaProjects/InventarioWebApp/src/main/liberty/config/server.xml</configFile>
+    <configDirectory>/home/tztyfrank/Proyecto_programacion/src/main/liberty/config</configDirectory>
+    <configFile>/home/tztyfrank/Proyecto_programacion/src/main/liberty/config/server.xml</configFile>
     <appsDirectory>dropins</appsDirectory>
     <looseApplication>true</looseApplication>
     <stripVersion>false</stripVersion>
@@ -15,9 +15,9 @@
     <assemblyArtifact>
         <type>jar</type>
     </assemblyArtifact>
-    <assemblyInstallDirectory>/home/manuel/IdeaProjects/InventarioWebApp/target/liberty</assemblyInstallDirectory>
+    <assemblyInstallDirectory>/home/tztyfrank/Proyecto_programacion/target/liberty</assemblyInstallDirectory>
     <refresh>false</refresh>
-    <installAppsConfigDropins>/usr/local/openliberty/wlp-25.0.0.8/wlp/usr/servers/prn335_2025/configDropins/defaults/install_apps_configuration_1491924271.xml</installAppsConfigDropins>
+    <installAppsConfigDropins>/home/tztyfrank/wlp_25.0.0.8/usr/servers/prn335_2025/configDropins/defaults/install_apps_configuration_1491924271.xml</installAppsConfigDropins>
     <projectType>war</projectType>
     <projectCompileDependency>jakarta.annotation:jakarta.annotation-api:2.1.1</projectCompileDependency>
     <projectCompileDependency>jakarta.activation:jakarta.activation-api:2.1.0</projectCompileDependency>
