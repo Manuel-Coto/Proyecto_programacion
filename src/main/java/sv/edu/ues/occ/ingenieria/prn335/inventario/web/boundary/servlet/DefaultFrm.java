@@ -9,6 +9,8 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.ProductoTipoProducto;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -208,7 +210,7 @@ public abstract class DefaultFrm<T> implements Serializable {
         this.registro = registro;
     }
 
-    public LazyDataModel<T> getModelo() {
+    public List<ProductoTipoProducto> getModelo() {
         return modelo;
     }
 

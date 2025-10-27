@@ -67,4 +67,9 @@ public class Producto {
         this.comentarios = comentarios;
     }
 
+    public String getNombre() { return getNombreProducto(); }
+
+    public void setNombre(String nombre) { setNombreProducto(nombre); }
+
+
 }

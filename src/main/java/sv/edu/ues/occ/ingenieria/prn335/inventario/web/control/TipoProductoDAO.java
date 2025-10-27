@@ -48,6 +48,17 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
         return em.createQuery(cq).getResultList();
     }
 
+    /** Todos los tipos, con el padre para ayudar a armar la jerarquía en memoria. */
+    public List<TipoProducto> findAllFetchPadre() {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<TipoProducto> cq = cb.createQuery(TipoProducto.class);
+        Root<TipoProducto> r = cq.from(TipoProducto.class);
+        r.fetch("idTipoProductoPadre", JoinType.LEFT);
+        cq.select(r).orderBy(cb.asc(r.get("nombre")));
+        TypedQuery<TipoProducto> q = em.createQuery(cq);
+        return q.getResultList();
+    }
+
     /** Cambiar padre (re-parent). */
     public void move(Long id, Long newParentId) {
         Objects.requireNonNull(id, "id no puede ser null");
@@ -71,5 +82,14 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
         q.setFirstResult(first);
         q.setMaxResults(max);
         return q.getResultList();
+    }
+
+    public TipoProducto findById(Long id) {
+        if (id == null) return null;
+        return em.find(TipoProducto.class, id);
+    }
+
+    public java.util.Optional<TipoProducto> findOptionalById(Long id) {
+        return java.util.Optional.ofNullable(findById(id));
     }
 }
