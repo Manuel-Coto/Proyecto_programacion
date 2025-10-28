@@ -8,14 +8,12 @@
     <meta charset="UTF-8"/>
     <title>#{clienteFrm.nombreBean}</title>
 
-    <!-- Tus estilos -->
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
-    <!-- Iconos Prime -->
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
 </h:head>
 <h:body>
 
-    <!-- Topbar / Menú -->
+    <!-- TOPBAR con URLs .jsf -->
     <h:form id="topbarForm">
         <p:menubar styleClass="topbar">
             <p:submenu label="Inventario" icon="pi pi-box">
@@ -32,12 +30,11 @@
 
     <h1>#{clienteFrm.nombreBean}</h1>
 
-    <!-- Tabla -->
+    <!-- LISTADO -->
     <h:panelGroup id="pnlTabla">
         <h:panelGrid>
             <h:form id="frmTop">
                 <p:dataTable id="tabla-top"
-                             widgetVar="tablaTop"
                              lazy="true"
                              rendered="#{clienteFrm.estado == 'NADA'}"
                              rows="#{clienteFrm.pageSize}"
@@ -48,80 +45,89 @@
                              selectionMode="single"
                              selection="#{clienteFrm.registro}"
                              rowKey="#{reg.id}">
+
                     <p:ajax event="rowSelect"
                             listener="#{clienteFrm.selectionHandler}"
-                            update=":pnlTabla :pnlDetalle"/>
+                            update=":pnlTabla :pnlDetalle :messages"/>
 
-                    <p:column headerText="ID"><h:outputText value="#{reg.id}"/></p:column>
-                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}"/></p:column>
-                    <p:column headerText="DUI"><h:outputText value="#{reg.dui}"/></p:column>
-                    <p:column headerText="NIT"><h:outputText value="#{reg.nit}"/></p:column>
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}" /></p:column>
+                    <p:column headerText="DUI"><h:outputText value="#{reg.dui}" /></p:column>
+                    <p:column headerText="NIT"><h:outputText value="#{reg.nit}" /></p:column>
                     <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
                 </p:dataTable>
 
-                <!-- Botones principales -->
                 <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
                                  rendered="#{clienteFrm.estado == 'NADA'}"
                                  actionListener="#{clienteFrm.btnNuevoHandler}"
-                                 update=":pnlDetalle :frmTop:tabla-top"/>
+                                 update=":pnlDetalle :pnlTabla :messages"/>
 
                 <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
                                  rendered="#{clienteFrm.estado != 'NADA'}"
                                  actionListener="#{clienteFrm.btnCancelarHandler}"
-                                 update=":pnlDetalle :frmTop:tabla-top"/>
+                                 update=":pnlDetalle :pnlTabla :messages"/>
             </h:form>
 
             <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
         </h:panelGrid>
     </h:panelGroup>
 
-    <!-- Detalle -->
-    <h:panelGroup id="pnlDetalle">
+    <!-- DETALLE / EDICIÓN -->
+    <h:panelGroup id="pnlDetalle" style="margin-left: 0; text-align: left;">
         <h:form id="frmCrear" rendered="#{clienteFrm.estado != 'NADA'}">
-            <h:panelGrid columns="2">
-                <!-- ID -->
+            <h:panelGrid columns="2" style="text-align:left;">
                 <h:outputLabel for="txtIdPanel" value="ID:"/>
                 <h:panelGroup id="txtIdPanel">
                     <h:outputText rendered="#{empty clienteFrm.registro.id}"
-                                  value="(Se asignará automáticamente al guardar)"
-                                  styleClass="id-info-text"/>
-                    <h:inputText id="txtId" value="#{clienteFrm.registro.id}"
-                                 rendered="#{not empty clienteFrm.registro.id}" disabled="true"/>
+                                  value="(Se asignará automáticamente al guardar)" />
+                    <h:inputText id="txtId"
+                                 value="#{clienteFrm.registro.id}"
+                                 rendered="#{not empty clienteFrm.registro.id}"
+                                 disabled="true"
+                                 style="width:300px;"/>
                 </h:panelGroup>
 
-                <!-- Nombre -->
                 <h:outputLabel for="txtNombre" value="Nombre:"/>
-                <h:inputText id="txtNombre" value="#{clienteFrm.registro.nombre}" />
+                <h:inputText id="txtNombre"
+                             value="#{clienteFrm.registro.nombre}"
+                             style="width:300px;"
+                             required="true"
+                             requiredMessage="El nombre es obligatorio."/>
 
-                <!-- DUI -->
                 <h:outputLabel for="txtDui" value="DUI:"/>
-                <h:inputText id="txtDui" value="#{clienteFrm.registro.dui}" />
+                <h:inputText id="txtDui"
+                             value="#{clienteFrm.registro.dui}"
+                             maxlength="10"
+                             placeholder="12345678-9"
+                             style="width:200px;"/>
 
-                <!-- NIT -->
                 <h:outputLabel for="txtNit" value="NIT:"/>
-                <h:inputText id="txtNit" value="#{clienteFrm.registro.nit}" />
+                <h:inputText id="txtNit"
+                             value="#{clienteFrm.registro.nit}"
+                             maxlength="20"
+                             placeholder="06140101010101"
+                             style="width:200px;"/>
 
-                <!-- Activo -->
                 <h:outputLabel for="chkActivo" value="Activo:"/>
-                <h:selectBooleanCheckbox id="chkActivo" value="#{clienteFrm.registro.activo}"/>
+                <h:selectBooleanCheckbox id="chkActivo"
+                                         value="#{clienteFrm.registro.activo}"/>
             </h:panelGrid>
 
-            <!-- Botones CRUD -->
-            <h:panelGrid columns="3" style="margin-top: 15px;">
+            <h:panelGrid columns="3" style="margin-top:50px;">
                 <p:commandButton value="Crear" styleClass="btn-rojo"
                                  actionListener="#{clienteFrm.btnGuardarHandler}"
                                  rendered="#{clienteFrm.estado == 'CREAR'}"
-                                 update="messages :frmTop:tabla-top :pnlDetalle" process="@form"/>
+                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
                 <p:commandButton value="Modificar" styleClass="btn-oscuro"
                                  actionListener="#{clienteFrm.btnModificarHandler}"
                                  rendered="#{clienteFrm.estado == 'MODIFICAR'}"
-                                 update="messages :frmTop:tabla-top :pnlDetalle" process="@form"/>
+                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
                 <p:commandButton value="Eliminar" styleClass="btn-rojo"
                                  actionListener="#{clienteFrm.btnEliminarHandler}"
                                  rendered="#{clienteFrm.estado == 'MODIFICAR'}"
-                                 update="messages :frmTop:tabla-top :pnlDetalle"/>
+                                 update=":messages :pnlDetalle :pnlTabla"/>
             </h:panelGrid>
         </h:form>
     </h:panelGroup>

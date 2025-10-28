@@ -23,9 +23,16 @@ public class ClienteFrm extends DefaultFrm<Cliente> implements Serializable {
     @Inject
     ClienteDAO clienteDAO;
 
+    /** 0 = Lista, 1 = Detalle */
+    private int activeIndex = 0;
+
     public ClienteFrm() {
         this.nombreBean = " Lista de Clientes";
     }
+
+    // --- Getter/Setter requeridos por el XHTML ---
+    public int getActiveIndex() { return activeIndex; }
+    public void setActiveIndex(int activeIndex) { this.activeIndex = activeIndex; }
 
     @Override
     protected FacesContext getFacesContext() {
@@ -52,9 +59,7 @@ public class ClienteFrm extends DefaultFrm<Cliente> implements Serializable {
     protected Cliente buscarRegistroPorId(Object id) {
         if (id != null && id instanceof UUID buscado && this.modelo != null && this.modelo.getWrappedData().isEmpty()) {
             for (Cliente cli : (Iterable<Cliente>) clienteDAO.findAll()) {
-                if (buscado.equals(cli.getId())) {
-                    return cli;
-                }
+                if (buscado.equals(cli.getId())) return cli;
             }
         }
         return null;
@@ -72,44 +77,57 @@ public class ClienteFrm extends DefaultFrm<Cliente> implements Serializable {
                 UUID buscado = UUID.fromString(id);
                 return this.modelo.getWrappedData().stream()
                         .filter(r -> r.getId() != null && r.getId().equals(buscado))
-                        .findFirst()
-                        .orElse(null);
+                        .findFirst().orElse(null);
             } catch (IllegalArgumentException e) {
-                System.err.println("ID no es un UUID válido: " + id);
                 return null;
             }
         }
         return null;
     }
 
-    /* ====== Refrescar tabla y paginador tras acciones CRUD ====== */
+    // ================== Navegación de pestañas ==================
 
-    private void refrescarTablaYPaginador() {
-        // Forzar recarga del LazyDataModel
-        this.modelo = null;
-        inicializarRegistros(); // si tu DefaultFrm lo expone
+    @Override
+    public void btnNuevoHandler(ActionEvent e) {
+        super.btnNuevoHandler(e);
+        activeIndex = 1; // ir a Detalle
+    }
 
-        // Volver paginador a la página 0 y limpiar filtros
-        PrimeFaces.current().executeScript(
-                "if (PF('tablaTop')) { PF('tablaTop').clearFilters(); PF('tablaTop').getPaginator().setPage(0); }"
-        );
+    @Override
+    public void selectionHandler(org.primefaces.event.SelectEvent<Cliente> evt) {
+        super.selectionHandler(evt);
+        activeIndex = 1; // abrir Detalle al seleccionar
+    }
+
+    @Override
+    public void btnCancelarHandler(ActionEvent e) {
+        super.btnCancelarHandler(e);
+        activeIndex = 0; // volver a Lista
     }
 
     @Override
     public void btnGuardarHandler(ActionEvent e) {
         super.btnGuardarHandler(e);
-        refrescarTablaYPaginador();
+        refrescarYVolverALista();
     }
 
     @Override
     public void btnModificarHandler(ActionEvent e) {
         super.btnModificarHandler(e);
-        refrescarTablaYPaginador();
+        refrescarYVolverALista();
     }
 
     @Override
     public void btnEliminarHandler(ActionEvent e) {
         super.btnEliminarHandler(e);
-        refrescarTablaYPaginador();
+        refrescarYVolverALista();
+    }
+
+    private void refrescarYVolverALista() {
+        this.modelo = null;
+        inicializarRegistros(); // si tu DefaultFrm lo expone
+        activeIndex = 0;
+        PrimeFaces.current().executeScript(
+                "if(PF('tablaTop')){PF('tablaTop').clearFilters(); PF('tablaTop').getPaginator().setPage(0);}");
     }
 }
