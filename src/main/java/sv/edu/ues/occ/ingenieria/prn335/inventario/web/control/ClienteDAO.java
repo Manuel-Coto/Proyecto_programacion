@@ -3,9 +3,11 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.control;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Cliente;
-import java.util.UUID;
+
 import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 public class ClienteDAO extends InventarioDefaultDataAccess<Cliente> {
@@ -22,72 +24,62 @@ public class ClienteDAO extends InventarioDefaultDataAccess<Cliente> {
         return em;
     }
 
-    /* =======================
-       Métodos personalizados
-       ======================= */
+    /* ========= CRUD (firmas alineadas con la superclase) ========= */
 
-    /** Buscar cliente por ID (UUID) */
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void crear(Cliente c) {
+        if (c == null) return;
+        if (c.getId() == null) c.setId(UUID.randomUUID());
+        em.persist(c);
+        em.flush(); // <-- asegura INSERT inmediato
+    }
+
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void modificar(Cliente c) {
+        if (c == null) return;
+        em.merge(c);
+        em.flush(); // <-- asegura UPDATE inmediato
+    }
+
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void eliminar(Cliente c) {
+        if (c == null) return;
+        em.remove(em.contains(c) ? c : em.merge(c));
+        em.flush(); // <-- asegura DELETE inmediato
+    }
+
+    /* =================== Lecturas / utilitarios =================== */
+
+    @Transactional(Transactional.TxType.SUPPORTS)
     public Cliente buscarRegistroPorId(UUID id) {
         if (id == null) return null;
-        try {
-            return em.find(Cliente.class, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return em.find(Cliente.class, id);
     }
 
-    /** Verificar si ya existe un cliente con el mismo nombre */
+    @Transactional(Transactional.TxType.SUPPORTS)
     public boolean existsByNombre(String nombre) {
-        try {
-            Long count = em.createQuery(
-                            "SELECT COUNT(c) FROM Cliente c WHERE c.nombre = :nombre", Long.class)
-                    .setParameter("nombre", nombre)
-                    .getSingleResult();
-            return count > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        if (nombre == null || nombre.isBlank()) return false;
+        Long total = em.createQuery(
+                        "SELECT COUNT(c) FROM Cliente c WHERE LOWER(c.nombre) = LOWER(:n)", Long.class)
+                .setParameter("n", nombre.trim())
+                .getSingleResult();
+        return total != null && total > 0;
     }
 
-    /** Obtener todos los clientes */
+    @Transactional(Transactional.TxType.SUPPORTS)
     public List<Cliente> findAll() {
-        try {
-            return em.createQuery("SELECT c FROM Cliente c", Cliente.class).getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return em.createQuery("SELECT c FROM Cliente c ORDER BY c.nombre", Cliente.class)
+                .getResultList();
     }
 
-    /** Eliminar un cliente por ID */
-    public void eliminarPorId(UUID id) {
-        try {
-            Cliente cliente = buscarRegistroPorId(id);
-            if (cliente != null) {
-                em.remove(cliente);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /** Modificar un cliente */
-    public void modificar(Cliente cliente) {
-        try {
-            em.merge(cliente);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /** Crear un nuevo cliente */
-    public void crear(Cliente cliente) {
-        try {
-            em.persist(cliente);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    @Transactional(Transactional.TxType.SUPPORTS)
+    public int count() { // coincide con la firma de la base
+        Long total = em.createQuery("SELECT COUNT(c) FROM Cliente c", Long.class)
+                .getSingleResult();
+        return (total == null) ? 0 : total.intValue();
     }
 }
