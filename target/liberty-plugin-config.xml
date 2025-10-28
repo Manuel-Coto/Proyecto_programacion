@@ -5,8 +5,8 @@
     <userDirectory>/home/tztyfrank/wlp_25.0.0.8/usr</userDirectory>
     <serverOutputDirectory>/home/tztyfrank/wlp_25.0.0.8/usr/servers/prn335_2025</serverOutputDirectory>
     <serverName>prn335_2025</serverName>
-    <configDirectory>/home/tztyfrank/Proyecto_programacion/src/main/liberty/config</configDirectory>
-    <configFile>/home/tztyfrank/Proyecto_programacion/src/main/liberty/config/server.xml</configFile>
+    <configDirectory>/home/tztyfrank/Descargas/Proyecto_programacion/src/main/liberty/config</configDirectory>
+    <configFile>/home/tztyfrank/Descargas/Proyecto_programacion/src/main/liberty/config/server.xml</configFile>
     <appsDirectory>dropins</appsDirectory>
     <looseApplication>true</looseApplication>
     <stripVersion>false</stripVersion>
@@ -15,7 +15,7 @@
     <assemblyArtifact>
         <type>jar</type>
     </assemblyArtifact>
-    <assemblyInstallDirectory>/home/tztyfrank/Proyecto_programacion/target/liberty</assemblyInstallDirectory>
+    <assemblyInstallDirectory>/home/tztyfrank/Descargas/Proyecto_programacion/target/liberty</assemblyInstallDirectory>
     <refresh>false</refresh>
     <installAppsConfigDropins>/home/tztyfrank/wlp_25.0.0.8/usr/servers/prn335_2025/configDropins/defaults/install_apps_configuration_1491924271.xml</installAppsConfigDropins>
     <projectType>war</projectType>
