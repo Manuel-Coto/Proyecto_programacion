@@ -3,7 +3,9 @@
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:f="jakarta.faces.core">
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
 <h:head>
     <meta charset="UTF-8"/>
     <title>#{clienteFrm.nombreBean}</title>
@@ -11,22 +13,11 @@
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
 </h:head>
+
 <h:body>
 
-    <!-- TOPBAR con URLs .jsf -->
-    <h:form id="topbarForm">
-        <p:menubar styleClass="topbar">
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <p:menuitem value="Tipo Unidad Medida" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
-                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
-                <p:menuitem value="TipoProducto-Característica" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
-                <p:menuitem value="Lista de Clientes" url="Clientes.jsf" icon="pi pi-list" />
-                <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-truck" />
-            </p:submenu>
-        </p:menubar>
-    </h:form>
+    <!-- Incluir el topbar -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
 
     <h1>#{clienteFrm.nombreBean}</h1>
 
@@ -50,19 +41,19 @@
                             listener="#{clienteFrm.selectionHandler}"
                             update=":pnlTabla :pnlDetalle :messages"/>
 
-                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
-                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}" /></p:column>
-                    <p:column headerText="DUI"><h:outputText value="#{reg.dui}" /></p:column>
-                    <p:column headerText="NIT"><h:outputText value="#{reg.nit}" /></p:column>
-                    <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
+                    <p:column headerText="#{msg['cliente_tablaID']}"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="#{msg['cliente_tablaNombre']}"><h:outputText value="#{reg.nombre}" /></p:column>
+                    <p:column headerText="#{msg['cliente_tablaDUI']}"><h:outputText value="#{reg.dui}" /></p:column>
+                    <p:column headerText="#{msg['cliente_tablaNIT']}"><h:outputText value="#{reg.nit}" /></p:column>
+                    <p:column headerText="#{msg['cliente_tablaEstado']}"><h:outputText value="#{reg.activo ? msg['cliente_estadoActivo'] : msg['cliente_estadoInactivo']}"/></p:column>
                 </p:dataTable>
 
-                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                <p:commandButton id="btnNuevo" value="#{msg['boton.nuevo']}" styleClass="btn-rojo"
                                  rendered="#{clienteFrm.estado == 'NADA'}"
                                  actionListener="#{clienteFrm.btnNuevoHandler}"
                                  update=":pnlDetalle :pnlTabla :messages"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="#{msg['boton.cancelar']}" styleClass="btn-oscuro"
                                  rendered="#{clienteFrm.estado != 'NADA'}"
                                  actionListener="#{clienteFrm.btnCancelarHandler}"
                                  update=":pnlDetalle :pnlTabla :messages"/>
@@ -76,7 +67,7 @@
     <h:panelGroup id="pnlDetalle" style="margin-left: 0; text-align: left;">
         <h:form id="frmCrear" rendered="#{clienteFrm.estado != 'NADA'}">
             <h:panelGrid columns="2" style="text-align:left;">
-                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:outputLabel for="txtIdPanel" value="#{msg['cliente_tablaID']}"/>
                 <h:panelGroup id="txtIdPanel">
                     <h:outputText rendered="#{empty clienteFrm.registro.id}"
                                   value="(Se asignará automáticamente al guardar)" />
@@ -87,28 +78,28 @@
                                  style="width:300px;"/>
                 </h:panelGroup>
 
-                <h:outputLabel for="txtNombre" value="Nombre:"/>
+                <h:outputLabel for="txtNombre" value="#{msg['cliente.form.nombre']}:"/>
                 <h:inputText id="txtNombre"
                              value="#{clienteFrm.registro.nombre}"
                              style="width:300px;"
                              required="true"
-                             requiredMessage="El nombre es obligatorio."/>
+                             requiredMessage="#{msg['cliente.nombre.requerido']}"/>
 
-                <h:outputLabel for="txtDui" value="DUI:"/>
+                <h:outputLabel for="txtDui" value="#{msg['cliente.form.dui']}"/>
                 <h:inputText id="txtDui"
                              value="#{clienteFrm.registro.dui}"
                              maxlength="10"
                              placeholder="12345678-9"
                              style="width:200px;"/>
 
-                <h:outputLabel for="txtNit" value="NIT:"/>
+                <h:outputLabel for="txtNit" value="#{msg['cliente.form.nit']}"/>
                 <h:inputText id="txtNit"
                              value="#{clienteFrm.registro.nit}"
                              maxlength="20"
                              placeholder="06140101010101"
                              style="width:200px;"/>
 
-                <h:outputLabel for="chkActivo" value="Activo:"/>
+                <h:outputLabel for="chkActivo" value="#{msg['cliente.form.activo']}"/>
                 <h:selectBooleanCheckbox id="chkActivo"
                                          value="#{clienteFrm.registro.activo}"/>
             </h:panelGrid>
@@ -119,12 +110,12 @@
                                  rendered="#{clienteFrm.estado == 'CREAR'}"
                                  update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                <p:commandButton value="#{msg['boton.modificar']}" styleClass="btn-oscuro"
                                  actionListener="#{clienteFrm.btnModificarHandler}"
                                  rendered="#{clienteFrm.estado == 'MODIFICAR'}"
                                  update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                <p:commandButton value="#{msg['boton.eliminar']}" styleClass="btn-rojo"
                                  actionListener="#{clienteFrm.btnEliminarHandler}"
                                  rendered="#{clienteFrm.estado == 'MODIFICAR'}"
                                  update=":messages :pnlDetalle :pnlTabla"/>
