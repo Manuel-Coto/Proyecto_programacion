@@ -14,16 +14,6 @@
 
 <h:body>
 
-    <h:form id="topbarForm">
-        <p:menubar>
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <p:menuitem value="Productos" url="Producto.jsf" icon="pi pi-database" />
-                <p:menuitem value="Producto-Tipo" url="ProductoTipoProducto.jsf" icon="pi pi-link" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
-            </p:submenu>
-        </p:menubar>
-    </h:form>
 
     <h1>#{productoTipoProductoFrm.nombreBean}</h1>
 
@@ -49,13 +39,11 @@
                 <p:column headerText="Fecha creación" style="width:210px"><h:outputText value="#{n.fechaCreacion}" /></p:column>
             </p:dataTable>
 
-            <p:commandButton id="btnNuevo" value="Nueva Relación" styleClass="btn-rojo"
                              rendered="#{productoTipoProductoFrm.modoLista}"
                              actionListener="#{productoTipoProductoFrm.btnNuevoHandler}"
                              process="@this" immediate="true"
                              update=":pnlDetalle :pnlTabla :frmTop:messages"/>
 
-            <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
                              rendered="#{productoTipoProductoFrm.modoDetalle}"
                              actionListener="#{productoTipoProductoFrm.btnCancelarHandler}"
                              process="@this" immediate="true"
@@ -72,7 +60,6 @@
 
                 <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
 
-                    <!-- ID -->
                     <h:outputLabel for="txtIdPanel" value="ID:"/>
                     <h:panelGroup id="txtIdPanel">
                         <h:outputText rendered="#{empty productoTipoProductoFrm.registro.id}"
@@ -80,8 +67,6 @@
                         <h:inputText id="txtId" value="#{productoTipoProductoFrm.registro.id}"
                                      rendered="#{not empty productoTipoProductoFrm.registro.id}" disabled="true"/>
                     </h:panelGroup>
-
-                    <!-- Producto (diálogo conservado) -->
                     <h:outputLabel for="txtProducto" value="Producto:"/>
                     <h:panelGroup>
                         <h:inputText id="txtProducto"
@@ -93,8 +78,6 @@
                                          oncomplete="PF('dlgBuscarProdWV').show();"
                                          style="margin-left:8px"/>
                     </h:panelGroup>
-
-                    <!-- Tipo de Producto con AUTOCOMPLETE -->
                     <h:outputLabel for="acTipo" value="Tipo de Producto:"/>
                     <p:autoComplete id="acTipo"
                                     value="#{productoTipoProductoFrm.registro.idTipoProducto}"
@@ -109,36 +92,21 @@
                                 listener="#{productoTipoProductoFrm.onTipoSelect}"
                                 update=":pnlDetalle :frmTop:messages"/>
                     </p:autoComplete>
-
-                    <!-- Activo -->
                     <h:outputLabel for="chkActivo" value="Activo:"/>
                     <h:selectBooleanCheckbox id="chkActivo" value="#{productoTipoProductoFrm.registro.activo}"/>
-
-                    <!-- Fecha -->
                     <h:outputLabel for="txtFec" value="Fecha de Creación:"/>
                     <h:inputText id="txtFec" value="#{productoTipoProductoFrm.fechaCreacionTexto}" disabled="true"/>
-
-                    <!-- Observaciones -->
                     <h:outputLabel for="txtObs" value="Observaciones:"/>
                     <h:inputTextarea id="txtObs" value="#{productoTipoProductoFrm.registro.observaciones}" rows="3" styleClass="inp"/>
                 </p:panelGrid>
-
                 <!-- Sección de características -->
-                <h:panelGroup id="pnlCar"
-                              rendered="#{productoTipoProductoFrm.mostrarSeccionCaracteristicas}"
-                              layout="block" style="margin-top:14px;">
                     <h:panelGrid columns="2" columnClasses="col-field,col-field" style="width:100%">
                         <p:panel header="Características disponibles del tipo" toggleable="true">
-                            <p:dataList value="#{productoTipoProductoFrm.carDisponibles}" var="tpc"
-                                        emptyMessage="Sin características para este tipo">
                                 <h:outputText value="#{tpc.idCaracteristica.nombre}" />
-                                <h:outputText value=" (Obligatoria)" rendered="#{tpc.obligatorio}" style="font-style:italic; margin-left:6px"/>
                             </p:dataList>
                         </p:panel>
 
                         <p:panel header="Características asignadas (obligatorias)" toggleable="true">
-                            <p:dataList value="#{productoTipoProductoFrm.carAsignadas}" var="tpc"
-                                        emptyMessage="(Aún no hay obligatorias)">
                                 <h:outputText value="#{tpc.idCaracteristica.nombre}" />
                             </p:dataList>
                         </p:panel>
@@ -146,15 +114,12 @@
                 </h:panelGroup>
 
                 <p:panelGrid columns="3" style="margin-top: 15px;">
-                    <p:commandButton value="Crear" styleClass="btn-rojo"
                                      actionListener="#{productoTipoProductoFrm.btnGuardarHandler}"
                                      rendered="#{productoTipoProductoFrm.estado.name() eq 'CREAR'}"
                                      update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
-                    <p:commandButton value="Modificar" styleClass="btn-oscuro"
                                      actionListener="#{productoTipoProductoFrm.btnModificarHandler}"
                                      rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
                                      update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
-                    <p:commandButton value="Eliminar" styleClass="btn-rojo"
                                      actionListener="#{productoTipoProductoFrm.btnEliminarHandler}"
                                      rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
                                      update=":frmTop:messages :pnlDetalle :pnlTabla"/>

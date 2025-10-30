@@ -11,8 +11,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
-
 @Stateless
 public class ProductoDAO extends InventarioDefaultDataAccess<Producto> {
 

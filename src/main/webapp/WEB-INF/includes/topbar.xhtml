@@ -9,39 +9,25 @@
 <h:form id="topbarForm">
     <p:menubar styleClass="topbar">
 
-        <!-- Inicio -->
-        <!--<p:menuitem value="Inicio" url="ManejarTodo.jsf" icon="pi pi-home" />-->
+        <!-- Tipos -->
+        <p:submenu label="Tipos" icon="pi pi-box">
+            <!-- Usa url=*.jsf para evitar problemas con mapeo -->
+            <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
+            <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
+            <p:menuitem value="Tipo Unidad de Medida" url="TipoUnidadMedida.jsf" icon="pi pi-balance-scale" />
 
-        <!-- Inventario -->
-        <p:submenu label="Inventario" icon="pi pi-box">
-            <p:menuitem value="#{msg['topbar.TipoAlmacen']}" url="TipoAlmacen.jsf" icon="pi pi-building" />
-            <p:menuitem value="#{msg['topbar.TipoProducto']}" url="TipoProducto.jsf" icon="pi pi-tags" />
-            <p:menuitem value="#{msg['topbar.TipoUnidadMedida']}" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
-            <p:menuitem value="#{msg['topbar.Característica']}" url="Caracteristica.jsf" icon="pi pi-list" />
-            <p:menuitem value="#{msg['topbar.TipoProducto-Característica']}" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
-            <p:menuitem value="#{msg['topbar.ListadeClientes']}" url="Clientes.jsf" icon="pi pi-list" />
-            <p:menuitem value="#{msg['topbar.Proveedores']}" url="Proveedor.jsf" icon="pi pi-truck" />
         </p:submenu>
 
-        <!-- Reportes -->
-        <!--<p:submenu label="Reportes" icon="pi pi-chart-bar">
-            <p:menuitem value="Movimientos" url="RptMovimientos.jsf" icon="pi pi-list" />
-        </p:submenu>-->
-
-        <!-- Selector de idioma (dropdown) -->
-        <f:facet name="options">
-            <h:form class="language-selector">
-                <p:selectOneMenu value="#{idiomas.idioma}"
-                                 styleClass="idioma-dropdown">
-                    <f:selectItem itemLabel="#{msg['idioma.espanol']}" itemValue="es" />
-                    <f:selectItem itemLabel="#{msg['idioma.ingles']}" itemValue="en" />
-                    <p:ajax event="change" listener="#{idiomas.cambiarIdioma(idiomas.idioma)}" update="@all" />
-                </p:selectOneMenu>
-            </h:form>
-
-        </f:facet>
+        <!-- Especificos -->
+        <p:submenu label="Especificos" icon="pi pi-chart-bar">
+            <p:menuitem value="Producto" url="Producto.jsf" icon="pi pi-boxes" />
+            <p:menuitem value="Almacén" url="Almacen.jsf" icon="pi pi-warehouse" />
+            <p:menuitem value="Unidad de Medida" url="UnidadMedida.jsf" icon="pi pi-ruler" />
+            <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-sliders-h" />
+            <p:menuitem value="Clientes" url="Clientes.jsf" icon="pi pi-users" />
+            <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-user-plus" />
+        </p:submenu>
 
     </p:menubar>
 </h:form>
-
 </html>

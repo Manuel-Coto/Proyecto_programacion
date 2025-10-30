@@ -4,12 +4,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -29,18 +28,18 @@ public abstract class DefaultFrm<T> implements Serializable {
     protected T registro;
     protected abstract T nuevoRegistro();
     protected abstract T buscarRegistroPorId(Object id);
-    protected abstract String getIdAsText(T r);
-    protected abstract T getIdByText(String id);
+    abstract protected String getIdAsText(T r);
+    abstract protected T getIdByText(String id);
 
-    protected int pageSize = 8;
-
+    protected int pageSize=8;
     @PostConstruct
     public void inicializar() {
         inicializarRegistros();
     }
 
-    public void inicializarRegistros() {
+    public void inicializarRegistros(){
         this.modelo = new LazyDataModel<T>() {
+
             @Override
             public String getRowKey(T object) {
                 if (object != null) {
@@ -52,6 +51,7 @@ public abstract class DefaultFrm<T> implements Serializable {
                 }
                 return null;
             }
+
 
             @Override
             public T getRowData(String rowKey) {
@@ -76,7 +76,7 @@ public abstract class DefaultFrm<T> implements Serializable {
             }
 
             @Override
-            public List<T> load(int first, int max, Map<String, SortMeta> sort, Map<String, FilterMeta> filter) {
+            public List<T> load(int first, int max, Map<String, SortMeta> map, Map<String, FilterMeta> map1) {
                 try {
                     return getDao().findRange(first, max);
                 } catch (Exception e) {
@@ -91,25 +91,29 @@ public abstract class DefaultFrm<T> implements Serializable {
         if (r != null) {
             this.registro = r.getObject();
             this.estado = ESTADO_CRUD.MODIFICAR;
+            System.out.println("✅ Registro seleccionado: " + this.registro);
+        } else {
+            System.out.println("⚠ Evento de selección nulo");
         }
     }
 
-    public void btnNuevoHandler(ActionEvent e) {
+    public void btnNuevoHandler(ActionEvent actionEvent) {
         this.registro = nuevoRegistro();
         this.estado = ESTADO_CRUD.CREAR;
     }
 
-    public void btnCancelarHandler(ActionEvent e) {
+    public void btnCancelarHandler(ActionEvent actionEvent) {
         this.registro = null;
         this.estado = ESTADO_CRUD.NADA;
     }
 
-    public void btnGuardarHandler(ActionEvent e) {
+    public void btnGuardarHandler(ActionEvent actionEvent) {
         if (this.registro != null) {
             try {
                 if (esNombreVacio(this.registro)) {
                     getFacesContext().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "El nombre no puede estar vacío"));
+                            new FacesMessage(FacesMessage.SEVERITY_WARN,
+                                    "Atención", "El nombre no puede estar vacío"));
                     return;
                 }
                 getDao().crear(this.registro);
@@ -118,15 +122,22 @@ public abstract class DefaultFrm<T> implements Serializable {
                 this.modelo = null;
                 inicializarRegistros();
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro guardado correctamente"));
-            } catch (Exception ex) {
+                        new FacesMessage(FacesMessage.SEVERITY_INFO,
+                                "Éxito", "Registro guardado correctamente"));
+            } catch (Exception e) {
+                e.printStackTrace();
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar", ex.getMessage()));
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error al guardar", e.getMessage()));
             }
+        } else {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                            "Atención", "No hay registro para guardar"));
         }
     }
 
-    public void btnEliminarHandler(ActionEvent e) {
+    public void btnEliminarHandler(ActionEvent actionEvent) {
         if (this.registro != null) {
             try {
                 getDao().eliminar(this.registro);
@@ -134,48 +145,82 @@ public abstract class DefaultFrm<T> implements Serializable {
                 this.estado = ESTADO_CRUD.NADA;
                 inicializarRegistros();
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro eliminado correctamente"));
-            } catch (Exception ex) {
+                        new FacesMessage(FacesMessage.SEVERITY_INFO,
+                                "Éxito", "Registro eliminado correctamente"));
+            } catch (Exception e) {
+                System.err.println("Error en eliminación:");
+                e.printStackTrace();
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al eliminar", ex.getMessage()));
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error al eliminar", e.getMessage()));
             }
         }
     }
 
-    public void btnModificarHandler(ActionEvent e) {
+    public void btnModificarHandler(ActionEvent actionEvent) {
         try {
             this.getDao().modificar(this.registro);
-            getFacesContext().addMessage(null,
+            FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Modificado correctamente", null));
             this.estado = ESTADO_CRUD.NADA;
-            inicializarRegistros();
-        } catch (Exception ex) {
-            getFacesContext().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", ex.getMessage()));
+            inicializarRegistros(); // recargá la tabla
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", e.getMessage()));
         }
     }
 
     private boolean esNombreVacio(T registro) {
         try {
-            var m = registro.getClass().getMethod("getNombre");
-            String nombre = (String) m.invoke(registro);
+            // Usar reflexión para obtener el nombre
+            java.lang.reflect.Method metodoGetNombre = registro.getClass().getMethod("getNombre");
+            String nombre = (String) metodoGetNombre.invoke(registro);
+
             return nombre == null || nombre.trim().isEmpty();
+
         } catch (Exception e) {
-            return false; // si no hay getNombre(), no aplica esta validación
+            System.err.println("Error validando nombre: " + e.getMessage());
+            return true; // Si hay error, consideramos que está vacío
         }
     }
 
-    public ESTADO_CRUD getEstado() { return estado; }
-    public void setEstado(ESTADO_CRUD estado) { this.estado = estado; }
-    public String getNombreBean() { return nombreBean; }
-    public void setNombreBean(String nombreBean) { this.nombreBean = nombreBean; }
-    public T getRegistro() { return registro; }
-    public void setRegistro(T registro) { this.registro = registro; }
+    public ESTADO_CRUD getEstado() {
+        return estado;
+    }
 
-    /* >>> CORRECTO: el modelo es LazyDataModel<T> */
-    public LazyDataModel<T> getModelo() { return modelo; }
-    public void setModelo(LazyDataModel<T> modelo) { this.modelo = modelo; }
+    public void setEstado(ESTADO_CRUD estado) {
+        this.estado = estado;
+    }
 
-    public int getPageSize() { return pageSize; }
-    public void setPageSize(int pageSize) { this.pageSize = pageSize; }
+    public String getNombreBean() {
+        return nombreBean;
+    }
+
+    public void setNombreBean(String nombreBean) {
+        this.nombreBean = nombreBean;
+    }
+
+    public T getRegistro() {
+        return registro;
+    }
+
+    public void setRegistro(T registro) {
+        this.registro = registro;
+    }
+
+    public LazyDataModel<T> getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(LazyDataModel<T> modelo) {
+        this.modelo = modelo;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
 }

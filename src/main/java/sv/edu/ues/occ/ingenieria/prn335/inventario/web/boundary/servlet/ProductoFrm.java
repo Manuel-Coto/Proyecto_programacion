@@ -7,13 +7,8 @@ import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
-import java.io.Serializable;
-import java.util.UUID;
-
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
-
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;

@@ -3,49 +3,23 @@
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
-
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
 <h:head>
     <meta charset="UTF-8"/>
     <title>#{tipoAlmacenFrm.nombreBean}</title>
 
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
 </h:head>
-
 <h:body>
 
-    <!-- Topbar (incluye el selector de idioma) -->
-    <h:form id="topbarForm">
-        <p:menubar styleClass="topbar">
+    <!-- Topbar  -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
 
-            <!-- Menú de Inventario -->
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <p:menuitem value="Tipo Unidad Medida" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
-                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
-                <p:menuitem value="TipoProducto-Característica" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
-                <p:menuitem value="Lista de Clientes" url="Clientes.jsf" icon="pi pi-list" />
-                <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-truck" />
-            </p:submenu>
-
-            <!-- Selector de idioma -->
-            <f:facet name="options">
-                <p:selectOneMenu value="#{idiomas.idioma}" styleClass="idioma-dropdown">
-                    <f:selectItem itemLabel="#{msg['idioma.espanol']}" itemValue="es" />
-                    <f:selectItem itemLabel="#{msg['idioma.ingles']}" itemValue="en" />
-                    <p:ajax event="change" listener="#{idiomas.cambiarIdioma(idiomas.idioma)}" update="@all" />
-                </p:selectOneMenu>
-            </f:facet>
-        </p:menubar>
-    </h:form>
-
-    <!-- Título de página -->
     <h1>#{tipoAlmacenFrm.nombreBean}</h1>
 
-    <!-- Tabla principal -->
     <h:panelGroup id="pnlTabla">
         <h:panelGrid>
             <h:form id="frmTop">
@@ -58,105 +32,60 @@
                              value="#{tipoAlmacenFrm.modelo}"
                              var="reg"
                              selectionMode="single"
-                             selection="#{tipoAlmacenFrm.registro}"
-                             rowKey="#{reg.id}">
-                    <p:ajax event="rowSelect"
-                            listener="#{tipoAlmacenFrm.selectionHandler}"
-                            update=":pnlTabla :pnlDetalle"/>
-                    <p:column headerText="#{msg['TipoAlmacen_tablaID']}">
-                        <h:outputText value="#{reg.id}" />
-                    </p:column>
-                    <p:column headerText="#{msg['TipoAlmacen_tablaNombre']}">
-                        <h:outputText value="#{reg.nombre}" />
-                    </p:column>
-                    <p:column headerText="#{msg['TipoAlmacen_tablaEstado']}">
-                        <h:outputText value="#{reg.activo ? msg['tipoAlmacen.estado.activo'] : msg['tipoAlmacen.estado.inactivo']}"/>
-                    </p:column>
-                    <p:column headerText="#{msg['TipoAlmacen_tablaObservaciones']}">
-                        <!-- Usamos 'obsevaciones' tal como en la entidad -->
-                        <h:outputText value="#{reg.obsevaciones}" />
-                    </p:column>
+                             selection="#{tipoAlmacenFrm.registro}" rowKey="#{reg.id}">
+                    <p:ajax event="rowSelect" listener="#{tipoAlmacenFrm.selectionHandler}" update=":pnlTabla :pnlDetalle"/>
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}" /></p:column>
+                    <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
+                    <p:column headerText="Observaciones"><h:outputText value="#{reg.obsevaciones}" /></p:column>
                 </p:dataTable>
 
                 <!-- Botones principales -->
-                <p:commandButton id="btnNuevo"
-                                 value="#{msg['boton.nuevo']}"
-                                 styleClass="btn-rojo"
+                <p:commandButton id="btnNuevo" value="Nuevo Tipo Almacen" styleClass="btn-rojo"
                                  rendered="#{tipoAlmacenFrm.estado == 'NADA'}"
-                                 actionListener="#{tipoAlmacenFrm.btnNuevoHandler}"
-                                 update=":pnlDetalle :pnlTabla"/>
+                                 actionListener="#{tipoAlmacenFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
 
-                <p:commandButton id="btnCancelar"
-                                 value="#{msg['boton.cancelar']}"
-                                 styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="Cancelar Tipo Almacen" styleClass="btn-oscuro"
                                  rendered="#{tipoAlmacenFrm.estado != 'NADA'}"
-                                 actionListener="#{tipoAlmacenFrm.btnCancelarHandler}"
-                                 update=":pnlDetalle :pnlTabla"/>
+                                 actionListener="#{tipoAlmacenFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
             </h:form>
 
             <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
         </h:panelGrid>
     </h:panelGroup>
 
-    <!-- Formulario de detalle / creación / edición -->
     <h:panelGroup id="pnlDetalle">
         <h:form id="frmCrear" rendered="#{tipoAlmacenFrm.estado != 'NADA'}">
-            <h:panelGrid id="gridDetalle"
-                         columns="2"
-                         columnClasses="label,component"
-                         cellpadding="5"
-                         style="width:100%;">
-
-                <!-- ID: se muestran siempre pares gracias a ui:fragment -->
-                <ui:fragment rendered="#{empty tipoAlmacenFrm.registro.id}">
-                    <h:outputLabel value="#{msg['TipoAlmacen_tablaID']}:"/>
-                    <h:outputText value="#{msg['tipoAlmacen.id.autogenerado']}"
+            <h:panelGrid columns="2">
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty tipoAlmacenFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"
                                   styleClass="id-info-text"/>
-                </ui:fragment>
+                    <h:inputText id="txtId" value="#{tipoAlmacenFrm.registro.id}"
+                                 rendered="#{not empty tipoAlmacenFrm.registro.id}" disabled="true"/>
+                </h:panelGroup>
 
-                <ui:fragment rendered="#{not empty tipoAlmacenFrm.registro.id}">
-                    <h:outputLabel for="txtId" value="#{msg['TipoAlmacen_tablaID']}:"/>
-                    <h:inputText id="txtId"
-                                 value="#{tipoAlmacenFrm.registro.id}"
-                                 disabled="true"/>
-                </ui:fragment>
-
-                <!-- Nombre -->
-                <h:outputLabel for="txtNombre" value="#{msg['tipoAlmacen.form.nombre']}"/>
-                <h:inputText id="txtNombre"
-                             value="#{tipoAlmacenFrm.registro.nombre}"
-                             required="true"
-                             requiredMessage="#{msg['tipoAlmacen.validacion.nombreObligatorio']}"/>
-
-                <!-- Activo -->
-                <h:outputLabel for="chkActivo" value="#{msg['tipoAlmacen.form.activo']}"/>
-                <h:selectBooleanCheckbox id="chkActivo"
-                                         value="#{tipoAlmacenFrm.registro.activo}"/>
-
-                <!-- Observaciones -->
-                <h:outputLabel for="txtObservaciones" value="#{msg['tipoAlmacen.form.observaciones']}"/>
-                <h:inputText id="txtObservaciones"
-                             value="#{tipoAlmacenFrm.registro.obsevaciones}"
-                             size="80"/>
+                <h:outputLabel for="txtNombre" value="Nombre:"/>
+                <h:inputText id="txtNombre" value="#{tipoAlmacenFrm.registro.nombre}"/>
+                <h:outputLabel for="chkActivo" value="Activo:"/>
+                <h:selectBooleanCheckbox id="chkActivo" value="#{tipoAlmacenFrm.registro.activo}"/>
+                <h:outputLabel for="txtObservaciones" value="Observaciones:"/>
+                <h:inputText id="txtObservaciones" value="#{tipoAlmacenFrm.registro.obsevaciones}" size="80"/>
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="#{msg['boton.crear']}"
-                                 styleClass="btn-rojo"
+                <p:commandButton value="Crear Tipo Almacen" styleClass="btn-rojo"
                                  actionListener="#{tipoAlmacenFrm.btnGuardarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'CREAR'}"
-                                 update="messages :pnlDetalle :pnlTabla"
-                                 process="@form"/>
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="#{msg['boton.modificar']}"
-                                 styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Tipo Almacen" styleClass="btn-oscuro"
                                  actionListener="#{tipoAlmacenFrm.btnModificarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'MODIFICAR'}"
-                                 update="messages :pnlDetalle :pnlTabla"
-                                 process="@form"/>
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="#{msg['boton.eliminar']}"
-                                 styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Tipo Almacen" styleClass="btn-rojo"
                                  actionListener="#{tipoAlmacenFrm.btnEliminarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla"/>

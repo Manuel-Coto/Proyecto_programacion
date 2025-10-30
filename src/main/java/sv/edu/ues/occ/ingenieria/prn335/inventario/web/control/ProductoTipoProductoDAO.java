@@ -4,13 +4,10 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.ProductoTipoProducto;
 
 @Stateless
 public class ProductoTipoProductoDAO extends InventarioDefaultDataAccess<ProductoTipoProducto> {

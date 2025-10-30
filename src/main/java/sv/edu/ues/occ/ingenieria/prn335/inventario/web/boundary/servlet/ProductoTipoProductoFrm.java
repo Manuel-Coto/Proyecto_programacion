@@ -7,20 +7,7 @@ import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
 import org.primefaces.event.SelectEvent;
-import org.primefaces.model.LazyDataModel;
-
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoTipoProductoDAO;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoCaracteristicaDAO;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.ProductoTipoProducto;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
@@ -198,12 +185,8 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
                 mostrarSeccionCaracteristicas = true;
                 return;
             }
-            carDisponibles = new ArrayList<>(todas);
-            List<TipoProductoCaracteristica> oblig = new ArrayList<>();
             for (TipoProductoCaracteristica tpc : todas) {
-                if (Boolean.TRUE.equals(tpc.getObligatorio())) oblig.add(tpc);
             }
-            carAsignadas = oblig; // prefill con obligatorias
             mostrarSeccionCaracteristicas = true;
         } catch (Exception e) {
             carDisponibles = Collections.emptyList();
@@ -241,8 +224,4 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
     public List<TipoProductoCaracteristica> getCarDisponibles() { return carDisponibles; }
     public List<TipoProductoCaracteristica> getCarAsignadas() { return carAsignadas; }
 
-    @SuppressWarnings("unchecked")
-    public LazyDataModel<ProductoTipoProducto> getModeloTipado() {
-        return (LazyDataModel<ProductoTipoProducto>) super.getModelo();
-    }
 }

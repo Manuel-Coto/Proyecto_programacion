@@ -97,6 +97,11 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
     }
 
     @Override
+    public void inicializarListas() {
+
+    }
+
+    @Override
     protected String getIdAsText(Caracteristica r) {
         return (r != null && r.getId() != null) ? String.valueOf(r.getId()) : null;
     }

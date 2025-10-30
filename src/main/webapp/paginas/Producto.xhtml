@@ -4,27 +4,14 @@
       xmlns:h="jakarta.faces.html"
       xmlns:p="http://primefaces.org/ui"
       xmlns:f="jakarta.faces.core">
-
 <h:head>
     <meta charset="UTF-8"/>
     <title>#{productoFrm.nombreBean}</title>
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
 </h:head>
-
 <h:body>
 
-    <!-- Topbar (opcional) -->
-    <h:form id="topbarForm">
-        <p:menubar>
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <p:menuitem value="Productos" url="Producto.jsf" icon="pi pi-database" />
-                <p:menuitem value="Producto-Tipo" url="ProductoTipoProducto.jsf" icon="pi pi-link" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
-            </p:submenu>
-        </p:menubar>
-    </h:form>
 
     <h1>#{productoFrm.nombreBean}</h1>
 
@@ -42,7 +29,6 @@
                         update=":pnlTabla :pnlDetalle :frmTop:messages"/>
                 <p:column headerText="ID" style="width:340px"><h:outputText value="#{n.id}" /></p:column>
                 <p:column headerText="Nombre"><h:outputText value="#{n.nombreProducto}" /></p:column>
-                <p:column headerText="Activo" style="width:110px">
                     <h:outputText value="#{n.activo ? 'Sí' : 'No'}" />
                 </p:column>
             </p:dataTable>
@@ -53,7 +39,6 @@
                              process="@this" immediate="true"
                              update=":pnlDetalle :pnlTabla :frmTop:messages"/>
 
-            <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
                              rendered="#{productoFrm.modoDetalle}"
                              actionListener="#{productoFrm.btnCancelarHandler}"
                              process="@this" immediate="true"
@@ -65,26 +50,18 @@
 
     <!-- DETALLE -->
     <h:panelGroup id="pnlDetalle">
-        <h:form id="frmCrear" rendered="#{productoFrm.modoDetalle}">
-            <p:tabView>
-
-                <!-- TAB 1: Generalidades -->
-                <p:tab title="Generalidades">
                     <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
 
                         <h:outputLabel for="txtIdPanel" value="ID:"/>
                         <h:panelGroup id="txtIdPanel">
                             <h:outputText rendered="#{empty productoFrm.registro.id}"
                                           value="(Se asignará automáticamente al guardar)"/>
-                            <h:inputText id="txtId" value="#{productoFrm.registro.id}"
                                          rendered="#{not empty productoFrm.registro.id}" readonly="true"/>
                         </h:panelGroup>
 
                         <h:outputLabel for="txtNombre" value="Nombre:"/>
                         <h:inputText id="txtNombre" value="#{productoFrm.registro.nombreProducto}" styleClass="inp"/>
 
-                        <h:outputLabel for="chkActivo" value="Activo:"/>
-                        <h:selectBooleanCheckbox id="chkActivo" value="#{productoFrm.registro.activo}"/>
 
                         <h:outputLabel for="txtRef" value="Referencia externa:"/>
                         <h:inputTextarea id="txtRef" value="#{productoFrm.registro.referenciaExterna}" rows="2" styleClass="inp"/>
@@ -109,135 +86,40 @@
                     </p:panelGrid>
                 </p:tab>
 
-                <!-- TAB 2: Tipos de Producto (simple, como en ProductoTipoProducto.xhtml) -->
-                <p:tab title="Tipos de Producto"
-                       rendered="#{not empty productoFrm.registro.id}">
-
-                    <!-- Preasigna el producto actual al Frm de la relación -->
-                    <f:event type="preRenderComponent"
-                             listener="#{productoTipoProductoFrm.seleccionarProducto(productoFrm.registro)}"/>
-
-                    <!-- Tabla de relaciones (solo cuando estado = NADA) -->
-                    <h:panelGroup id="ptpTablaPanel" rendered="#{productoTipoProductoFrm.estado.name() eq 'NADA'}">
-                        <p:dataTable id="ptpTabla"
-                                     value="#{productoTipoProductoFrm.modelo}" var="reg" lazy="true"
                                      paginator="true" rows="#{productoTipoProductoFrm.pageSize}"
                                      paginatorPosition="bottom"
                                      selectionMode="single"
                                      selection="#{productoTipoProductoFrm.registro}"
-                                     rowKey="#{reg.id}">
-                            <p:ajax event="rowSelect"
-                                    listener="#{productoTipoProductoFrm.selectionHandler}"
-                                    update=":frmCrear:ptpFormPanel :frmTop:messages"/>
-                            <p:column headerText="ID" style="width:320px"><h:outputText value="#{reg.id}" /></p:column>
-                            <p:column headerText="Producto"><h:outputText value="#{reg.idProducto != null ? reg.idProducto.nombreProducto : '-'}" /></p:column>
-                            <p:column headerText="Tipo de Producto"><h:outputText value="#{reg.idTipoProducto != null ? reg.idTipoProducto.nombre : '-'}" /></p:column>
-                            <p:column headerText="Activo" style="width:110px"><h:outputText value="#{reg.activo ? 'Sí' : 'No'}"/></p:column>
-                            <p:column headerText="Fecha creación" style="width:210px"><h:outputText value="#{reg.fechaCreacion}" /></p:column>
                         </p:dataTable>
 
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <p:commandButton id="btnNuevoPTP" value="Nueva Relación" styleClass="btn-rojo"
-                                             actionListener="#{productoTipoProductoFrm.nuevoParaProducto(productoFrm.registro)}"
-                                             process="@this"
-                                             update=":frmCrear:ptpTablaPanel :frmCrear:ptpFormPanel :frmTop:messages"/>
-                        </div>
-                    </h:panelGroup>
 
-                    <!-- Formulario (solo cuando estado != NADA) -->
-                    <h:panelGroup id="ptpFormPanel" rendered="#{productoTipoProductoFrm.estado.name() ne 'NADA'}" style="margin-top:12px;">
-                        <p:panelGrid columns="2" columnClasses="col-label,col-field" styleClass="form-grid-2col">
 
-                            <h:outputLabel for="txtPTPId" value="ID:"/>
-                            <h:panelGroup id="txtPTPId">
                                 <h:outputText rendered="#{empty productoTipoProductoFrm.registro.id}"
                                               value="(Se asignará automáticamente al guardar)"/>
-                                <h:inputText value="#{productoTipoProductoFrm.registro.id}"
-                                             rendered="#{not empty productoTipoProductoFrm.registro.id}" readonly="true"/>
                             </h:panelGroup>
-
-                            <h:outputLabel for="txtProducto" value="Producto:"/>
-                            <h:inputText id="txtProducto"
-                                         value="#{productoFrm.registro.nombreProducto}"
-                                         readonly="true" style="min-width:420px"/>
-
-                            <h:outputLabel for="txtTipo" value="Tipo de Producto:"/>
                             <h:panelGroup>
-                                <h:inputText id="txtTipo"
-                                             value="#{productoTipoProductoFrm.registro.idTipoProducto != null ? productoTipoProductoFrm.registro.idTipoProducto.nombre : ''}"
-                                             readonly="true" style="min-width:420px"/>
-                                <p:commandButton value="Seleccionar Tipo" styleClass="btn-oscuro"
                                                  process="@this"
-                                                 update=":dlgBuscarTipo"
-                                                 oncomplete="PF('dlgBuscarTipoWV').show();"
                                                  style="margin-left:8px"/>
                             </h:panelGroup>
 
-                            <h:outputLabel for="chkPTPActivo" value="Activo:"/>
-                            <h:selectBooleanCheckbox id="chkPTPActivo" value="#{productoTipoProductoFrm.registro.activo}"/>
 
-                            <h:outputLabel for="txtObs" value="Observaciones:"/>
-                            <h:inputTextarea id="txtObs" value="#{productoTipoProductoFrm.registro.observaciones}" rows="3" styleClass="inp"/>
 
-                            <h:outputText />
-                            <h:panelGroup>
-                                <p:commandButton value="Guardar" styleClass="btn-rojo"
-                                                 rendered="#{productoTipoProductoFrm.estado.name() eq 'CREAR'}"
                                                  actionListener="#{productoTipoProductoFrm.btnGuardarHandler}"
-                                                 process=":frmCrear"
-                                                 update=":frmTop:messages :frmCrear:ptpTablaPanel :frmCrear:ptpFormPanel"/>
-
-                                <p:commandButton value="Modificar" styleClass="btn-oscuro"
-                                                 rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
                                                  actionListener="#{productoTipoProductoFrm.btnModificarHandler}"
-                                                 process=":frmCrear"
-                                                 update=":frmTop:messages :frmCrear:ptpTablaPanel :frmCrear:ptpFormPanel"
-                                                 style="margin-left:8px;"/>
-
-                                <p:commandButton value="Eliminar" styleClass="btn-rojo"
                                                  rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
                                                  actionListener="#{productoTipoProductoFrm.btnEliminarHandler}"
-                                                 process="@this"
-                                                 update=":frmTop:messages :frmCrear:ptpTablaPanel :frmCrear:ptpFormPanel"
-                                                 style="margin-left:8px;"/>
 
-                                <p:commandButton value="Cancelar" styleClass="btn-oscuro"
-                                                 actionListener="#{productoTipoProductoFrm.btnCancelarHandler}"
-                                                 process="@this"
-                                                 update=":frmCrear:ptpTablaPanel :frmCrear:ptpFormPanel :frmTop:messages"
-                                                 style="margin-left:8px;"/>
-                            </h:panelGroup>
-                        </p:panelGrid>
-                    </h:panelGroup>
                 </p:tab>
-
             </p:tabView>
         </h:form>
     </h:panelGroup>
 
-    <!-- Diálogo: Buscar Tipo de Producto -->
-    <p:dialog id="dlgBuscarTipo" widgetVar="dlgBuscarTipoWV" header="Seleccionar Tipo de Producto"
-              modal="true" resizable="false" width="720">
-        <h:form id="frmDlgTipo">
             <p:panelGrid columns="3" styleClass="form-grid-2col" columnClasses="col-label,col-field,col-field">
-                <h:outputLabel for="txtFiltroTipo" value="Buscar:"/>
-                <h:inputText id="txtFiltroTipo" value="#{productoTipoProductoFrm.filtroTipoProducto}" styleClass="inp"/>
                 <p:commandButton value="Buscar" styleClass="btn-oscuro"
-                                 actionListener="#{productoTipoProductoFrm.buscarTipos}"
-                                 update="tblTipos"/>
             </p:panelGrid>
 
-            <p:dataTable id="tblTipos"
-                         value="#{productoTipoProductoFrm.resultadosBusquedaTipo}"
-                         var="t" paginator="true" rows="8"
                          emptyMessage="Sin resultados">
-                <p:column headerText="ID" style="width:100px"><h:outputText value="#{t.id}" /></p:column>
-                <p:column headerText="Nombre"><h:outputText value="#{t.nombre}" /></p:column>
-                <p:column style="width:150px; text-align:center">
                     <p:commandButton value="Elegir" styleClass="btn-rojo"
-                                     actionListener="#{productoTipoProductoFrm.seleccionarTipo(t)}"
-                                     update=":frmCrear:ptpFormPanel :frmTop:messages"
-                                     oncomplete="PF('dlgBuscarTipoWV').hide();"/>
                 </p:column>
             </p:dataTable>
         </h:form>

@@ -21,12 +21,8 @@
                 <p:menuitem value="Tipo Unidad Medida" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
                 <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
                 <p:menuitem value="TipoProducto-Característica" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
-<<<<<<< HEAD
-                <p:menuitem value="Unidad Medida" url="UnidadMedida.jsf" icon="pi pi-sliders-h" />
-=======
                 <p:menuitem value="Lista de Clientes" url="Cliente.jsf" icon="pi pi-list" />
                 <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-truck" />
->>>>>>> Manuel
             </p:submenu>
         </p:menubar>
     </h:form>
@@ -113,17 +109,17 @@
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Crear Caracteristica" styleClass="btn-rojo"
+                <p:commandButton value="Crear" styleClass="btn-rojo"
                                  actionListener="#{tipoProductoCaracteristicaFrm.btnGuardarHandler}"
                                  rendered="#{tipoProductoCaracteristicaFrm.estado == 'CREAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Modificar Caracteristica" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar" styleClass="btn-oscuro"
                                  actionListener="#{tipoProductoCaracteristicaFrm.btnModificarHandler}"
                                  rendered="#{tipoProductoCaracteristicaFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Eliminar Caracteristica" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar" styleClass="btn-rojo"
                                  actionListener="#{tipoProductoCaracteristicaFrm.btnEliminarHandler}"
                                  rendered="#{tipoProductoCaracteristicaFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla"/>
