@@ -344,6 +344,7 @@ h\:inputText:focus {
 /* Íconos */
 .topbar .pi{ margin-right: .35rem; font-size: 1rem; }
 
+<<<<<<< HEAD
 /* =========================================================
    🌲 TREE TABLE (PrimeFaces p:treeTable) — Tema rojo/negro
    ========================================================= */
@@ -552,3 +553,35 @@ h\:inputText:focus {
 }
 
 
+=======
+.language-selector {
+    padding: 10px;
+    text-align: center;
+    background-color: #555;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.idioma-dropdown {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.idioma-dropdown:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+}
+
+.idioma-dropdown:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.4);
+}
+>>>>>>> Manuel

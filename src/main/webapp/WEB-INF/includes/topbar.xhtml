@@ -6,29 +6,42 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:f="jakarta.faces.core">
 
-    <h:form id="topbarForm">
-        <p:menubar styleClass="topbar">
+<h:form id="topbarForm">
+    <p:menubar styleClass="topbar">
 
-            <!-- Inicio -->
-            <p:menuitem value="Inicio" url="ManejarTodo.jsf" icon="pi pi-home" />
+        <!-- Inicio -->
+        <!--<p:menuitem value="Inicio" url="ManejarTodo.jsf" icon="pi pi-home" />-->
 
-            <!-- Inventario -->
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <!-- Usa url=*.jsf para evitar problemas con mapeo -->
-                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <!-- Agrega más módulos aquí -->
-            </p:submenu>
+        <!-- Inventario -->
+        <p:submenu label="Inventario" icon="pi pi-box">
+            <p:menuitem value="#{msg['topbar.TipoAlmacen']}" url="TipoAlmacen.jsf" icon="pi pi-building" />
+            <p:menuitem value="#{msg['topbar.TipoProducto']}" url="TipoProducto.jsf" icon="pi pi-tags" />
+            <p:menuitem value="#{msg['topbar.TipoUnidadMedida']}" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
+            <p:menuitem value="#{msg['topbar.Característica']}" url="Caracteristica.jsf" icon="pi pi-list" />
+            <p:menuitem value="#{msg['topbar.TipoProducto-Característica']}" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
+            <p:menuitem value="#{msg['topbar.ListadeClientes']}" url="Clientes.jsf" icon="pi pi-list" />
+            <p:menuitem value="#{msg['topbar.Proveedores']}" url="Proveedor.jsf" icon="pi pi-truck" />
+        </p:submenu>
 
-            <!-- Reportes -->
-            <p:submenu label="Reportes" icon="pi pi-chart-bar">
-                <p:menuitem value="Movimientos" url="RptMovimientos.jsf" icon="pi pi-list" />
-            </p:submenu>
+        <!-- Reportes -->
+        <!--<p:submenu label="Reportes" icon="pi pi-chart-bar">
+            <p:menuitem value="Movimientos" url="RptMovimientos.jsf" icon="pi pi-list" />
+        </p:submenu>-->
 
-            <!-- Acciones a la derecha -->
-            <f:facet name="options">
-                <p:commandButton type="button" value="Ayuda" icon="pi pi-question-circle" styleClass="btn-oscuro" />
-            </f:facet>
-        </p:menubar>
-    </h:form>
+        <!-- Selector de idioma (dropdown) -->
+        <f:facet name="options">
+            <h:form class="language-selector">
+                <p:selectOneMenu value="#{idiomas.idioma}"
+                                 styleClass="idioma-dropdown">
+                    <f:selectItem itemLabel="#{msg['idioma.espanol']}" itemValue="es" />
+                    <f:selectItem itemLabel="#{msg['idioma.ingles']}" itemValue="en" />
+                    <p:ajax event="change" listener="#{idiomas.cambiarIdioma(idiomas.idioma)}" update="@all" />
+                </p:selectOneMenu>
+            </h:form>
+
+        </f:facet>
+
+    </p:menubar>
+</h:form>
+
 </html>
