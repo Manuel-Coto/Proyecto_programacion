@@ -3,89 +3,153 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.VentaDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.VentaDetalleDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ClienteDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Venta;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.VentaDetalle;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Cliente;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Named("ventaFrm")
 @ViewScoped
-public class VentaFrm implements Serializable {
+public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
 
     @Inject
-    private VentaDAO ventaDAO; // Inyecta el DAO de Venta
+    private VentaDAO ventaDAO;
 
-    private Venta venta; // Objeto para almacenar la venta actual
-    private List<Venta> ventas; // Lista para almacenar todas las ventas
+    @Inject
+    private VentaDetalleDAO ventaDetalleDAO;
 
-    // Para manejar la selección de ventas (por ejemplo, para editar o ver detalles)
-    private Venta selectedVenta;
+    @Inject
+    private ProductoDAO productoDAO;
 
-    // Método de inicialización
+    @Inject
+    private ClienteDAO clienteDAO;
+
+    private List<Producto> productos; // Lista de productos disponibles
+    private List<VentaDetalle> ventaDetalles; // Detalles de la venta
+    private VentaDetalle selectedDetalle; // Detalle de venta seleccionado
+
     @PostConstruct
     public void init() {
-        ventas = ventaDAO.findAll(); // Cargar todas las ventas al iniciar el formulario
+        super.inicializar();
+        productos = productoDAO.findAll();
+        ventaDetalles = new ArrayList<>();
     }
 
-    // Método para crear una nueva venta
-    public void crear() {
-        try {
-            ventaDAO.crear(venta); // Crear la venta usando el DAO
-            ventas.add(venta); // Añadir la venta a la lista
-            venta = new Venta(); // Limpiar el objeto para una nueva venta
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta creada con éxito", ""));
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al crear la venta", ""));
+    @Override
+    protected Venta nuevoRegistro() {
+        Venta nuevaVenta = new Venta();
+        nuevaVenta.setId(UUID.randomUUID());
+        nuevaVenta.setFecha(OffsetDateTime.now());
+        nuevaVenta.setEstado("PENDIENTE");
+        nuevaVenta.setObservaciones("");
+        return nuevaVenta;
+    }
+
+    @Override
+    protected Venta buscarRegistroPorId(Object id) {
+        return ventaDAO.find((UUID) id);  // Usa el método find de VentaDAO
+    }
+
+    @Override
+    protected String getIdAsText(Venta venta) {
+        return venta.getId().toString();
+    }
+
+    @Override
+    protected Venta getIdByText(String id) {
+        return ventaDAO.find(UUID.fromString(id));  // Usa el método find de VentaDAO
+    }
+
+    // Agregar un detalle a la venta
+    public void agregarDetalle() {
+        if (selectedDetalle != null) {
+            ventaDetalles.add(selectedDetalle);
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Detalle agregado", ""));
+            selectedDetalle = null; // Limpiar selección
         }
     }
 
-    // Método para modificar una venta
-    public void modificar() {
-        try {
-            ventaDAO.modificar(selectedVenta); // Modificar la venta seleccionada usando el DAO
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta modificada con éxito", ""));
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar la venta", ""));
+    // Eliminar un detalle de la venta
+    public void eliminarDetalle(VentaDetalle detalle) {
+        ventaDetalles.remove(detalle);
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Detalle eliminado", ""));
+    }
+
+    // Guardar la venta con sus detalles
+    public void guardarVenta() {
+        if (this.registro != null) {
+            try {
+                // Guardar la venta
+                ventaDAO.crear(this.registro);
+
+                // Guardar los detalles de la venta
+                for (VentaDetalle detalle : ventaDetalles) {
+                    detalle.setIdVenta((Venta) this.registro); // Asociar el detalle con la venta
+                    ventaDetalleDAO.crear(detalle);
+                }
+
+                this.registro = null;
+                this.estado = ESTADO_CRUD.NADA;
+                this.ventaDetalles = new ArrayList<>();
+                inicializarRegistros(); // Recargar la tabla de ventas
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta y detalles guardados correctamente", ""));
+            } catch (Exception e) {
+                e.printStackTrace();
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar la venta", e.getMessage()));
+            }
+        } else {
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para guardar"));
         }
     }
 
-    // Método para eliminar una venta
-    public void eliminar() {
-        try {
-            ventaDAO.eliminar(selectedVenta); // Eliminar la venta seleccionada usando el DAO
-            ventas.remove(selectedVenta); // Eliminar de la lista
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta eliminada con éxito", ""));
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al eliminar la venta", ""));
-        }
+    // Getter y Setter de propiedades
+    public List<Producto> getProductos() {
+        return productos;
     }
 
-    // Getters y Setters
-    public Venta getVenta() {
-        return venta;
+    public void setProductos(List<Producto> productos) {
+        this.productos = productos;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
+    public List<VentaDetalle> getVentaDetalles() {
+        return ventaDetalles;
     }
 
-    public List<Venta> getVentas() {
-        return ventas;
+    public void setVentaDetalles(List<VentaDetalle> ventaDetalles) {
+        this.ventaDetalles = ventaDetalles;
     }
 
-    public void setVentas(List<Venta> ventas) {
-        this.ventas = ventas;
+    public VentaDetalle getSelectedDetalle() {
+        return selectedDetalle;
     }
 
-    public Venta getSelectedVenta() {
-        return selectedVenta;
+    public void setSelectedDetalle(VentaDetalle selectedDetalle) {
+        this.selectedDetalle = selectedDetalle;
     }
 
-    public void setSelectedVenta(Venta selectedVenta) {
-        this.selectedVenta = selectedVenta;
+    @Override
+    public InventarioDefaultDataAccess<Venta> getDao() {
+        return ventaDAO;
+    }
+
+    @Override
+    protected void btnCancelarHandler(ActionEvent actionEvent) {
+        super.btnCancelarHandler(actionEvent);
+        ventaDetalles.clear(); // Limpiar los detalles si se cancela la venta
     }
 }
