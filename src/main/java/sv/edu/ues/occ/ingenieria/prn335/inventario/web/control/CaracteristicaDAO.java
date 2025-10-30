@@ -14,7 +14,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Caracteristic
 @Stateless
 public class CaracteristicaDAO extends InventarioDefaultDataAccess<Caracteristica> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public CaracteristicaDAO() {

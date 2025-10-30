@@ -19,12 +19,20 @@ import java.util.List;
 public class TipoAlmacenDAO extends InventarioDefaultDataAccess<TipoAlmacen> implements Serializable {
     public TipoAlmacenDAO() { super(TipoAlmacen.class); }
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     EntityManager em;
 
     @Override
     public EntityManager getEntityManager() {
         return em;
+    }
+
+
+    // Método para obtener todos los tipos de almacen activos
+    public List<TipoAlmacen> findActiveTipoAlmacen() {
+        String jpql = "SELECT ta FROM TipoAlmacen ta WHERE ta.activo = true";  // Asegura que solo se devuelvan los tipos activos
+        TypedQuery<TipoAlmacen> query = em.createQuery(jpql, TipoAlmacen.class);
+        return query.getResultList();
     }
 
     public List<TipoAlmacen> findRange(int first, int max) throws IllegalArgumentException {
