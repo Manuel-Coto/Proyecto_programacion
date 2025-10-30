@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{unidadMedidaFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+<h:body>
+
+    <!-- Topbar  -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{unidadMedidaFrm.nombreBean}</h1>
+
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tabla-top"
+                             lazy="true"
+                             rendered="#{unidadMedidaFrm.estado == 'NADA'}"
+                             rows="#{unidadMedidaFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             value="#{unidadMedidaFrm.modelo}"
+                             var="reg"
+                             selectionMode="single"
+                             selection="#{unidadMedidaFrm.registro}" rowKey="#{reg.id}">
+                    <p:ajax event="rowSelect" listener="#{unidadMedidaFrm.selectionHandler}" update=":pnlTabla :pnlDetalle"/>
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Expresión Regular"><h:outputText value="#{reg.expresionRegular}" /></p:column>
+                    <p:column headerText="Equivalencia"><h:outputText value="#{reg.equivalencia}" /></p:column>
+                    <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}" /></p:column>
+                </p:dataTable>
+
+                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                                 rendered="#{unidadMedidaFrm.estado == 'NADA'}"
+                                 actionListener="#{unidadMedidaFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
+
+                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                                 rendered="#{unidadMedidaFrm.estado != 'NADA'}"
+                                 actionListener="#{unidadMedidaFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
+            </h:form>
+
+            <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{unidadMedidaFrm.estado != 'NADA'}">
+            <h:panelGrid columns="2">
+                <h:outputLabel for="txtEquivalencia" value="Equivalencia:"/>
+                <h:inputText id="txtEquivalencia" value="#{unidadMedidaFrm.registro.equivalencia}"/>
+
+                <h:outputLabel for="txtExpresionRegular" value="Expresión Regular:"/>
+                <h:inputText id="txtExpresionRegular" value="#{unidadMedidaFrm.registro.expresionRegular}"/>
+
+                <h:outputLabel for="chkActivoUnidad" value="Activo:"/>
+                <h:selectBooleanCheckbox id="chkActivoUnidad" value="#{unidadMedidaFrm.registro.activo}"/>
+
+                <h:outputLabel for="txtComentariosUnidad" value="Comentarios:"/>
+                <h:inputText id="txtComentariosUnidad" value="#{unidadMedidaFrm.registro.comentarios}" size="80"/>
+            </h:panelGrid>
+
+            <h:panelGrid columns="3" style="margin-top: 15px;">
+                <p:commandButton value="Crear" styleClass="btn-rojo"
+                                 actionListener="#{unidadMedidaFrm.btnGuardarHandler}"
+                                 rendered="#{unidadMedidaFrm.estado == 'CREAR'}"
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                                 actionListener="#{unidadMedidaFrm.btnModificarHandler}"
+                                 rendered="#{unidadMedidaFrm.estado == 'MODIFICAR'}"
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                                 actionListener="#{unidadMedidaFrm.btnEliminarHandler}"
+                                 rendered="#{unidadMedidaFrm.estado == 'MODIFICAR'}"
+                                 update="messages :pnlDetalle :pnlTabla"/>
+            </h:panelGrid>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>
