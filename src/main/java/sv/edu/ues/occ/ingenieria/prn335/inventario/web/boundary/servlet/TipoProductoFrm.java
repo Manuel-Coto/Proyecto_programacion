@@ -15,6 +15,7 @@ import java.util.*;
 
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.TreeNode;
 
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CaracteristicaDAO;
@@ -60,10 +61,9 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
        ======================= */
     private List<TipoProductoCaracteristica> listaTPC;     // tabla
     private TipoProductoCaracteristica tpcRegistro;        // form (crear/editar)
-    private boolean tpcMostrandoFormulario = false;
+    private boolean tpcMostrandoFormulario = false;        // ⬅️ control de visibilidad del formulario
 
-    // Diálogo buscar/seleccionar característica
-    private boolean dlgBuscarVisible = false;
+    // Diálogo buscar/seleccionar característica (solo para lógica de búsqueda)
     private String filtroCaracteristica;
     private List<Caracteristica> resultadosBusqueda;
 
@@ -78,7 +78,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         construirArbol();
         cargarOpcionesPadre();
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC();          // ⬅️ deja oculto el formulario
     }
 
     /* =======================
@@ -97,7 +97,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         padreSeleccionadoId = null;
         cargarOpcionesPadre();
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC(); // oculta formulario
         return t;
     }
 
@@ -106,12 +106,18 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         if (id == null) return null;
         try {
             Long lid = (id instanceof Long) ? (Long) id : Long.valueOf(String.valueOf(id));
-            return tipoProductoDao.getEntityManager().find(TipoProducto.class, lid);
-        } catch (Exception e) { return null; }
+            return tipoProductoDao.findById(lid); // ✅ usar DAO, no EM directo
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    @Override protected String getIdAsText(TipoProducto r) { return (r!=null && r.getId()!=null) ? String.valueOf(r.getId()) : null; }
-    @Override protected TipoProducto getIdByText(String id) { return (id==null) ? null : buscarRegistroPorId(id); }
+    @Override protected String getIdAsText(TipoProducto r) {
+        return (r!=null && r.getId()!=null) ? String.valueOf(r.getId()) : null;
+    }
+    @Override protected TipoProducto getIdByText(String id) {
+        return (id==null) ? null : buscarRegistroPorId(id);
+    }
 
     /* =======================
        Selección de fila (tabla/árbol)
@@ -123,7 +129,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                 ? registro.getIdTipoProductoPadre().getId() : null;
         cargarOpcionesPadre();
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC(); // ⬅️ oculta formulario al cambiar de selección
     }
 
     public void onTreeRowSelect() {
@@ -134,7 +140,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                     ? registro.getIdTipoProductoPadre().getId() : null;
             cargarOpcionesPadre();
             cargarTPC();
-            prepararNuevoTPC();
+            prepararNuevoTPC(); // ⬅️ oculta formulario
         }
     }
 
@@ -145,7 +151,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         padreSeleccionadoId = null;
         cargarOpcionesPadre();
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC(); // ⬅️ oculta formulario
     }
 
     @Override
@@ -155,7 +161,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                 ? registro.getIdTipoProductoPadre().getId() : null;
         cargarOpcionesPadre();
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC(); // ⬅️ oculta formulario
     }
 
     @Override
@@ -172,13 +178,16 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                 return;
             }
 
-            registro.setIdTipoProductoPadre(padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId));
-            super.btnGuardarHandler(e);
+            registro.setIdTipoProductoPadre(
+                    padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId)
+            );
+
+            super.btnGuardarHandler(e); // crea el registro
 
             construirArbol();
             cargarOpcionesPadre();
             cargarTPC();
-            prepararNuevoTPC();
+            prepararNuevoTPC(); // ⬅️ oculta formulario
         } catch (Exception ex) {
             msg(FacesMessage.SEVERITY_ERROR, "Error al guardar", ex.getMessage());
         }
@@ -199,13 +208,16 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                 return;
             }
 
-            registro.setIdTipoProductoPadre(padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId));
-            super.btnModificarHandler(e);
+            registro.setIdTipoProductoPadre(
+                    padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId)
+            );
+
+            super.btnModificarHandler(e); // modifica el registro
 
             construirArbol();
             cargarOpcionesPadre();
             cargarTPC();
-            prepararNuevoTPC();
+            prepararNuevoTPC(); // ⬅️ oculta formulario
         } catch (Exception ex) {
             msg(FacesMessage.SEVERITY_ERROR, "Error al modificar", ex.getMessage());
         }
@@ -218,7 +230,7 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         padreSeleccionadoId = null;
         selectedNode = null;
         cargarTPC();
-        prepararNuevoTPC();
+        prepararNuevoTPC(); // ⬅️ oculta formulario
     }
 
     /* =======================
@@ -228,9 +240,11 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         try {
             root = new DefaultTreeNode<>(null, null);
             List<TipoProducto> raices = tipoProductoDao.findRoots();
-            if (raices != null) for (TipoProducto r : raices) {
-                TreeNode<TipoProducto> n = new DefaultTreeNode<>("nodo", r, root);
-                cargarHijosRec(n, r);
+            if (raices != null) {
+                for (TipoProducto r : raices) {
+                    TreeNode<TipoProducto> n = new DefaultTreeNode<>("nodo", r, root);
+                    cargarHijosRec(n, r);
+                }
             }
             root.setExpanded(true);
         } catch (Exception ignored) {
@@ -240,7 +254,9 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
     }
 
     private void cargarHijosRec(TreeNode<TipoProducto> padreNode, TipoProducto padreEntity) {
-        List<TipoProducto> hijos = tipoProductoDao.findChildren(padreEntity.getId());
+        List<TipoProducto> hijos = (padreEntity != null && padreEntity.getId()!=null)
+                ? tipoProductoDao.findChildren(padreEntity.getId())
+                : Collections.emptyList();
         if (hijos == null || hijos.isEmpty()) return;
         for (TipoProducto h : hijos) {
             TreeNode<TipoProducto> n = new DefaultTreeNode<>("nodo", h, padreNode);
@@ -280,7 +296,13 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         while (!st.isEmpty()) {
             Long cur = st.pop();
             List<TipoProducto> hijos = tipoProductoDao.findChildren(cur);
-            if (hijos != null) for (TipoProducto h : hijos) if (h.getId()!=null && res.add(h.getId())) st.push(h.getId());
+            if (hijos != null) {
+                for (TipoProducto h : hijos) {
+                    if (h.getId()!=null && res.add(h.getId())) {
+                        st.push(h.getId());
+                    }
+                }
+            }
         }
         return res;
     }
@@ -288,6 +310,8 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
     /* =======================
        Pestaña: Características
        ======================= */
+
+    /** Cargar tabla de asociaciones existentes. */
     public void cargarTPC() {
         if (this.registro != null && this.registro.getId() != null) {
             this.listaTPC = tipoProductoCaracteristicaDao.findByTipoProductoIdFetch(this.registro.getId());
@@ -296,34 +320,32 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         }
     }
 
+    /** Deja preparado un nuevo TPC y oculta el formulario. */
     private void prepararNuevoTPC() {
         this.tpcRegistro = new TipoProductoCaracteristica();
         this.tpcRegistro.setIdTipoProducto(this.registro); // puede ser null si aún no guardas el tipo
         this.tpcRegistro.setObligatorio(Boolean.FALSE);
         this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
-        this.tpcMostrandoFormulario = false;
+        this.tpcMostrandoFormulario = false;               // ⬅️ oculto por defecto
 
         this.filtroCaracteristica = "";
         this.resultadosBusqueda = Collections.emptyList();
     }
 
+    /** Mostrar el formulario y abrir diálogo de búsqueda. */
     public void tpcBtnNuevo() {
-        if (this.registro == null || (this.registro.getId() == null && this.estado != ESTADO_CRUD.CREAR)) {
-            msg(FacesMessage.SEVERITY_WARN, "Atención", "Primero cree o seleccione un Tipo de Producto.");
-            return;
-        }
-        prepararNuevoTPC();
-        this.tpcMostrandoFormulario = true;
-    }
-
-    public void tpcBtnCancelar() { prepararNuevoTPC(); }
-
-    public void tpcSeleccionarAbrirDialogo() {
-        this.dlgBuscarVisible = true;
+        this.tpcRegistro = new TipoProductoCaracteristica();
+        this.tpcRegistro.setIdTipoProducto(this.registro);
+        this.tpcRegistro.setObligatorio(Boolean.FALSE);
+        this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
+        this.tpcMostrandoFormulario = true;                // ⬅️ mostrar
         this.filtroCaracteristica = "";
         this.resultadosBusqueda = Collections.emptyList();
+        // El diálogo se abre desde el XHTML con widgetVar.show()
     }
 
+
+    /** Buscar características por filtro. */
     public void tpcBuscarCaracteristicas() {
         String q = (filtroCaracteristica == null) ? "" : filtroCaracteristica.trim();
         if (q.isEmpty()) {
@@ -333,11 +355,12 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
         }
     }
 
+    /** Selección de característica desde el diálogo. */
     public void tpcSeleccionarCaracteristica(Caracteristica c) {
         if (c == null) return;
         if (this.tpcRegistro == null) this.tpcRegistro = new TipoProductoCaracteristica();
         this.tpcRegistro.setIdCaracteristica(c);
-        this.dlgBuscarVisible = false;
+        this.tpcMostrandoFormulario = true; // seguimos mostrando
     }
 
     /** Guarda/actualiza la asociación TPC. Usa crearYFlush / modificarYFlush del DAO. */
@@ -368,7 +391,6 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                 if (this.tpcRegistro.getFechaCreacion() == null) {
                     this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
                 }
-                // >>> ahora el flush ocurre dentro del EJB
                 tipoProductoCaracteristicaDao.crearYFlush(this.tpcRegistro);
                 msg(FacesMessage.SEVERITY_INFO, "Guardado", "Característica asociada correctamente.");
             } else {
@@ -377,33 +399,16 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
                                 .findByTipoProductoAndCaracteristica(idTipo, Long.valueOf(idCar)).orElse(null);
                 if (existente != null) {
                     existente.setObligatorio(Boolean.TRUE.equals(this.tpcRegistro.getObligatorio()));
-                    // >>> ahora el flush ocurre dentro del EJB
                     tipoProductoCaracteristicaDao.modificarYFlush(existente);
                     msg(FacesMessage.SEVERITY_INFO, "Actualizado", "Asociación actualizada.");
                 }
             }
 
             cargarTPC();
-            prepararNuevoTPC();
+            prepararNuevoTPC(); // ⬅️ oculta formulario tras guardar
 
         } catch (Exception ex) {
             msg(FacesMessage.SEVERITY_ERROR, "Error al guardar característica", ex.getMessage());
-        }
-    }
-
-    public void tpcEliminar(TipoProductoCaracteristica tpc) {
-        if (tpc == null || tpc.getId() == null) {
-            msg(FacesMessage.SEVERITY_WARN, "Atención", "Seleccione una asociación válida para eliminar.");
-            return;
-        }
-        try {
-            // No es necesario flush aquí; el EJB hace commit al terminar.
-            tipoProductoCaracteristicaDao.eliminar(tpc);
-            msg(FacesMessage.SEVERITY_INFO, "Eliminado", "Asociación eliminada correctamente.");
-            cargarTPC();
-            prepararNuevoTPC();
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al eliminar asociación", ex.getMessage());
         }
     }
 
@@ -433,15 +438,17 @@ public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Seriali
 
     public List<TipoProductoCaracteristica> getListaTPC() { return listaTPC; }
     public TipoProductoCaracteristica getTpcRegistro() { return tpcRegistro; }
-    public void setTpcRegistro(TipoProductoCaracteristica r) { this.tpcRegistro = r; this.tpcMostrandoFormulario = (r!=null); }
+    public void setTpcRegistro(TipoProductoCaracteristica r) {
+        this.tpcRegistro = r;
+        this.tpcMostrandoFormulario = (r != null); // al seleccionar una fila, mostrar formulario
+    }
 
     public boolean isTpcMostrandoFormulario() { return tpcMostrandoFormulario; }
-
-    public boolean isDlgBuscarVisible() { return dlgBuscarVisible; }
-    public void setDlgBuscarVisible(boolean v) { this.dlgBuscarVisible = v; }
 
     public String getFiltroCaracteristica() { return filtroCaracteristica; }
     public void setFiltroCaracteristica(String f) { this.filtroCaracteristica = f; }
 
     public List<Caracteristica> getResultadosBusqueda() { return resultadosBusqueda; }
+
+
 }

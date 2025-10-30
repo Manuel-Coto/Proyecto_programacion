@@ -101,21 +101,16 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
     }
 
     /** Trae con fetch los many-to-one. */
-    public List<TipoProductoCaracteristica> findByTipoProductoIdFetch(Long idTipoProducto) {
-        Objects.requireNonNull(idTipoProducto, "idTipoProducto no puede ser null");
-        EntityManager em = getOrFail();
-
+    public List<TipoProductoCaracteristica> findByTipoProductoIdFetch(Long idTipo) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoProductoCaracteristica> cq = cb.createQuery(TipoProductoCaracteristica.class);
-        Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
-        root.fetch("idCaracteristica", JoinType.LEFT);
-        root.fetch("idTipoProducto", JoinType.LEFT);
-
-        cq.select(root)
-                .where(cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto))
-                .orderBy(cb.asc(root.get("id")));
-
-        return em.createQuery(cq).getResultList();
+        Root<TipoProductoCaracteristica> r = cq.from(TipoProductoCaracteristica.class);
+        r.fetch("idCaracteristica", JoinType.LEFT);
+        r.fetch("idTipoProducto", JoinType.LEFT);
+        cq.select(r).where(cb.equal(r.get("idTipoProducto").get("id"), idTipo))
+                .orderBy(cb.asc(r.get("idCaracteristica").get("nombre")));
+        TypedQuery<TipoProductoCaracteristica> q = em.createQuery(cq);
+        return q.getResultList();
     }
 
     /** Solo las obligatorias de un TipoProducto. */
@@ -163,43 +158,27 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
        ========================================== */
 
     /** Busca por (idTipoProducto, idCaracteristica). */
-    public Optional<TipoProductoCaracteristica> findByTipoProductoAndCaracteristica(Long idTipoProducto, Long idCaracteristica) {
-        Objects.requireNonNull(idTipoProducto, "idTipoProducto no puede ser null");
-        Objects.requireNonNull(idCaracteristica, "idCaracteristica no puede ser null");
-
-        EntityManager em = getOrFail();
+    public Optional<TipoProductoCaracteristica> findByTipoProductoAndCaracteristica(Long idTipo, Long idCar) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoProductoCaracteristica> cq = cb.createQuery(TipoProductoCaracteristica.class);
-        Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
-
-        cq.select(root).where(
-                cb.and(
-                        cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
-                        cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
-                )
+        Root<TipoProductoCaracteristica> r = cq.from(TipoProductoCaracteristica.class);
+        cq.select(r).where(
+                cb.equal(r.get("idTipoProducto").get("id"), idTipo),
+                cb.equal(r.get("idCaracteristica").get("id"), idCar)
         );
-
-        List<TipoProductoCaracteristica> lista = em.createQuery(cq).setMaxResults(1).getResultList();
-        return lista.isEmpty() ? Optional.empty() : Optional.of(lista.get(0));
+        List<TipoProductoCaracteristica> res = em.createQuery(cq).setMaxResults(1).getResultList();
+        return res.isEmpty() ? Optional.empty() : Optional.of(res.get(0));
     }
 
     /** Verifica existencia por (idTipoProducto, idCaracteristica). */
-    public boolean existsByTipoProductoAndCaracteristica(Long idTipoProducto, Long idCaracteristica) {
-        Objects.requireNonNull(idTipoProducto, "idTipoProducto no puede ser null");
-        Objects.requireNonNull(idCaracteristica, "idCaracteristica no puede ser null");
-
-        EntityManager em = getOrFail();
+    public boolean existsByTipoProductoAndCaracteristica(Long idTipo, Long idCar) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
-
-        cq.select(cb.count(root)).where(
-                cb.and(
-                        cb.equal(root.get("idTipoProducto").get("id"), idTipoProducto),
-                        cb.equal(root.get("idCaracteristica").get("id"), idCaracteristica)
-                )
+        Root<TipoProductoCaracteristica> r = cq.from(TipoProductoCaracteristica.class);
+        cq.select(cb.count(r)).where(
+                cb.equal(r.get("idTipoProducto").get("id"), idTipo),
+                cb.equal(r.get("idCaracteristica").get("id"), idCar)
         );
-
         Long c = em.createQuery(cq).getSingleResult();
         return c != null && c > 0;
     }
@@ -215,4 +194,6 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         }
         return em;
     }
+
+
 }

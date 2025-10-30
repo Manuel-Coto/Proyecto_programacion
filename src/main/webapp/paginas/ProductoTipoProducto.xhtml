@@ -1,12 +1,198 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="es"
       xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:f="jakarta.faces.core"
-      xmlns:h="jakarta.faces.html">
-<f:view>
-  <h:head></h:head>
-  <h:body>
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
 
-  </h:body>
-</f:view>
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{productoTipoProductoFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+
+<h:body>
+
+    <h:form id="topbarForm">
+        <p:menubar>
+            <p:submenu label="Inventario" icon="pi pi-box">
+                <p:menuitem value="Productos" url="Producto.jsf" icon="pi pi-database" />
+                <p:menuitem value="Producto-Tipo" url="ProductoTipoProducto.jsf" icon="pi pi-link" />
+                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
+                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
+            </p:submenu>
+        </p:menubar>
+    </h:form>
+
+    <h1>#{productoTipoProductoFrm.nombreBean}</h1>
+
+    <!-- LISTA -->
+    <h:panelGroup id="pnlTabla">
+        <h:form id="frmTop">
+            <p:dataTable id="tablaPtp"
+                         rendered="#{productoTipoProductoFrm.modoLista}"
+                         value="#{productoTipoProductoFrm.modelo}"
+                         var="n" lazy="true"
+                         paginator="true" rows="#{productoTipoProductoFrm.pageSize}"
+                         paginatorPosition="bottom"
+                         selectionMode="single"
+                         selection="#{productoTipoProductoFrm.registro}"
+                         rowKey="#{n.id}">
+                <p:ajax event="rowSelect" listener="#{productoTipoProductoFrm.selectionHandler}"
+                        update=":pnlTabla :pnlDetalle :frmTop:messages"/>
+
+                <p:column headerText="ID" style="width:320px"><h:outputText value="#{n.id}" /></p:column>
+                <p:column headerText="Producto"><h:outputText value="#{n.idProducto != null ? n.idProducto.nombreProducto : '-'}" /></p:column>
+                <p:column headerText="Tipo de Producto"><h:outputText value="#{n.idTipoProducto != null ? n.idTipoProducto.nombre : '-'}" /></p:column>
+                <p:column headerText="Activo" style="width:100px"><h:outputText value="#{n.activo ? 'Sí' : 'No'}" /></p:column>
+                <p:column headerText="Fecha creación" style="width:210px"><h:outputText value="#{n.fechaCreacion}" /></p:column>
+            </p:dataTable>
+
+            <p:commandButton id="btnNuevo" value="Nueva Relación" styleClass="btn-rojo"
+                             rendered="#{productoTipoProductoFrm.modoLista}"
+                             actionListener="#{productoTipoProductoFrm.btnNuevoHandler}"
+                             process="@this" immediate="true"
+                             update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+            <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                             rendered="#{productoTipoProductoFrm.modoDetalle}"
+                             actionListener="#{productoTipoProductoFrm.btnCancelarHandler}"
+                             process="@this" immediate="true"
+                             update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+            <p:growl id="messages" showDetail="true" life="5000" />
+        </h:form>
+    </h:panelGroup>
+
+    <!-- DETALLE -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{productoTipoProductoFrm.modoDetalle}">
+            <p:panel header="Producto - Tipo de Producto">
+
+                <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
+
+                    <!-- ID -->
+                    <h:outputLabel for="txtIdPanel" value="ID:"/>
+                    <h:panelGroup id="txtIdPanel">
+                        <h:outputText rendered="#{empty productoTipoProductoFrm.registro.id}"
+                                      value="(Se asignará automáticamente al guardar)"/>
+                        <h:inputText id="txtId" value="#{productoTipoProductoFrm.registro.id}"
+                                     rendered="#{not empty productoTipoProductoFrm.registro.id}" disabled="true"/>
+                    </h:panelGroup>
+
+                    <!-- Producto (diálogo conservado) -->
+                    <h:outputLabel for="txtProducto" value="Producto:"/>
+                    <h:panelGroup>
+                        <h:inputText id="txtProducto"
+                                     value="#{productoTipoProductoFrm.registro.idProducto != null ? productoTipoProductoFrm.registro.idProducto.nombreProducto : ''}"
+                                     disabled="true" style="min-width:420px"/>
+                        <p:commandButton value="Seleccionar" styleClass="btn-oscuro"
+                                         process="@this"
+                                         update=":dlgBuscarProd"
+                                         oncomplete="PF('dlgBuscarProdWV').show();"
+                                         style="margin-left:8px"/>
+                    </h:panelGroup>
+
+                    <!-- Tipo de Producto con AUTOCOMPLETE -->
+                    <h:outputLabel for="acTipo" value="Tipo de Producto:"/>
+                    <p:autoComplete id="acTipo"
+                                    value="#{productoTipoProductoFrm.registro.idTipoProducto}"
+                                    completeMethod="#{productoTipoProductoFrm.autoCompleteTipos}"
+                                    var="t" itemLabel="#{t.nombre}" itemValue="#{t}"
+                                    dropdown="true" forceSelection="true"
+                                    converter="tipoProductoConverter"
+                                    cache="true" cacheTimeout="60000"
+                                    minQueryLength="1" scrollHeight="260"
+                                    inputStyle="min-width:420px">
+                        <p:ajax event="itemSelect"
+                                listener="#{productoTipoProductoFrm.onTipoSelect}"
+                                update=":pnlDetalle :frmTop:messages"/>
+                    </p:autoComplete>
+
+                    <!-- Activo -->
+                    <h:outputLabel for="chkActivo" value="Activo:"/>
+                    <h:selectBooleanCheckbox id="chkActivo" value="#{productoTipoProductoFrm.registro.activo}"/>
+
+                    <!-- Fecha -->
+                    <h:outputLabel for="txtFec" value="Fecha de Creación:"/>
+                    <h:inputText id="txtFec" value="#{productoTipoProductoFrm.fechaCreacionTexto}" disabled="true"/>
+
+                    <!-- Observaciones -->
+                    <h:outputLabel for="txtObs" value="Observaciones:"/>
+                    <h:inputTextarea id="txtObs" value="#{productoTipoProductoFrm.registro.observaciones}" rows="3" styleClass="inp"/>
+                </p:panelGrid>
+
+                <!-- Sección de características -->
+                <h:panelGroup id="pnlCar"
+                              rendered="#{productoTipoProductoFrm.mostrarSeccionCaracteristicas}"
+                              layout="block" style="margin-top:14px;">
+                    <h:panelGrid columns="2" columnClasses="col-field,col-field" style="width:100%">
+                        <p:panel header="Características disponibles del tipo" toggleable="true">
+                            <p:dataList value="#{productoTipoProductoFrm.carDisponibles}" var="tpc"
+                                        emptyMessage="Sin características para este tipo">
+                                <h:outputText value="#{tpc.idCaracteristica.nombre}" />
+                                <h:outputText value=" (Obligatoria)" rendered="#{tpc.obligatorio}" style="font-style:italic; margin-left:6px"/>
+                            </p:dataList>
+                        </p:panel>
+
+                        <p:panel header="Características asignadas (obligatorias)" toggleable="true">
+                            <p:dataList value="#{productoTipoProductoFrm.carAsignadas}" var="tpc"
+                                        emptyMessage="(Aún no hay obligatorias)">
+                                <h:outputText value="#{tpc.idCaracteristica.nombre}" />
+                            </p:dataList>
+                        </p:panel>
+                    </h:panelGrid>
+                </h:panelGroup>
+
+                <p:panelGrid columns="3" style="margin-top: 15px;">
+                    <p:commandButton value="Crear" styleClass="btn-rojo"
+                                     actionListener="#{productoTipoProductoFrm.btnGuardarHandler}"
+                                     rendered="#{productoTipoProductoFrm.estado.name() eq 'CREAR'}"
+                                     update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                    <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                                     actionListener="#{productoTipoProductoFrm.btnModificarHandler}"
+                                     rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
+                                     update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                    <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                                     actionListener="#{productoTipoProductoFrm.btnEliminarHandler}"
+                                     rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
+                                     update=":frmTop:messages :pnlDetalle :pnlTabla"/>
+                </p:panelGrid>
+            </p:panel>
+        </h:form>
+    </h:panelGroup>
+
+    <!-- Dlg: Buscar Producto -->
+    <p:dialog id="dlgBuscarProd" widgetVar="dlgBuscarProdWV" header="Seleccionar Producto"
+              modal="true" resizable="false" width="760">
+        <h:form id="frmDlgProd">
+            <p:panelGrid columns="3" styleClass="form-grid-2col" columnClasses="col-label,col-field,col-field">
+                <h:outputLabel for="txtFiltroProd" value="Buscar:"/>
+                <h:inputText id="txtFiltroProd" value="#{productoTipoProductoFrm.filtroProducto}" styleClass="inp"/>
+                <p:commandButton value="Buscar" styleClass="btn-oscuro"
+                                 process="@form"
+                                 actionListener="#{productoTipoProductoFrm.buscarProductos}"
+                                 update=":frmDlgProd:tblProd"/>
+            </p:panelGrid>
+
+            <p:dataTable id="tblProd"
+                         value="#{productoTipoProductoFrm.resultadosBusquedaProducto}"
+                         var="p" paginator="true" rows="8"
+                         emptyMessage="Sin resultados">
+                <p:column headerText="ID" style="width:320px"><h:outputText value="#{p.id}" /></p:column>
+                <p:column headerText="Nombre"><h:outputText value="#{p.nombreProducto}" /></p:column>
+                <p:column headerText="Activo" style="width:100px"><h:outputText value="#{p.activo ? 'Sí' : 'No'}" /></p:column>
+                <p:column style="width:140px; text-align:center">
+                    <p:commandButton value="Elegir" styleClass="btn-rojo"
+                                     process="@this"
+                                     actionListener="#{productoTipoProductoFrm.seleccionarProducto(p)}"
+                                     update=":pnlDetalle :frmTop:messages"
+                                     oncomplete="PF('dlgBuscarProdWV').hide();"/>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </p:dialog>
+
+</h:body>
 </html>
