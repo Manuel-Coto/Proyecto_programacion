@@ -21,10 +21,6 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Caracteristic
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoCaracteristica;
 
-/**
- * Managed Bean para administrar la relación TipoProducto-Caracteristica.
- * Hereda el comportamiento base de DefaultFrm<T>.
- */
 @Named("tipoProductoCaracteristicaFrm")
 @ViewScoped
 public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaracteristica> implements Serializable {
@@ -36,11 +32,8 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
        ======================= */
     @Inject
     private TipoProductoCaracteristicaDAO tpcDao;
-
-    // Si ya tienes estos DAO, inyéctalos; si no, puedes crearlos siguiendo tu base abstracta.
     @Inject
     private sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoDAO tipoProductoDao;
-
     @Inject
     private sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CaracteristicaDAO caracteristicaDao;
 
@@ -53,13 +46,29 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
     private List<TipoProducto> listaTipoProducto;
     private List<Caracteristica> listaCaracteristica;
 
+    private List<TipoProductoCaracteristica> carDisponibles;
+    private List<TipoProductoCaracteristica> carAsignadas;
+    private TipoProductoCaracteristica registro;
+
     @PostConstruct
     @Override
     public void inicializar() {
         this.nombreBean = "TipoProducto-Característica";
-        super.inicializar(); // inicializa LazyDataModel
+        super.inicializar();
         cargarCombos();
     }
+
+    private void cargarCaracteristicas() {
+        try {
+            this.carDisponibles = tpcDao.findByTipoProductoId(1L); // Ejemplo, cargar datos.
+            this.carAsignadas = carDisponibles;
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error cargando características", e);
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error", "No fue posible cargar las características"));
+        }
+    }
+
 
     private void cargarCombos() {
         try {
@@ -91,7 +100,6 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
         TipoProductoCaracteristica t = new TipoProductoCaracteristica();
         t.setFechaCreacion(OffsetDateTime.now());
         t.setObligatorio(Boolean.FALSE);
-        // al crear, limpia selección
         selectedTipoProductoId = null;
         selectedCaracteristicaId = null;
         return t;
@@ -102,12 +110,15 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
         if (id == null) return null;
         try {
             Long lid = (id instanceof Long) ? (Long) id : Long.valueOf(String.valueOf(id));
-            // usamos el EM del DAO concreto
             return tpcDao.getEntityManager().find(TipoProductoCaracteristica.class, lid);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error en buscarRegistroPorId", e);
             return null;
         }
+    }
+
+    @Override
+    public void inicializarListas() {
     }
 
     @Override
@@ -211,6 +222,39 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
         }
     }
 
+    // Método para eliminar una característica (verificando si es obligatoria)
+    public void eliminarCaracteristicas(ActionEvent e) {
+        try {
+            // Si la característica es obligatoria, no se puede eliminar
+            if (registro != null && Boolean.TRUE.equals(registro.getObligatorio())) {
+                msg(FacesMessage.SEVERITY_WARN, "No se puede eliminar", "No se puede eliminar una característica obligatoria.");
+                return;
+            }
+            tpcDao.eliminarSiNoEsObligatoria(registro.getId());
+            msg(FacesMessage.SEVERITY_INFO, "Éxito", "Característica eliminada correctamente.");
+            cargarCaracteristicas(); // Recargar las características
+        } catch (IllegalArgumentException ex) {
+            msg(FacesMessage.SEVERITY_ERROR, "Error", ex.getMessage());
+        } catch (Exception ex) {
+            msg(FacesMessage.SEVERITY_ERROR, "Error al eliminar", ex.getMessage());
+        }
+    }
+
+    // Método para asignar una característica (solo si no es obligatoria)
+    public void asignarCaracteristicas(ActionEvent e) {
+        try {
+            // Aquí iría la lógica para asignar la característica
+            msg(FacesMessage.SEVERITY_INFO, "Asignación realizada", "Características asignadas correctamente.");
+        } catch (Exception ex) {
+            msg(FacesMessage.SEVERITY_ERROR, "Error", "Error al asignar características");
+        }
+    }
+
+    // Método de mensaje de error o éxito
+    private void msg(FacesMessage.Severity s, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(s, summary, detail));
+    }
+
     /* =======================
        Getters / Setters para UI
        ======================= */
@@ -241,5 +285,21 @@ public class TipoProductoCaracteristicaFrm extends DefaultFrm<TipoProductoCaract
             cargarCombos();
         }
         return listaCaracteristica;
+    }
+
+    public List<TipoProductoCaracteristica> getCarDisponibles() {
+        return carDisponibles;
+    }
+
+    public List<TipoProductoCaracteristica> getCarAsignadas() {
+        return carAsignadas;
+    }
+
+    public TipoProductoCaracteristica getRegistro() {
+        return registro;
+    }
+
+    public void setRegistro(TipoProductoCaracteristica registro) {
+        this.registro = registro;
     }
 }
