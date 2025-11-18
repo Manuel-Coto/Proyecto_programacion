@@ -232,4 +232,5 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
         }
         return listaTipoUnidadMedida;
     }
+    // Me pica un pulmon
 }
