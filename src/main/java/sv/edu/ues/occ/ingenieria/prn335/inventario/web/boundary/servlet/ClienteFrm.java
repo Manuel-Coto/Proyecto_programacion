@@ -78,6 +78,10 @@ public class ClienteFrm extends DefaultFrm<Cliente> implements Serializable {
     }
 
     @Override
+    public void inicializarListas() {
+    }
+
+    @Override
     protected String getIdAsText(Cliente r) {
         return (r != null && r.getId() != null) ? r.getId().toString() : null;
     }

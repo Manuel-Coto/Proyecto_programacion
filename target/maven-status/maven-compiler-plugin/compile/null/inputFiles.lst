@@ -1,5 +1,6 @@
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/KardexDetalle.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/Kardex.java
+/home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/Idiomas.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/CaracteristicaDAO.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/TipoUnidadMedida.java
 /home/manuel/IdeaProjects/InventarioWebApp/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/core/entity/TipoAlmacen.java

@@ -9,26 +9,25 @@
 <h:form id="topbarForm">
     <p:menubar styleClass="topbar">
 
-        <!-- Inicio -->
-        <p:menuitem value="Inicio" url="ManejarTodo.jsf" icon="pi pi-home" />
-
-        <!-- Inventario -->
-        <p:submenu label="Inventario" icon="pi pi-box">
+        <!-- Tipos -->
+        <p:submenu label="Tipos" icon="pi pi-box">
             <!-- Usa url=*.jsf para evitar problemas con mapeo -->
             <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
             <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-            <!-- Agrega más módulos aquí -->
+            <p:menuitem value="Tipo Unidad de Medida" url="TipoUnidadMedida.jsf" icon="pi pi-balance-scale" />
+
         </p:submenu>
 
-        <!-- Reportes -->
-        <p:submenu label="Reportes" icon="pi pi-chart-bar">
-            <p:menuitem value="Movimientos" url="RptMovimientos.jsf" icon="pi pi-list" />
+        <!-- Especificos -->
+        <p:submenu label="Especificos" icon="pi pi-chart-bar">
+            <p:menuitem value="Producto" url="Producto.jsf" icon="pi pi-boxes" />
+            <p:menuitem value="Almacén" url="Almacen.jsf" icon="pi pi-warehouse" />
+            <p:menuitem value="Unidad de Medida" url="UnidadMedida.jsf" icon="pi pi-ruler" />
+            <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-sliders-h" />
+            <p:menuitem value="Clientes" url="Clientes.jsf" icon="pi pi-users" />
+            <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-user-plus" />
         </p:submenu>
 
-        <!-- Acciones a la derecha -->
-        <f:facet name="options">
-            <p:commandButton type="button" value="Ayuda" icon="pi pi-question-circle" styleClass="btn-oscuro" />
-        </f:facet>
     </p:menubar>
 </h:form>
 </html>

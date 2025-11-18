@@ -3,6 +3,7 @@
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
       xmlns:f="jakarta.faces.core">
 <h:head>
     <meta charset="UTF-8"/>
@@ -14,19 +15,8 @@
 </h:head>
 <h:body>
 
-    <h:form id="topbarForm">
-        <p:menubar styleClass="topbar">
-            <p:submenu label="Inventario" icon="pi pi-box">
-                <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
-                <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-                <p:menuitem value="Tipo Unidad Medida" url="TipoUnidadMedida.jsf" icon="pi pi-sliders-h" />
-                <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-list" />
-                <p:menuitem value="TipoProducto-Característica" url="TipoProductoCaracteristica.jsf" icon="pi pi-link" />
-                <p:menuitem value="Lista de Clientes" url="Clientes.jsf" icon="pi pi-list" />
-                <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-truck" />
-            </p:submenu>
-        </p:menubar>
-    </h:form>
+    <!-- Topbar  -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
 
     <h1>#{tipoAlmacenFrm.nombreBean}</h1>
 
@@ -51,11 +41,11 @@
                 </p:dataTable>
 
                 <!-- Botones principales -->
-                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                <p:commandButton id="btnNuevo" value="Nuevo Tipo Almacen" styleClass="btn-rojo"
                                  rendered="#{tipoAlmacenFrm.estado == 'NADA'}"
                                  actionListener="#{tipoAlmacenFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="Cancelar Tipo Almacen" styleClass="btn-oscuro"
                                  rendered="#{tipoAlmacenFrm.estado != 'NADA'}"
                                  actionListener="#{tipoAlmacenFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
             </h:form>
@@ -85,17 +75,17 @@
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Crear" styleClass="btn-rojo"
+                <p:commandButton value="Crear Tipo Almacen" styleClass="btn-rojo"
                                  actionListener="#{tipoAlmacenFrm.btnGuardarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'CREAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Tipo Almacen" styleClass="btn-oscuro"
                                  actionListener="#{tipoAlmacenFrm.btnModificarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Tipo Almacen" styleClass="btn-rojo"
                                  actionListener="#{tipoAlmacenFrm.btnEliminarHandler}"
                                  rendered="#{tipoAlmacenFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla"/>

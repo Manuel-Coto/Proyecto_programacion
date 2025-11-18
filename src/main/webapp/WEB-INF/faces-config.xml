@@ -10,8 +10,9 @@
             <supported-locale>en</supported-locale>
             <supported-locale>es</supported-locale>
         </locale-config>
+
         <resource-bundle>
-            <base-name>messages</base-name>
+            <base-name>messages</base-name> <!-- Asegúrate que este es el nombre correcto del bundle -->
             <var>msg</var>
         </resource-bundle>
     </application>

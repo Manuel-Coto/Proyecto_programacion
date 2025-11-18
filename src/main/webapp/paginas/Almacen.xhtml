@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{almacenFrm.nombreBean}</title>
+
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- Topbar -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{almacenFrm.nombreBean}</h1>
+
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tabla-top"
+                             lazy="true"
+                             value="#{almacenFrm.modelo}"
+                             var="reg"
+                             selectionMode="single"
+                             selection="#{almacenFrm.registro}"
+                             rowKey="#{reg.id}"
+                             rows="#{almacenFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             rendered="#{almacenFrm.estado == 'NADA'}">
+                    <p:ajax event="rowSelect" listener="#{almacenFrm.seleccionarRegistro}" update=":pnlTabla :pnlDetalle"/>
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Tipo Almacen"><h:outputText value="#{reg.idTipoAlmacen.nombre}" /></p:column>
+                    <p:column headerText="Activo"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
+                    <p:column headerText="Observaciones"><h:outputText value="#{reg.observaciones}" /></p:column>
+                </p:dataTable>
+
+                <p:commandButton id="btnNuevo" value="Nuevo Almacen" styleClass="btn-rojo"
+                                 rendered="#{almacenFrm.estado == 'NADA'}"
+                                 actionListener="#{almacenFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
+
+                <p:commandButton id="btnCancelar" value="Cancelar Almacen" styleClass="btn-oscuro"
+                                 rendered="#{almacenFrm.estado != 'NADA'}"
+                                 actionListener="#{almacenFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
+            </h:form>
+
+            <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{almacenFrm.estado != 'NADA'}">
+            <h:panelGrid columns="2">
+
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty almacenFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"
+                                  styleClass="id-info-text"/>
+                    <h:inputText id="txtId" value="#{almacenFrm.registro.id}"
+                                 rendered="#{not empty almacenFrm.registro.id}" disabled="true"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="txtTipoAlmacen" value="Tipo de Almacen:"/>
+                <p:selectOneMenu id="txtTipoAlmacen" value="#{almacenFrm.registro.idTipoAlmacen.id}">
+                    <f:selectItem itemLabel="Seleccione Tipo de Almacen" itemValue="#{null}"/>
+                    <f:selectItems value="#{almacenFrm.listaTipoAlmacen}" var="tipo"
+                                   itemLabel="#{tipo.nombre}" itemValue="#{tipo.id}"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="chkActivo" value="Activo:"/>
+                <h:selectBooleanCheckbox id="chkActivo" value="#{almacenFrm.registro.activo}"/>
+
+                <h:outputLabel for="txtObservaciones" value="Observaciones:"/>
+                <h:inputText id="txtObservaciones" value="#{almacenFrm.registro.observaciones}" size="80"/>
+            </h:panelGrid>
+
+            <h:panelGrid columns="3" style="margin-top: 15px;">
+                <p:commandButton value="Crear Almacen" styleClass="btn-rojo"
+                                 actionListener="#{almacenFrm.btnGuardarHandler}"
+                                 rendered="#{almacenFrm.estado == 'CREAR'}"
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Modificar Almacen" styleClass="btn-oscuro"
+                                 actionListener="#{almacenFrm.btnModificarHandler}"
+                                 rendered="#{almacenFrm.estado == 'MODIFICAR'}"
+                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+
+                <p:commandButton value="Eliminar Almacen" styleClass="btn-rojo"
+                                 actionListener="#{almacenFrm.btnEliminarHandler}"
+                                 rendered="#{almacenFrm.estado == 'MODIFICAR'}"
+                                 update="messages :pnlDetalle :pnlTabla"/>
+            </h:panelGrid>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>

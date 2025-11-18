@@ -9,10 +9,8 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefault
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoAlmacenDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoAlmacen;
 
-
 import java.io.Serializable;
 import java.util.List;
-
 
 @Named
 @ViewScoped
@@ -24,11 +22,13 @@ public class TipoAlmacenFrm extends DefaultFrm<TipoAlmacen> implements Serializa
     @Inject
     TipoAlmacenDAO tipoAlmacenDAO;
 
+    private List<TipoAlmacen> listaTipoAlmacen;
 
-    public TipoAlmacenFrm() {
-        this.nombreBean = " Tipo Almacen";
+    @PostConstruct
+    public void init() {
+        this.nombreBean = "Tipo Almacen";
+        this.listaTipoAlmacen = tipoAlmacenDAO.findAll();
     }
-
 
     @Override
     protected FacesContext getFacesContext() {
@@ -48,14 +48,18 @@ public class TipoAlmacenFrm extends DefaultFrm<TipoAlmacen> implements Serializa
 
     @Override
     protected TipoAlmacen buscarRegistroPorId(Object id) {
-        if (id != null && id instanceof Integer buscado && this.modelo.getWrappedData().isEmpty()) {
-            for (TipoAlmacen ta : (Iterable<TipoAlmacen>) tipoAlmacenDAO.findAll()) {
-                if (ta.getId().equals(buscado)) {
+        if (id != null && id instanceof Integer) {
+            for (TipoAlmacen ta : listaTipoAlmacen) {
+                if (ta.getId().equals(id)) {
                     return ta;
                 }
             }
         }
         return null;
+    }
+
+    @Override
+    public void inicializarListas() {
     }
 
     @Override
@@ -68,21 +72,19 @@ public class TipoAlmacenFrm extends DefaultFrm<TipoAlmacen> implements Serializa
 
     @Override
     protected TipoAlmacen getIdByText(String id) {
-        if (id != null && this.modelo != null && !this.modelo.getWrappedData().isEmpty()) {
+        if (id != null) {
             try {
                 Integer buscado = Integer.parseInt(id);
-                return this.modelo.getWrappedData().stream()
-                        .filter(r -> r.getId() != null && r.getId().equals(buscado))
-                        .findFirst()
-                        .orElse(null);
+                for (TipoAlmacen ta : listaTipoAlmacen) {
+                    if (ta.getId().equals(buscado)) {
+                        return ta;
+                    }
+                }
             } catch (NumberFormatException e) {
                 System.err.println("ID no es un número válido: " + id);
-                return null;
             }
         }
         return null;
     }
 
-
 }
-
