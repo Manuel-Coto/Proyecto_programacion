@@ -24,7 +24,7 @@ public class AlmacenDAO extends InventarioDefaultDataAccess<Almacen> implements 
     }
 
     // Inyección del EntityManager para interactuar con la base de datos
-    @PersistenceContext(unitName = "consolePU")
+    @PersistenceContext(unitName = "inventarioPU")
     EntityManager em;
 
 

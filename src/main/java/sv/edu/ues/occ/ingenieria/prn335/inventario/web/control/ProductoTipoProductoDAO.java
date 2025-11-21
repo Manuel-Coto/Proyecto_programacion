@@ -16,7 +16,7 @@ import java.util.UUID;
 @Stateless
 public class ProductoTipoProductoDAO extends InventarioDefaultDataAccess<ProductoTipoProducto> {
 
-    @PersistenceContext(unitName = "consolePU")
+    @PersistenceContext(unitName = "inventarioPU")
     private EntityManager em;
 
     public ProductoTipoProductoDAO() {

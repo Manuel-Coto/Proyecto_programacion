@@ -18,7 +18,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoC
 @Stateless
 public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<TipoProductoCaracteristica> {
 
-    @PersistenceContext(unitName = "consolePU")
+    @PersistenceContext(unitName = "inventarioPU")
     private EntityManager em;
 
     public TipoProductoCaracteristicaDAO() {

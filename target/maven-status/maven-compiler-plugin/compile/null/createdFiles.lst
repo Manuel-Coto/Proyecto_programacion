@@ -1,2 +1,17 @@
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/ClienteFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/Converte/TipoProductoConverter.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/ProductoTipoProductoDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/AlmacenFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/AlmacenDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/TipoProductoFrm$OpcionPadre.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/VentaDetalleDAO.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/ClienteDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/UnidadMedidaDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/UnidadMedidaFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/VentaDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/VentaFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/Converte/CaracteristicaConverter.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/ProductoDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/ProductoTipoProductoFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/ProductoFrm.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/Idiomas.class

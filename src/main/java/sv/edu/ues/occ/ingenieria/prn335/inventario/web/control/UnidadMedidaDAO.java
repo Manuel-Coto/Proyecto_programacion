@@ -15,7 +15,7 @@ import java.util.Objects;
 @Stateless
 public class UnidadMedidaDAO extends InventarioDefaultDataAccess<UnidadMedida> {
 
-    @PersistenceContext(unitName = "consolePU")
+    @PersistenceContext(unitName = "inventarioPU")
     private EntityManager em;
 
     public UnidadMedidaDAO() {

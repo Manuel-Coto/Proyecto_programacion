@@ -12,7 +12,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoUnidadMed
 @Stateless
 public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadMedida> {
 
-    @PersistenceContext(unitName = "consolePU")
+    @PersistenceContext(unitName = "inventarioPU")
     private EntityManager em;
 
     public TipoUnidadMedidaDAO() {

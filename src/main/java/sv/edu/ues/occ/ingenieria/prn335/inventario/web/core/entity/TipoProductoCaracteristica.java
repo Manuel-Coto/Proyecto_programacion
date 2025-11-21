@@ -66,4 +66,7 @@ public class TipoProductoCaracteristica {
         this.fechaCreacion = fechaCreacion;
     }
 
+    public boolean getSelected() {
+        return false;
+    }
 }
