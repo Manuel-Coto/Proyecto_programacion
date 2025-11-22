@@ -18,7 +18,15 @@ public interface InventarioDAOInterface<T> {
 
     //public T buscarPorId(Object id) throws IllegalArgumentException;
 
+    List<T> findAll() throws IllegalArgumentException;
+
     public List<T> findRange(int first, int max) throws IllegalArgumentException;
 
     public int count() throws IllegalArgumentException;
+
+    void modificar(T registro) throws IllegalArgumentException;
+
+    void eliminar(T entity) throws IllegalArgumentException;
+
+    void eliminarPorId(Object id) throws IllegalArgumentException;
 }

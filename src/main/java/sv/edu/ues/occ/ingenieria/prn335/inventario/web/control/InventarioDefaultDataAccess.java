@@ -1,28 +1,39 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.control;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
-
 import java.util.List;
-public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInterface<T> {
-    final Class<T> entityClass;
+
+public class InventarioDefaultDataAccess<T> implements InventarioDAOInterface<T> {
+
+    @PersistenceContext(unitName = "inventarioPU")
+    protected EntityManager em;
+
+    protected final Class<T> entityClass;
 
     public InventarioDefaultDataAccess(Class<T> entityClass) {
+        if (entityClass == null) {
+            throw new IllegalArgumentException("entityClass no puede ser nulo");
+        }
         this.entityClass = entityClass;
     }
 
-    public abstract EntityManager getEntityManager();
+    protected EntityManager getEntityManager() {
+        if (em == null) {
+            throw new IllegalStateException("EntityManager no disponible (¿inyección fallida?)");
+        }
+        return em;
+    }
 
+    @Override
     public List<T> findAll() throws IllegalArgumentException {
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
 
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<T> cq = cb.createQuery(entityClass);
@@ -35,6 +46,7 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
         }
     }
 
+    @Override
     public List<T> findRange(int first, int max) throws IllegalArgumentException {
         if (first < 0 || max < 1) {
             throw new IllegalArgumentException("Parámetros inválidos: first debe ser >= 0, max debe ser >= 1");
@@ -42,9 +54,6 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
 
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
 
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<T> cq = cb.createQuery(entityClass);
@@ -59,12 +68,10 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
         }
     }
 
+    @Override
     public int count() throws IllegalArgumentException {
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
 
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Long> cq = cb.createQuery(Long.class);
@@ -77,6 +84,7 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
         }
     }
 
+    @Override
     public void crear(T registro) throws IllegalArgumentException {
         if (registro == null) {
             throw new IllegalArgumentException("El registro no puede ser nulo");
@@ -84,15 +92,13 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
 
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
             em.persist(registro);
         } catch (Exception ex) {
             throw new IllegalStateException("Error al crear el registro", ex);
         }
     }
 
+    @Override
     public void modificar(T registro) throws IllegalArgumentException {
         if (registro == null) {
             throw new IllegalArgumentException("El registro no puede ser nulo");
@@ -100,16 +106,13 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
 
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
             em.merge(registro);
         } catch (Exception ex) {
             throw new IllegalStateException("Error al modificar el registro", ex);
         }
     }
 
-    // ✅ CAMBIADO: Ahora acepta la entidad (T) en lugar de solo el ID
+    @Override
     public void eliminar(T entity) throws IllegalArgumentException {
         if (entity == null) {
             throw new IllegalArgumentException("La entidad no puede ser nula");
@@ -117,9 +120,6 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
 
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
             if (!em.contains(entity)) {
                 entity = em.merge(entity);
             }
@@ -131,6 +131,7 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
         }
     }
 
+    @Override
     public void eliminarPorId(Object id) throws IllegalArgumentException {
         if (id == null) {
             throw new IllegalArgumentException("El ID no puede ser nulo");
@@ -138,9 +139,6 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
 
         try {
             EntityManager em = getEntityManager();
-            if (em == null) {
-                throw new IllegalStateException("EntityManager no disponible");
-            }
             T registro = em.find(entityClass, id);
             if (registro != null) {
                 em.remove(registro);
@@ -151,4 +149,16 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
             throw new IllegalStateException("Error al eliminar el registro por ID", ex);
         }
     }
+
+    public T findById(Object id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        try {
+            return getEntityManager().find(entityClass, id);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al encontrar la entidad", e);
+        }
+    }
+
 }

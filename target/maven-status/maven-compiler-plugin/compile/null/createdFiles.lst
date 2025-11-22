@@ -7,6 +7,8 @@ sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/TipoProductoFrm
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/VentaDetalleDAO.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/ClienteDAO.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/UnidadMedidaDAO.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/OffsetDateTimeConverter.class
+sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/EstadoCompra.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/UnidadMedidaFrm.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/VentaDAO.class
 sv/edu/ues/occ/ingenieria/prn335/inventario/web/boundary/servlet/VentaFrm.class

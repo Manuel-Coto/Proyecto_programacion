@@ -1,4 +1,3 @@
-<!-- /WEB-INF/includes/topbar.xhtml -->
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
@@ -11,11 +10,9 @@
 
         <!-- Tipos -->
         <p:submenu label="Tipos" icon="pi pi-box">
-            <!-- Usa url=*.jsf para evitar problemas con mapeo -->
             <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
             <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
             <p:menuitem value="Tipo Unidad de Medida" url="TipoUnidadMedida.jsf" icon="pi pi-balance-scale" />
-
         </p:submenu>
 
         <!-- Especificos -->
@@ -26,8 +23,16 @@
             <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-sliders-h" />
             <p:menuitem value="Clientes" url="Clientes.jsf" icon="pi pi-users" />
             <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-user-plus" />
+            <p:menuitem value="Compra" url="Compra.jsf" icon="pi pi-shopping-cart" />
         </p:submenu>
+
+        <!-- Compras (Nuevo) -->
+        <!--<p:submenu label="Compras" icon="pi pi-cart-plus">
+            <p:menuitem value="Compra" url="Compra.jsf" icon="pi pi-shopping-cart" />
+            <p:menuitem value="Detalle Compra" url="CompraDetalle.jsf" icon="pi pi-list" />
+        </p:submenu>-->
 
     </p:menubar>
 </h:form>
+
 </html>

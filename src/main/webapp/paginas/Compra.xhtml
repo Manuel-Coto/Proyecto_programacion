@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8" />
+    <title>#{compraFrm.nombreBean}</title>
+
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css" />
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css" />
+</h:head>
+
+<h:body>
+
+    <!-- TOPBAR ÚNICAMENTE -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml" />
+
+    <div class="page-container">
+        <div class="container">
+            <div class="header">
+                <h1>#{compraFrm.nombreBean}</h1>
+            </div>
+
+            <div class="content">
+
+                <!-- =========================
+                     LISTA / TABLA PRINCIPAL
+                     ========================= -->
+                <h:panelGroup id="pnlTabla" layout="block">
+
+                    <h:form id="frmTop">
+
+                        <p:growl id="messages"
+                                 showDetail="true"
+                                 life="5000" />
+
+                        <p:dataTable id="tablaCompras"
+                                     rendered="#{compraFrm.modoLista}"
+                                     value="#{compraFrm.modelo}"
+                                     var="n"
+                                     lazy="true"
+                                     paginator="true"
+                                     rows="#{compraFrm.pageSize}"
+                                     paginatorPosition="bottom"
+                                     selectionMode="single"
+                                     selection="#{compraFrm.registro}"
+                                     rowKey="#{n.id}"
+                                     rowHover="true"
+                                     responsiveLayout="scroll"
+                                     emptyMessage="No hay compras registradas"
+                                     styleClass="tabla-general">
+
+                            <p:ajax event="rowSelect"
+                                    listener="#{compraFrm.selectionHandler}"
+                                    update=":pnlTabla :pnlDetalle :frmTop:messages" />
+
+                            <p:column headerText="ID"
+                                      style="width:120px; text-align:center;">
+                                <h:outputText value="#{n.id}" />
+                            </p:column>
+
+                            <p:column headerText="Proveedor">
+                                <!-- Ajusta según tu entidad: n.proveedor.nombre o n.idProveedor -->
+                                <!-- <h:outputText value="#{n.proveedor.nombre}" /> -->
+                                <h:outputText value="#{n.proveedor.nombre}" />
+                            </p:column>
+
+                            <p:column headerText="Estado"
+                                      style="width:110px; text-align:center;">
+                                <h:outputText value="#{n.estado}" />
+                            </p:column>
+
+                            <p:column headerText="Observaciones">
+                                <h:outputText value="#{n.observaciones}" />
+                            </p:column>
+
+                        </p:dataTable>
+
+                        <!-- Barra de botones debajo de la tabla -->
+                        <p:toolbar styleClass="toolbar-acciones" style="margin-top: 1rem;">
+                            <p:toolbarGroup align="left">
+                                <p:commandButton id="btnNuevo"
+                                                 value="Nueva Compra"
+                                                 icon="pi pi-plus"
+                                                 styleClass="btn-rojo"
+                                                 rendered="#{compraFrm.modoLista}"
+                                                 actionListener="#{compraFrm.btnNuevoHandler}"
+                                                 process="@this"
+                                                 immediate="true"
+                                                 update=":pnlDetalle :pnlTabla :frmTop:messages" />
+                            </p:toolbarGroup>
+
+                            <p:toolbarGroup align="right">
+                                <p:commandButton id="btnCancelar"
+                                                 value="Cancelar Compra"
+                                                 icon="pi pi-times"
+                                                 styleClass="btn-oscuro"
+                                                 rendered="#{compraFrm.modoDetalle}"
+                                                 actionListener="#{compraFrm.btnCancelarHandler}"
+                                                 process="@this"
+                                                 immediate="true"
+                                                 update=":pnlDetalle :pnlTabla :frmTop:messages" />
+                            </p:toolbarGroup>
+                        </p:toolbar>
+
+                    </h:form>
+                </h:panelGroup>
+
+                <!-- =========================
+                     DETALLE / FORMULARIO
+                     ========================= -->
+                <h:panelGroup id="pnlDetalle" layout="block">
+                    <h:form id="frmCrear"
+                            rendered="#{compraFrm.modoDetalle}">
+
+                        <p:messages id="msgGlobal"
+                                    showDetail="true"
+                                    autoUpdate="true" />
+
+                        <p:tabView id="tabView">
+                            <p:tab title="Generalidades" id="tabGeneral">
+
+                                <p:panelGrid columns="2"
+                                             styleClass="form-grid-2col"
+                                             columnClasses="col-label,col-field">
+
+                                    <!-- ID -->
+                                    <h:outputLabel for="txtIdPanel" value="ID Compra:" />
+                                    <h:panelGroup id="txtIdPanel">
+                                        <h:outputText rendered="#{empty compraFrm.registro.id}"
+                                                      value="(Se asignará automáticamente al guardar)" />
+                                        <h:inputText id="txtIdGeneral"
+                                                     value="#{compraFrm.registro.id}"
+                                                     rendered="#{not empty compraFrm.registro.id}"
+                                                     readonly="true"
+                                                     styleClass="inp readonly" />
+                                    </h:panelGroup>
+
+                                    <!-- Proveedor -->
+                                    <h:outputLabel for="txtProveedor" value="Proveedor:" />
+                                    <p:selectOneMenu id="txtProveedor"
+                                                     value="#{compraFrm.registro.idProveedor}"
+                                                     styleClass="inp"
+                                                     required="true"
+                                                     requiredMessage="Debe seleccionar un proveedor"
+                                                     filter="true"
+                                                     filterMatchMode="contains">
+                                        <f:selectItem itemLabel="-- Seleccione --"
+                                                      itemValue="#{null}"
+                                                      noSelectionOption="true" />
+                                        <f:selectItems value="#{compraFrm.listaProveedores}"
+                                                       var="proveedor"
+                                                       itemLabel="#{proveedor.nombre}"
+                                                       itemValue="#{proveedor.id}" />
+                                    </p:selectOneMenu>
+
+                                    <!-- Estado -->
+                                    <h:outputLabel for="txtEstado" value="Estado:" />
+                                    <p:inputText id="txtEstado"
+                                                 value="#{compraFrm.registro.estado}"
+                                                 maxlength="10"
+                                                 styleClass="inp"
+                                                 label="Estado" />
+
+                                    <!-- Observaciones -->
+                                    <h:outputLabel for="txtObservaciones" value="Observaciones:" />
+                                    <p:inputTextarea id="txtObservaciones"
+                                                     value="#{compraFrm.registro.observaciones}"
+                                                     rows="3"
+                                                     autoResize="false"
+                                                     styleClass="inp"
+                                                     maxlength="500"
+                                                     counter="obsCounter"
+                                                     counterTemplate="{0} caracteres restantes" />
+                                </p:panelGrid>
+
+                                <h:outputText id="obsCounter"
+                                              styleClass="counter-text"
+                                              style="margin-top: 0.25rem; display:block;" />
+
+                                <!-- Botones CRUD -->
+                                <p:panelGrid columns="3"
+                                             style="margin-top: 15px;"
+                                             styleClass="grid-acciones">
+                                    <p:commandButton value="Crear Compra"
+                                                     icon="pi pi-save"
+                                                     styleClass="btn-rojo"
+                                                     actionListener="#{compraFrm.btnGuardarHandler}"
+                                                     rendered="#{compraFrm.estado.name() eq 'CREAR'}"
+                                                     update=":frmTop:messages :pnlDetalle :pnlTabla"
+                                                     process="@form" />
+
+                                    <p:commandButton value="Modificar Compra"
+                                                     icon="pi pi-pencil"
+                                                     styleClass="btn-oscuro"
+                                                     actionListener="#{compraFrm.btnModificarHandler}"
+                                                     rendered="#{compraFrm.estado.name() eq 'MODIFICAR'}"
+                                                     update=":frmTop:messages :pnlDetalle :pnlTabla"
+                                                     process="@form" />
+
+                                    <p:commandButton value="Eliminar Compra"
+                                                     icon="pi pi-trash"
+                                                     styleClass="btn-rojo"
+                                                     actionListener="#{compraFrm.btnEliminarHandler}"
+                                                     rendered="#{compraFrm.estado.name() eq 'MODIFICAR'}"
+                                                     update=":frmTop:messages :pnlDetalle :pnlTabla" />
+                                </p:panelGrid>
+
+                            </p:tab>
+                        </p:tabView>
+                    </h:form>
+                </h:panelGroup>
+
+            </div>
+        </div>
+    </div>
+
+</h:body>
+</html>

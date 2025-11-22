@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{compraDetalleFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+<h:body>
+
+    <!-- Topbar -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{compraDetalleFrm.nombreBean}</h1>
+
+    <!-- LISTA PRINCIPAL -->
+    <h:panelGroup id="pnlTabla">
+        <h:form id="frmTop">
+            <p:dataTable id="tablaCompraDetalles"
+                         rendered="#{compraDetalleFrm.modoLista}"
+                         value="#{compraDetalleFrm.modelo}" var="n" lazy="true"
+                         paginator="true" rows="#{compraDetalleFrm.pageSize}"
+                         paginatorPosition="bottom"
+                         selectionMode="single" selection="#{compraDetalleFrm.registro}"
+                         rowKey="#{n.id}">
+                <p:ajax event="rowSelect" listener="#{compraDetalleFrm.selectionHandler}"
+                        update=":pnlTabla :pnlDetalle :frmTop:messages"/>
+                <p:column headerText="ID" style="width:340px"><h:outputText value="#{n.id}" /></p:column>
+                <p:column headerText="Compra"><h:outputText value="#{n.idCompra.id}" /></p:column>
+                <p:column headerText="Producto"><h:outputText value="#{n.idProducto.nombre}" /></p:column>
+                <p:column headerText="Cantidad"><h:outputText value="#{n.cantidad}" /></p:column>
+                <p:column headerText="Precio"><h:outputText value="#{n.precio}" /></p:column>
+                <p:column headerText="Estado" style="width:110px">
+                    <h:outputText value="#{n.estado}" />
+                </p:column>
+            </p:dataTable>
+
+            <p:commandButton id="btnNuevo" value="Nuevo Detalle de Compra" styleClass="btn-rojo"
+                             rendered="#{compraDetalleFrm.modoLista}"
+                             actionListener="#{compraDetalleFrm.btnNuevoHandler}"
+                             process="@this" immediate="true"
+                             update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+            <p:commandButton id="btnCancelar" value="Cancelar Detalle" styleClass="btn-oscuro"
+                             rendered="#{compraDetalleFrm.modoDetalle}"
+                             actionListener="#{compraDetalleFrm.btnCancelarHandler}"
+                             process="@this" immediate="true"
+                             update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+            <p:growl id="messages" showDetail="true" life="5000" />
+        </h:form>
+    </h:panelGroup>
+
+    <!-- DETALLE -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{compraDetalleFrm.modoDetalle ne 'NADA'}">
+            <p:tabView id="tabView">
+                <p:tab title="Generalidades" id="tabGeneral">
+                    <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
+
+                        <h:outputLabel for="txtIdPanel" value="ID:"/>
+                        <h:panelGroup id="txtIdPanel">
+                            <h:outputText rendered="#{empty compraDetalleFrm.registro.id}"
+                                          value="(Se asignará automáticamente al guardar)"/>
+                            <h:inputText id="txtIdGeneral" value="#{compraDetalleFrm.registro.id}"
+                                         rendered="#{not empty compraDetalleFrm.registro.id}" readonly="true"/>
+                        </h:panelGroup>
+
+                        <h:outputLabel for="txtCantidad" value="Cantidad:"/>
+                        <p:inputNumber id="txtCantidad" value="#{compraDetalleFrm.registro.cantidad}" styleClass="inp"/>
+
+                        <h:outputLabel for="txtPrecio" value="Precio:"/>
+                        <p:inputNumber id="txtPrecio" value="#{compraDetalleFrm.registro.precio}" styleClass="inp"/>
+
+                        <h:outputLabel for="txtEstado" value="Estado:"/>
+                        <h:selectOneMenu id="txtEstado" value="#{compraDetalleFrm.registro.estado}">
+                            <f:selectItem itemLabel="PENDIENTE" itemValue="PENDIENTE"/>
+                            <f:selectItem itemLabel="RECIBIDO" itemValue="RECIBIDO"/>
+                            <f:selectItem itemLabel="DEVUELTO" itemValue="DEVUELTO"/>
+                        </h:selectOneMenu>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="3" style="margin-top: 15px;">
+                        <p:commandButton value="Crear Detalle" styleClass="btn-rojo"
+                                         actionListener="#{compraDetalleFrm.btnGuardarHandler}"
+                                         rendered="#{compraDetalleFrm.estado.name() eq 'CREAR'}"
+                                         update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                        <p:commandButton value="Modificar Detalle" styleClass="btn-oscuro"
+                                         actionListener="#{compraDetalleFrm.btnModificarHandler}"
+                                         rendered="#{compraDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                         update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                        <p:commandButton value="Eliminar Detalle" styleClass="btn-rojo"
+                                         actionListener="#{compraDetalleFrm.btnEliminarHandler}"
+                                         rendered="#{compraDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                         update=":frmTop:messages :pnlDetalle :pnlTabla"/>
+                    </p:panelGrid>
+                </p:tab>
+
+            </p:tabView>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>
