@@ -2,29 +2,32 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tipo_producto_caracteristica", schema = "public")
-public class TipoProductoCaracteristica {
+public class TipoProductoCaracteristica implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tipo_producto_caracteristica", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_caracteristica")
-    private Caracteristica idCaracteristica;
+    private Caracteristica caracteristica;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tipo_producto")
-    private TipoProducto idTipoProducto;
+    private TipoProducto tipoProducto;
 
     @Column(name = "obligatorio")
     private Boolean obligatorio;
 
     @Column(name = "fecha_creacion")
     private OffsetDateTime fechaCreacion;
+
+    // Getters y setters
 
     public Long getId() {
         return id;
@@ -34,20 +37,20 @@ public class TipoProductoCaracteristica {
         this.id = id;
     }
 
-    public Caracteristica getIdCaracteristica() {
-        return idCaracteristica;
+    public Caracteristica getCaracteristica() {
+        return caracteristica;
     }
 
-    public void setIdCaracteristica(Caracteristica idCaracteristica) {
-        this.idCaracteristica = idCaracteristica;
+    public void setCaracteristica(Caracteristica caracteristica) {
+        this.caracteristica = caracteristica;
     }
 
-    public TipoProducto getIdTipoProducto() {
-        return idTipoProducto;
+    public TipoProducto getTipoProducto() {
+        return tipoProducto;
     }
 
-    public void setIdTipoProducto(TipoProducto idTipoProducto) {
-        this.idTipoProducto = idTipoProducto;
+    public void setTipoProducto(TipoProducto tipoProducto) {
+        this.tipoProducto = tipoProducto;
     }
 
     public Boolean getObligatorio() {
@@ -64,9 +67,5 @@ public class TipoProductoCaracteristica {
 
     public void setFechaCreacion(OffsetDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
-    }
-
-    public boolean getSelected() {
-        return false;
     }
 }

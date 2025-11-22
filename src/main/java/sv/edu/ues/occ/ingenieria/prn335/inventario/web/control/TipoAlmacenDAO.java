@@ -19,7 +19,7 @@ import java.util.List;
 public class TipoAlmacenDAO extends InventarioDefaultDataAccess<TipoAlmacen> implements Serializable {
     public TipoAlmacenDAO() { super(TipoAlmacen.class); }
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     EntityManager em;
 
     @Override

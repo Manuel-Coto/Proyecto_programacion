@@ -79,7 +79,7 @@ public class TipoAlmacenDAOTest {
         Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
 
         // Ejecutar el método count
-        int resultado = spyCut.count();
+        int resultado = Math.toIntExact(spyCut.count());
 
         // Verificar el resultado y las interacciones
         assertEquals(5, resultado);

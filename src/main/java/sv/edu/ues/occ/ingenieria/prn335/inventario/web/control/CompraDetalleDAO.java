@@ -14,7 +14,7 @@ import java.util.UUID;
 public class CompraDetalleDAO extends InventarioDefaultDataAccess<CompraDetalle> {
 
     // Nombre de la unidad de persistencia (asegúrate de que coincida con tu persistence.xml)
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     EntityManager em;
 
     public CompraDetalleDAO() {

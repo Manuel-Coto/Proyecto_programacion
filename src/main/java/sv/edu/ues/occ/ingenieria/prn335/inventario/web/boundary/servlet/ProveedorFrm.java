@@ -51,10 +51,6 @@ public class ProveedorFrm extends DefaultFrm<Proveedor> implements Serializable 
         }
     }
 
-    @Override
-    public void inicializarListas() {
-    }
-
     protected String getIdAsText(Proveedor r) {
         return r != null && r.getId() != null ? String.valueOf(r.getId()) : null;
     }

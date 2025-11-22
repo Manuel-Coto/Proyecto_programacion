@@ -1,309 +1,269 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.primefaces.event.SelectEvent;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.*;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.ProductoTipoProducto;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoCaracteristica;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.ZoneId;
+import java.util.*;
+
+import org.primefaces.event.SelectEvent;
+
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoTipoProductoDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.ProductoTipoProducto;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
 
 @Named("productoTipoProductoFrm")
 @ViewScoped
 public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> implements Serializable {
 
-    @Inject private ProductoTipoProductoDAO dao;
-    @Inject private ProductoDAO productoDao;
-    @Inject private TipoProductoDAO tipoProductoDao;
-    @Inject private TipoProductoCaracteristicaDAO tipoProductoCaracteristicaDao;
-    private TipoProductoCaracteristica selectedCaracteristica;
-    private TipoProductoCaracteristicaDAO tipoProductoCaracteristicaDAO;
+    @EJB
+    ProductoTipoProductoDAO productoTipoProductoDAO;
+
+    @EJB
+    ProductoDAO productoDAO;
+
+    @EJB
+    TipoProductoDAO tipoProductoDAO;
+
+    private List<Producto> listaProductos;
+    private List<TipoProducto> listaTipoProductos;
 
 
-    public boolean isModoLista()   { return getEstado() == ESTADO_CRUD.NADA; }
-    public boolean isModoDetalle() { return getEstado() != ESTADO_CRUD.NADA; }
+    public UUID getIdProductoSeleccionado() {
+        return idProductoSeleccionado;
+    }
 
-    // === Diálogo de búsqueda de Producto ===
-    private String filtroProducto;
-    private List<Producto> resultadosBusquedaProducto = Collections.emptyList();
+    public void setIdProductoSeleccionado(UUID idProductoSeleccionado) {
+        this.idProductoSeleccionado = idProductoSeleccionado;
+    }
 
-    // === Autocomplete de Tipo de Producto ===
-    private List<TipoProducto> sugerenciasTipo = Collections.emptyList();
+    public Long getIdTipoProductoSeleccionado() {
+        return idTipoProductoSeleccionado;
+    }
 
-    // >>> Compatibilidad si el XHTML viejo aún referencia resultadosBusquedaTipo (ya NO se usa)
-    private List<TipoProducto> resultadosBusquedaTipo = Collections.emptyList();
+    public void setIdTipoProductoSeleccionado(Long idTipoProductoSeleccionado) {
+        this.idTipoProductoSeleccionado = idTipoProductoSeleccionado;
+    }
 
-    // === Sección de características (visual) ===
-    private boolean mostrarSeccionCaracteristicas = false;
-    private List<TipoProductoCaracteristica> carDisponibles = Collections.emptyList();
-    private List<TipoProductoCaracteristica> carAsignadas = Collections.emptyList();
+    private UUID idProductoSeleccionado;
+
+
+
+    private Long idTipoProductoSeleccionado;
 
     @PostConstruct
     @Override
     public void inicializar() {
-        this.nombreBean = "Producto - Tipo de Producto";
         super.inicializar();
-        ocultarSeccionCar();
+        cargarListaProductos();
+        cargarListaTipoProductos();
     }
 
-    @Override protected FacesContext getFacesContext() { return FacesContext.getCurrentInstance(); }
-    @Override protected InventarioDefaultDataAccess<ProductoTipoProducto> getDao() { return dao; }
+    private void cargarListaProductos() {
+        try {
+            this.listaProductos = productoDAO.findAll();
+            System.out.println("Productos cargados: " + listaProductos.size());
+        } catch (Exception e) {
+            System.err.println("Error al cargar productos: " + e.getMessage());
+        }
+    }
+
+
+    private void cargarListaTipoProductos() {
+        try {
+            this.listaTipoProductos = tipoProductoDAO.findAll();
+        } catch (Exception e) {
+            System.err.println("Error al cargar tipos de producto: " + e.getMessage());
+        }
+    }
+
+    @Override
+    protected FacesContext getFacesContext() {
+        return FacesContext.getCurrentInstance();
+    }
+
+    @Override
+    protected ProductoTipoProductoDAO getDao() {
+        return productoTipoProductoDAO;
+    }
 
     @Override
     protected ProductoTipoProducto nuevoRegistro() {
-        ProductoTipoProducto r = new ProductoTipoProducto();
-        r.setActivo(Boolean.TRUE);
-        r.setFechaCreacion(OffsetDateTime.now());
-        r.setObservaciones("");
-        ocultarSeccionCar();
-        return r;
+        ProductoTipoProducto nuevo = new ProductoTipoProducto();
+        nuevo.setId(UUID.randomUUID());
+        nuevo.setFechaCreacion(OffsetDateTime.now());
+        nuevo.setActivo(true);
+        return nuevo;
     }
 
     @Override
     protected ProductoTipoProducto buscarRegistroPorId(Object id) {
-        if (id == null) return null;
-        try {
-            UUID uuid = (id instanceof UUID) ? (UUID) id : UUID.fromString(String.valueOf(id));
-            return dao.findById(uuid);
-        } catch (Exception e) { return null; }
+        if (id instanceof UUID) {
+            return productoTipoProductoDAO.findById((UUID) id);
+        }
+        return null;
     }
 
     @Override
-    public void inicializarListas() {
+    protected String getIdAsText(ProductoTipoProducto r) {
+        if (r != null && r.getId() != null) {
+            return r.getId().toString();
+        }
+        return null;
     }
-
-    @Override protected String getIdAsText(ProductoTipoProducto r) {
-        return (r != null && r.getId() != null) ? r.getId().toString() : null;
-    }
-    @Override protected ProductoTipoProducto getIdByText(String id) {
-        return (id == null || id.isBlank()) ? null : buscarRegistroPorId(id);
-    }
-
-    // ===== CRUD overrides =====
 
     @Override
-    public void btnGuardarHandler(ActionEvent e) {
-        try {
-            if (this.registro == null) { msg(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para guardar."); return; }
-            if (this.registro.getIdProducto() == null || this.registro.getIdProducto().getId() == null) {
-                msg(FacesMessage.SEVERITY_WARN, "Validación", "Seleccione un Producto."); return;
+    protected ProductoTipoProducto getIdByText(String id) {
+        if (id != null && !id.isEmpty()) {
+            try {
+                return buscarRegistroPorId(UUID.fromString(id));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error al convertir ID: " + e.getMessage());
             }
-            if (this.registro.getIdTipoProducto() == null || this.registro.getIdTipoProducto().getId() == null) {
-                msg(FacesMessage.SEVERITY_WARN, "Validación", "Seleccione un Tipo de Producto."); return;
-            }
-            if (dao.existsByProductoUuidAndTipoId(this.registro.getIdProducto().getId(), this.registro.getIdTipoProducto().getId())) {
-                msg(FacesMessage.SEVERITY_WARN, "Duplicado", "La relación Producto-Tipo ya existe."); return;
-            }
-            if (this.registro.getId() == null) this.registro.setId(UUID.randomUUID());
-            if (this.registro.getFechaCreacion() == null) this.registro.setFechaCreacion(OffsetDateTime.now());
-            if (this.registro.getActivo() == null) this.registro.setActivo(Boolean.TRUE);
+        }
+        return null;
+    }
 
-            dao.crear(this.registro);
+    @Override
+    protected boolean esNombreVacio(ProductoTipoProducto registro) {
+        // ProductoTipoProducto no tiene campo "nombre", así que validamos otros campos
+        return registro.getIdProducto() == null || registro.getIdTipoProducto() == null;
+    }
 
-            this.registro = null;
-            this.estado = ESTADO_CRUD.NADA;
-            this.modelo = null;
-            inicializarRegistros();
-            ocultarSeccionCar();
-            msg(FacesMessage.SEVERITY_INFO, "Éxito", "Asociación creada correctamente.");
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al guardar", ex.getMessage());
+    // Métodos para conversión de fechas (para p:calendar)
+    public Date getFechaCreacionDate() {
+        if (registro != null && registro.getFechaCreacion() != null) {
+            return Date.from(registro.getFechaCreacion().toInstant());
+        }
+        return new Date();
+    }
+
+    public void setFechaCreacionDate(Date date) {
+        if (registro != null && date != null) {
+            registro.setFechaCreacion(
+                    OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
+            );
         }
     }
 
     @Override
-    public void btnModificarHandler(ActionEvent e) {
-        try {
-            if (this.registro == null) { msg(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para modificar."); return; }
-            if (this.registro.getIdProducto() == null || this.registro.getIdTipoProducto() == null) {
-                msg(FacesMessage.SEVERITY_WARN, "Validación", "Debe mantener un Producto y un Tipo seleccionados."); return;
-            }
-            dao.modificar(this.registro);
-            msg(FacesMessage.SEVERITY_INFO, "Modificado", "Asociación modificada.");
-            this.estado = ESTADO_CRUD.NADA;
-            inicializarRegistros();
-            ocultarSeccionCar();
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al modificar", ex.getMessage());
-        }
-    }
-
-    @Override
-    public void selectionHandler(SelectEvent<ProductoTipoProducto> ev) {
-        super.selectionHandler(ev);
-        if (this.registro != null && this.registro.getIdTipoProducto() != null && this.registro.getIdTipoProducto().getId() != null) {
-            cargarCaracteristicasDeTipo(this.registro.getIdTipoProducto().getId());
-        } else {
-            ocultarSeccionCar();
-        }
-    }
-
-    // ===== Productos (diálogo) =====
-    public void buscarProductos() {
-        String q = (filtroProducto == null) ? "" : filtroProducto.trim();
-        try {
-            resultadosBusquedaProducto = q.isEmpty()
-                    ? productoDao.findAll()
-                    : productoDao.findByNombreLike(q, 0, 30);
-        } catch (Exception ex) {
-            resultadosBusquedaProducto = Collections.emptyList();
-        }
-    }
-
-    public void seleccionarProducto(Producto p) {
-        if (p == null) return;
-        if (this.registro == null) this.registro = nuevoRegistro();
-        this.registro.setIdProducto(p);
-    }
-
-    // ===== Autocomplete TipoProducto =====
-    public List<TipoProducto> autoCompleteTipos(String q) {
-        String texto = (q == null) ? "" : q.trim();
-        try {
-            if (texto.isEmpty()) sugerenciasTipo = tipoProductoDao.findRange(0, 20);
-            else                 sugerenciasTipo = tipoProductoDao.findByNombreLike(texto, 0, 20);
-        } catch (Exception ex) {
-            sugerenciasTipo = Collections.emptyList();
-        }
-        return sugerenciasTipo;
-    }
-
-    public void onTipoSelect(SelectEvent<TipoProducto> ev) {
-        TipoProducto t = ev.getObject();
-        if (t != null) {
-            if (this.registro == null) this.registro = nuevoRegistro();
-            this.registro.setIdTipoProducto(t);
-            if (t.getId() != null) cargarCaracteristicasDeTipo(t.getId());
-        }
-    }
-
-    // ===== Características (visual) =====
-    private void cargarCaracteristicasDeTipo(Long idTipo) {
-        try {
-            List<TipoProductoCaracteristica> todas = tipoProductoCaracteristicaDao.findByTipoProductoIdFetch(idTipo);
-            if (todas == null) {
-                carDisponibles = Collections.emptyList();
-                carAsignadas = Collections.emptyList();
-                mostrarSeccionCaracteristicas = true;
-                return;
-            }
-            carAsignadas = new ArrayList<>();
-            carDisponibles = new ArrayList<>();
-
-            for (TipoProductoCaracteristica tpc : todas) {
-                if (Boolean.TRUE.equals(tpc.getObligatorio())) {
-                    carAsignadas.add(tpc);
-                } else {
-                    carDisponibles.add(tpc);
-                }
-            }
-            List<TipoProductoCaracteristica> asignadasIds = new ArrayList<>();
-            for (TipoProductoCaracteristica asignada : carAsignadas) {
-                asignadasIds.add(asignada); // Guardamos las asignadas
-            }
-            carDisponibles.removeIf(tpc -> asignadasIds.contains(tpc));
-            mostrarSeccionCaracteristicas = true;
-        } catch (Exception e) {
-            carDisponibles = Collections.emptyList();
-            carAsignadas = Collections.emptyList();
-            mostrarSeccionCaracteristicas = true;
-        }
-    }
-
-
-    public void asignarCaracteristicas() {
-        for (TipoProductoCaracteristica tpc : carDisponibles) {
-            if (tpc.getSelected()) {
-                carAsignadas.add(tpc);
-                carDisponibles.remove(tpc);
-            }
-        }
-    }
-
-    public void eliminarCaracteristicas() {
-        List<TipoProductoCaracteristica> aEliminar = new ArrayList<>();
-
-        for (TipoProductoCaracteristica tpc : carAsignadas) {
-            if (tpc.getSelected()) {
-                System.out.println("Característica: " + tpc.getIdCaracteristica().getNombre() + " | Obligatoria: " + tpc.getObligatorio());
-
-                if (Boolean.TRUE.equals(tpc.getObligatorio())) {
-                    msg(FacesMessage.SEVERITY_WARN, "No se puede eliminar", "No se puede eliminar una característica obligatoria.");
+    public void btnGuardarHandler(ActionEvent actionEvent) {
+        if (this.registro != null) {
+            try {
+                if (idProductoSeleccionado == null || idTipoProductoSeleccionado == null) {
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar Producto y Tipo de Producto"));
                     return;
                 }
 
-                aEliminar.add(tpc);
+                // Buscar objetos por ID
+                Producto producto = productoDAO.findById(idProductoSeleccionado);
+                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+
+                registro.setIdProducto(producto);
+                registro.setIdTipoProducto(tipo);
+
+                if (estado == ESTADO_CRUD.CREAR) {
+                    getDao().crear(registro);
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro creado correctamente"));
+                } else if (estado == ESTADO_CRUD.MODIFICAR) {
+                    getDao().modificar(registro);
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
+                }
+
+                registro = null;
+                estado = ESTADO_CRUD.NADA;
+                inicializarRegistros();
+
+            } catch (Exception e) {
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar", e.getMessage()));
             }
         }
-
-        for (TipoProductoCaracteristica tpc : aEliminar) {
-            carAsignadas.remove(tpc);
-            carDisponibles.add(tpc);
-        }
-
-        msg(FacesMessage.SEVERITY_INFO, "Éxito", "Característica eliminada correctamente.");
     }
-
-    public void editarCaracteristica(TipoProductoCaracteristica tipoProductoCaracteristica) {
-        // Verificamos que la característica esté seleccionada
-        if (tipoProductoCaracteristica != null && tipoProductoCaracteristica.getId() != null) {
+    @Override
+    public void btnModificarHandler(ActionEvent actionEvent) {
+        if (this.registro != null) {
             try {
-                // Si la característica es modificada, guardamos los cambios.
-                tipoProductoCaracteristicaDAO.actualizar(tipoProductoCaracteristica); // Usamos el DAO para actualizar la entidad
-                // Mensaje de éxito
-                msg(FacesMessage.SEVERITY_INFO, "Éxito", "La característica del producto ha sido actualizada.");
+                // Validación específica: asegurarse que producto y tipo producto estén seleccionados
+                if (idProductoSeleccionado == null || idTipoProductoSeleccionado == null) {
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar Producto y Tipo de Producto"));
+                    return;
+                }
+
+                // Buscar objetos por ID
+                Producto producto = productoDAO.findById(idProductoSeleccionado);
+                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+
+                registro.setIdProducto(producto);
+                registro.setIdTipoProducto(tipo);
+
+                // Llamar al DAO para modificar
+                getDao().modificar(this.registro);
+
+                // Resetear estado y refrescar modelo
+                this.registro = null;
+                this.estado = ESTADO_CRUD.NADA;
+                inicializarRegistros();
+                this.idProductoSeleccionado = null;
+                this.idTipoProductoSeleccionado = null;
+
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
+
             } catch (Exception e) {
-                // En caso de error, mostramos mensaje
-                msg(FacesMessage.SEVERITY_ERROR, "Error", "Hubo un problema al actualizar la característica del producto.");
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", e.getMessage()));
                 e.printStackTrace();
             }
         }
+
+    }
+    @Override
+    public void selectionHandler(SelectEvent<ProductoTipoProducto> r) {
+        if (r != null && r.getObject() != null) {
+            this.registro = r.getObject();
+            this.estado = ESTADO_CRUD.MODIFICAR;
+
+            // Sincronizar los auxiliares para que los combos muestren el valor actual
+            if (registro.getIdProducto() != null) {
+                this.idProductoSeleccionado = registro.getIdProducto().getId(); // UUID
+            }
+
+            if (registro.getIdTipoProducto() != null) {
+                this.idTipoProductoSeleccionado = registro.getIdTipoProducto().getId(); // Long
+            }
+        }
     }
 
 
-
-
-    private void ocultarSeccionCar() {
-        mostrarSeccionCaracteristicas = false;
-        carDisponibles = Collections.emptyList();
-        carAsignadas = Collections.emptyList();
+    // Getters y Setters
+    public List<Producto> getListaProductos() {
+        return listaProductos;
     }
 
-    public String getFechaCreacionTexto() {
-        if (registro == null || registro.getFechaCreacion() == null) return "";
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        return fmt.format(registro.getFechaCreacion());
+    public void setListaProductos(List<Producto> listaProductos) {
+        this.listaProductos = listaProductos;
     }
 
-    private void msg(FacesMessage.Severity s, String sum, String det) {
-        getFacesContext().addMessage(null, new FacesMessage(s, sum, det));
+    public List<TipoProducto> getListaTipoProductos() {
+        return listaTipoProductos;
     }
 
-    // ==== Getters / Setters requeridos por la vista ====
-    public String getFiltroProducto() { return filtroProducto; }
-    public void setFiltroProducto(String filtroProducto) { this.filtroProducto = filtroProducto; }
-    public List<Producto> getResultadosBusquedaProducto() { return resultadosBusquedaProducto; }
-
-    // Compat: si algún xhtml viejo pregunta por esto, no truena
-    public List<TipoProducto> getResultadosBusquedaTipo() { return resultadosBusquedaTipo; }
-    public void setResultadosBusquedaTipo(List<TipoProducto> l) { this.resultadosBusquedaTipo = l; }
-
-    public boolean isMostrarSeccionCaracteristicas() { return mostrarSeccionCaracteristicas; }
-    public List<TipoProductoCaracteristica> getCarDisponibles() { return carDisponibles; }
-    public List<TipoProductoCaracteristica> getCarAsignadas() { return carAsignadas; }
-
+    public void setListaTipoProductos(List<TipoProducto> listaTipoProductos) {
+        this.listaTipoProductos = listaTipoProductos;
+    }
 }

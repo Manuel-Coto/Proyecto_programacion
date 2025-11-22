@@ -96,10 +96,6 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
         }
     }
 
-    @Override
-    public void inicializarListas() {
-
-    }
 
     @Override
     protected String getIdAsText(Caracteristica r) {
@@ -124,20 +120,20 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
             return;
         }
         try {
-            // Validaciones mínimas
+            // Validaciones básicas para evitar errores
             String nombre = this.registro.getNombre();
             if (nombre == null || nombre.isBlank()) {
                 getFacesContext().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
                         "Atención", "El nombre no puede estar vacío"));
                 return;
-            }
+            } // Verificar selección de Unidad de Medida
             if (selectedTipoUnidadMedidaId == null) {
                 getFacesContext().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
                         "Atención", "Debe seleccionar una Unidad de Medida"));
                 return;
             }
 
-            // Asignar relación
+            // Asignar la relación de TipoUnidadMedida
             TipoUnidadMedida tum = caracteristicaDao.getEntityManager()
                     .find(TipoUnidadMedida.class, selectedTipoUnidadMedidaId);
             if (tum == null) {
@@ -186,12 +182,12 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
                         "Atención", "No hay registro para modificar"));
                 return;
             }
-            if (selectedTipoUnidadMedidaId != null) {
+            if (selectedTipoUnidadMedidaId != null) { // Asignar la relación de TipoUnidadMedida
                 TipoUnidadMedida tum = caracteristicaDao.getEntityManager()
-                        .find(TipoUnidadMedida.class, selectedTipoUnidadMedidaId);
+                        .find(TipoUnidadMedida.class, selectedTipoUnidadMedidaId); // Buscar por ID seleccionado
                 this.registro.setIdTipoUnidadMedida(tum);
             }
-            caracteristicaDao.modificar(this.registro);
+            caracteristicaDao.modificar(this.registro); // Actualiza el registro existente
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Modificado correctamente", null));
@@ -204,9 +200,7 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
         }
     }
 
-    /* =======================
-       Sincronizar selección al editar
-       ======================= */
+    //Sincronizar selección al editar
 
     @Override
     public void selectionHandler(org.primefaces.event.SelectEvent<Caracteristica> evt) {
@@ -214,28 +208,28 @@ public class CaracteristicaFrm extends DefaultFrm<Caracteristica> implements Ser
         if (this.registro != null && this.registro.getIdTipoUnidadMedida() != null) {
             try {
                 this.selectedTipoUnidadMedidaId = this.registro.getIdTipoUnidadMedida().getId();
-            } catch (Exception ignored) { /* noop */ }
+            } catch (Exception ignored) { }
         } else {
             this.selectedTipoUnidadMedidaId = null;
         }
     }
 
-    /* =======================
-       Getters / Setters UI
-       ======================= */
+    // Getters / Setters UI
 
+    // Para el combo de TipoUnidadMedida select en la UI
     public Integer getSelectedTipoUnidadMedidaId() {
         return selectedTipoUnidadMedidaId;
     }
+    // Para el combo de TipoUnidadMedida select en la UI
     public void setSelectedTipoUnidadMedidaId(Integer selectedTipoUnidadMedidaId) {
         this.selectedTipoUnidadMedidaId = selectedTipoUnidadMedidaId;
     }
 
+    // Lista para el combo de TipoUnidadMedida en la UI
     public List<TipoUnidadMedida> getListaTipoUnidadMedida() {
         if (listaTipoUnidadMedida == null || listaTipoUnidadMedida.isEmpty()) {
             cargarUnidades();
         }
         return listaTipoUnidadMedida;
     }
-
 }

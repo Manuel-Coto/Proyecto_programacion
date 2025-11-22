@@ -4,14 +4,13 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
-
 import java.util.List;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
 
 @Stateless
 public class ProveedorDAO extends InventarioDefaultDataAccess<Proveedor> {
     @PersistenceContext(
-            unitName = "inventarioPU"
+            unitName = "consolePU"
     )
     private EntityManager em;
 

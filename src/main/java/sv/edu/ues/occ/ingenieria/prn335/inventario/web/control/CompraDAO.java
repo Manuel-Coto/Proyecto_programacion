@@ -17,7 +17,7 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
 
     private static final Logger LOGGER = Logger.getLogger(CompraDAO.class.getName());
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public CompraDAO() {

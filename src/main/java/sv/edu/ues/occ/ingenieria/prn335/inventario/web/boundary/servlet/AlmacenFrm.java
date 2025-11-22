@@ -3,10 +3,10 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
-import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.faces.event.ActionEvent;
 import org.primefaces.model.LazyDataModel;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.AlmacenDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
@@ -59,7 +59,6 @@ public class AlmacenFrm extends DefaultFrm<Almacen> implements Serializable {
         inicializarListas();
     }
 
-    @Override
     public void inicializarListas() {
         try {
             this.listaTipoAlmacen = tipoAlmacenDAO.findActiveTipoAlmacen();

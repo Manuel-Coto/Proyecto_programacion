@@ -43,11 +43,11 @@
                     <p:column headerText="Comentarios"><h:outputText value="#{reg.comentarios}" /></p:column>
                 </p:dataTable>
 
-                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                <p:commandButton id="btnNuevo" value="Nuevo Tipo de Unidad Medida" styleClass="btn-rojo"
                                  rendered="#{tipoUnidadMedidaFrm.estado == 'NADA'}"
                                  actionListener="#{tipoUnidadMedidaFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="Cancelar Tipo de Unidad Medida" styleClass="btn-oscuro"
                                  rendered="#{tipoUnidadMedidaFrm.estado != 'NADA'}"
                                  actionListener="#{tipoUnidadMedidaFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
             </h:form>
@@ -82,17 +82,17 @@
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Crear" styleClass="btn-rojo"
+                <p:commandButton value="Crear Tipo de Unidad Medida" styleClass="btn-rojo"
                                  actionListener="#{tipoUnidadMedidaFrm.btnGuardarHandler}"
                                  rendered="#{tipoUnidadMedidaFrm.estado == 'CREAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Tipo de Unidad Medida" styleClass="btn-oscuro"
                                  actionListener="#{tipoUnidadMedidaFrm.btnModificarHandler}"
                                  rendered="#{tipoUnidadMedidaFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Tipo de Unidad Medida" styleClass="btn-rojo"
                                  actionListener="#{tipoUnidadMedidaFrm.btnEliminarHandler}"
                                  rendered="#{tipoUnidadMedidaFrm.estado == 'MODIFICAR'}"
                                  update="messages :pnlDetalle :pnlTabla"/>

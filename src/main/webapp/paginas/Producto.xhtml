@@ -20,6 +20,7 @@
 
     <!-- LISTA PRINCIPAL -->
     <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
         <h:form id="frmTop">
             <p:dataTable id="tablaProductos"
                          rendered="#{productoFrm.modoLista}"
@@ -49,7 +50,7 @@
                              process="@this" immediate="true"
                              update=":pnlDetalle :pnlTabla :frmTop:messages"/>
 
-            <p:commandButton id="btnCancelar" value="Cancelar Producto" styleClass="btn-oscuro"
+            <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
                              rendered="#{productoFrm.modoDetalle}"
                              actionListener="#{productoFrm.btnCancelarHandler}"
                              process="@this" immediate="true"
@@ -57,238 +58,52 @@
 
             <p:growl id="messages" showDetail="true" life="5000" />
         </h:form>
+        </h:panelGrid>
     </h:panelGroup>
 
     <!-- DETALLE -->
     <h:panelGroup id="pnlDetalle">
-        <h:form id="frmCrear" rendered="#{productoFrm.modoDetalle ne 'NADA'}">
-            <p:tabView id="tabView">
-                <p:tab title="Generalidades" id="tabGeneral">
-                    <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
+        <h:form id="frmCrear" rendered="#{productoFrm.modoDetalle}">
+            <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
 
-                        <h:outputLabel for="txtIdPanel" value="ID:"/>
-                        <h:panelGroup id="txtIdPanel">
-                            <h:outputText rendered="#{empty productoFrm.registro.id}"
-                                          value="(Se asignará automáticamente al guardar)"/>
-                            <h:inputText id="txtIdGeneral" value="#{productoFrm.registro.id}"
-                                         rendered="#{not empty productoFrm.registro.id}" readonly="true"/>
-                        </h:panelGroup>
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty productoFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"/>
+                    <h:inputText id="txtIdGeneral" value="#{productoFrm.registro.id}"
+                                 rendered="#{not empty productoFrm.registro.id}" readonly="true"/>
+                </h:panelGroup>
 
-                        <h:outputLabel for="txtNombre" value="Nombre:"/>
-                        <h:inputText id="txtNombre" value="#{productoFrm.registro.nombreProducto}" styleClass="inp"/>
+                <h:outputLabel for="txtNombre" value="Nombre:"/>
+                <h:inputText id="txtNombre" value="#{productoFrm.registro.nombreProducto}" styleClass="inp"/>
 
-                        <h:outputLabel for="chkActivoGeneral" value="Activo:"/>
-                        <h:selectBooleanCheckbox id="chkActivoGeneral" value="#{productoFrm.registro.activo}"/>
+                <h:outputLabel for="chkActivoGeneral" value="Activo:"/>
+                <h:selectBooleanCheckbox id="chkActivoGeneral" value="#{productoFrm.registro.activo}"/>
 
-                        <h:outputLabel for="txtRef" value="Referencia externa:"/>
-                        <h:inputTextarea id="txtRef" value="#{productoFrm.registro.referenciaExterna}" rows="2" styleClass="inp"/>
+                <h:outputLabel for="txtRef" value="Referencia externa:"/>
+                <h:inputTextarea id="txtRef" value="#{productoFrm.registro.referenciaExterna}" rows="2" styleClass="inp"/>
 
-                        <h:outputLabel for="txtComentarios" value="Comentarios:"/>
-                        <h:inputTextarea id="txtComentarios" value="#{productoFrm.registro.comentarios}" rows="3" styleClass="inp"/>
+                <h:outputLabel for="txtComentarios" value="Comentarios:"/>
+                <h:inputTextarea id="txtComentarios" value="#{productoFrm.registro.comentarios}" rows="3" styleClass="inp"/>
 
-                    </p:panelGrid>
-
-                    <p:panelGrid columns="3" style="margin-top: 15px;">
-                        <p:commandButton value="Crear Producto" styleClass="btn-rojo"
-                                         actionListener="#{productoFrm.btnGuardarHandler}"
-                                         rendered="#{productoFrm.estado.name() eq 'CREAR'}"
-                                         update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
-                        <p:commandButton value="Modificar Producto" styleClass="btn-oscuro"
-                                         actionListener="#{productoFrm.btnModificarHandler}"
-                                         rendered="#{productoFrm.estado.name() eq 'MODIFICAR'}"
-                                         update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
-                        <p:commandButton value="Eliminar Producto" styleClass="btn-rojo"
-                                         actionListener="#{productoFrm.btnEliminarHandler}"
-                                         rendered="#{productoFrm.estado.name() eq 'MODIFICAR'}"
-                                         update=":frmTop:messages :pnlDetalle :pnlTabla"/>
-                    </p:panelGrid>
-                </p:tab>
-
-                <!-- Pestaña Tipos de Producto -->
-                <p:tab title="Tipos de Producto" id="tabTipos">
-                    <p:dataTable id="tablaPtp"
-                                 rendered="#{productoTipoProductoFrm.modoLista}"
-                                 value="#{productoTipoProductoFrm.modelo}"
-                                 var="n" lazy="true"
-                                 paginator="true" rows="#{productoTipoProductoFrm.pageSize}"
-                                 paginatorPosition="bottom"
-                                 selectionMode="single"
-                                 selection="#{productoTipoProductoFrm.registro}"
-                                 rowKey="#{n.id}">
-                        <p:ajax event="rowSelect" listener="#{productoTipoProductoFrm.selectionHandler}"
-                                update=":pnlDetalle :pnlTabla :frmTop:messages"/>
-
-                        <p:column headerText="ID" style="width:320px"><h:outputText value="#{n.id}" /></p:column>
-                        <p:column headerText="Producto"><h:outputText value="#{n.idProducto != null ? n.idProducto.nombreProducto : '-'}" /></p:column>
-                        <p:column headerText="Tipo de Producto"><h:outputText value="#{n.idTipoProducto != null ? n.idTipoProducto.nombre : '-'}" /></p:column>
-                        <p:column headerText="Activo" style="width:100px"><h:outputText value="#{n.activo ? 'Sí' : 'No'}" /></p:column>
-                        <p:column headerText="Fecha creación" style="width:210px"><h:outputText value="#{n.fechaCreacion}" /></p:column>
-                    </p:dataTable>
-
-                    <p:commandButton id="NuevoTP" value="Nueva Relacion" styleClass="btn-rojo"
-                                     rendered="#{productoTipoProductoFrm.estado.name() eq 'NADA'}"
-                                     actionListener="#{productoTipoProductoFrm.btnNuevoHandler}"
-                                     process="@this" immediate="true"
-                                     update=":pnlDetalle :pnlTabla :messages"/>
-
-                    <p:commandButton id="CancelarTP" value="Cancelar Relacion" styleClass="btn-oscuro"
-                                     rendered="#{productoTipoProductoFrm.estado.name() ne 'NADA'}"
-                                     actionListener="#{productoTipoProductoFrm.btnCancelarHandler}"
-                                     process="@this" immediate="true"
-                                     update=":pnlDetalle :pnlTabla :messages"/>
-
-                    <p:outputPanel id="tpPanel" rendered="#{productoTipoProductoFrm.estado.name() ne 'NADA'}">
-                        <h:panelGrid columns="2">
-                            <h:outputLabel for="txtIdPanelTP" value="ID:"/>
-                            <h:panelGroup id="txtIdPanelTP">
-                                <h:outputText rendered="#{empty productoTipoProductoFrm.registro.id}"
-                                              value="(Se asignará automáticamente al guardar)"/>
-                                <h:inputText id="txtIdTipoProducto" value="#{productoTipoProductoFrm.registro.id}"
-                                             rendered="#{not empty productoTipoProductoFrm.registro.id}" disabled="true"/>
-                            </h:panelGroup>
-                            <h:outputLabel for="txtProductoTipo" value="Producto:"/>
-                            <h:panelGroup>
-                                <h:inputText id="txtProductoTipo"
-                                             value="#{productoTipoProductoFrm.registro.idProducto != null ? productoTipoProductoFrm.registro.idProducto.nombreProducto : ''}"
-                                             disabled="true" style="min-width:420px"/>
-                                <p:commandButton value="Seleccionar" styleClass="btn-oscuro"
-                                                 process="@this"
-                                                 update=":dlgBuscarProd"
-                                                 oncomplete="PF('dlgBuscarProdWV').show();"
-                                                 style="margin-left:8px"/>
-                            </h:panelGroup>
-                            <h:outputLabel for="acTipoProducto" value="Tipo de Producto:"/>
-                            <p:autoComplete id="acTipoProducto"
-                                            value="#{productoTipoProductoFrm.registro.idTipoProducto}"
-                                            completeMethod="#{productoTipoProductoFrm.autoCompleteTipos}"
-                                            var="t" itemLabel="#{t.nombre}" itemValue="#{t}"
-                                            dropdown="true" forceSelection="true"
-                                            converter="tipoProductoConverter"
-                                            cache="true" cacheTimeout="60000"
-                                            minQueryLength="1" scrollHeight="260"
-                                            inputStyle="min-width:420px">
-                                <p:ajax event="itemSelect"
-                                        listener="#{productoTipoProductoFrm.onTipoSelect}"
-                                        update=":pnlDetalle :frmTop:messages"/>
-                            </p:autoComplete>
-                            <h:outputLabel for="chkEstado" value="Estado:"/>
-                            <h:selectBooleanCheckbox id="chkEstado" value="#{productoTipoProductoFrm.registro.activo}"/>
-                            <h:outputLabel for="txtFecTipoProducto" value="Fecha de Creación:"/>
-                            <h:inputText id="txtFecTipoProducto" value="#{productoTipoProductoFrm.fechaCreacionTexto}" disabled="true"/>
-                            <h:outputLabel for="txtObsTipoProducto" value="Observaciones:"/>
-                            <h:inputTextarea id="txtObsTipoProducto" value="#{productoTipoProductoFrm.registro.observaciones}" rows="3" styleClass="inp"/>
-                        </h:panelGrid>
-
-                        <h:panelGroup id="pnlCar" rendered="#{productoTipoProductoFrm.mostrarSeccionCaracteristicas}" layout="block" style="margin-top:14px;">
-                            <h:panelGrid columns="2" columnClasses="col-field,col-field" style="width:100%">
-                                <!-- Panel de Características Disponibles -->
-                                <p:panel header="Características disponibles del tipo" toggleable="true">
-                                    <p:dataList value="#{productoTipoProductoFrm.carDisponibles}" var="tpc" emptyMessage="Sin características para este tipo">
-                                        <!-- Casilla de verificación para seleccionar la característica -->
-                                        <h:selectBooleanCheckbox value="#{tpc.selected}" />
-                                        <!-- Mostrar nombre de la característica -->
-                                        <h:outputText value="#{tpc.idCaracteristica.nombre}" />
-                                        <!-- Mostrar el campo de texto solo si la característica está seleccionada -->
-                                        <h:inputText value="#{tpc.idCaracteristica.nombre}"
-                                                     styleClass="inp"
-                                                     disabled="#{!tpc.selected}" />
-                                        <!-- Botón de edición solo si la característica está seleccionada y es editable -->
-                                        <p:commandButton value="Editar" icon="pi pi-pencil" styleClass="btn-oscuro"
-                                                         actionListener="#{productoTipoProductoFrm.editarCaracteristica(tpc)}"
-                                                         rendered="#{tpc.selected and tpc.editable}"
-                                                         update=":pnlDetalle :frmTop:messages"/>
-                                    </p:dataList>
-                                </p:panel>
-
-                                <p:panel header="Características asignadas (obligatorias)" toggleable="true">
-                                    <p:dataList value="#{productoTipoProductoFrm.carAsignadas}" var="tpc" emptyMessage="(Aún no hay obligatorias)">
-                                        <h:selectBooleanCheckbox value="#{tpc.selected}" />
-                                        <h:outputText value="#{tpc.idCaracteristica.nombre}" />
-                                        <h:outputText value=" (Obligatoria)" style="font-style:italic; margin-left:6px"/>
-
-                                        <!-- Campo para editar nombre de la característica -->
-                                        <h:inputText value="#{tpc.idCaracteristica.nombre}"
-                                                     rendered="#{tpc.selected}"
-                                                     styleClass="inp"
-                                                     disabled="#{not tpc.selected}" />
-
-                                        <!-- Botón de eliminar solo si la característica no es obligatoria -->
-                                        <p:commandButton value="Eliminar" icon="pi pi-arrow-left" styleClass="btn-rojo"
-                                                         actionListener="#{productoTipoProductoFrm.eliminarCaracteristicas}"
-                                                         rendered="#{tpc.selected and not tpc.obligatorio}"
-                                                         update=":pnlDetalle :pnlTabla"/>
-                                    </p:dataList>
-                                </p:panel>
-
-                            </h:panelGrid>
-
-                            <!-- Botones de Asignar y Eliminar -->
-                            <h:panelGroup styleClass="columna-botones">
-                                <!-- Mostrar el botón de Asignar solo si hay características disponibles seleccionadas -->
-                                <p:commandButton value="Asignar" icon="pi pi-arrow-right" styleClass="btn-rojo"
-                                                 actionListener="#{productoTipoProductoFrm.asignarCaracteristicas}"
-                                                 rendered="#{not empty productoTipoProductoFrm.carDisponibles}"
-                                                 update=":pnlDetalle :pnlTabla"/>
-
-
-                                <!-- Mostrar el botón de Eliminar solo si hay características asignadas seleccionadas y no son obligatorias -->
-                                <p:commandButton value="Eliminar" icon="pi pi-arrow-left" styleClass="btn-rojo"
-                                                 actionListener="#{productoTipoProductoFrm.eliminarCaracteristicas}"
-                                                 rendered="#{not empty productoTipoProductoFrm.carAsignadas and not tpc.obligatorio}"
-                                                 update=":pnlDetalle :pnlTabla"/>
-                            </h:panelGroup>
-                        </h:panelGroup>
-
-                        <h:panelGrid columns="3" style="margin-top: 15px;">
-                            <p:commandButton value="Crear Relación" styleClass="btn-rojo"
-                                             actionListener="#{productoTipoProductoFrm.btnGuardarHandler}"
-                                             rendered="#{productoTipoProductoFrm.estado.name() eq 'CREAR'}"
-                                             update=":messages :pnlDetalle :pnlTabla" process="@form"/>
-                            <p:commandButton value="Modificar Relación" styleClass="btn-oscuro"
-                                             actionListener="#{productoTipoProductoFrm.btnModificarHandler}"
-                                             rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
-                                             update=":messages :pnlDetalle :pnlTabla" process="@form"/>
-                            <p:commandButton value="Eliminar Relación" styleClass="btn-rojo"
-                                             actionListener="#{productoTipoProductoFrm.btnEliminarHandler}"
-                                             rendered="#{productoTipoProductoFrm.estado.name() eq 'MODIFICAR'}"
-                                             update=":messages :pnlDetalle :pnlTabla"/>
-                        </h:panelGrid>
-
-                    </p:outputPanel>
-                </p:tab>
-            </p:tabView>
-        </h:form>
-    </h:panelGroup>
-
-    <p:dialog id="dlgBuscarProd" widgetVar="dlgBuscarProdWV" header="Seleccionar Producto"
-              modal="true" resizable="false" width="760">
-        <h:form id="frmDlgProd">
-            <p:panelGrid columns="3" styleClass="form-grid-2col" columnClasses="col-label,col-field,col-field">
-                <h:outputLabel for="txtFiltroProd" value="Buscar:"/>
-                <h:inputText id="txtFiltroProd" value="#{productoTipoProductoFrm.filtroProducto}" styleClass="inp"/>
-                <p:commandButton value="Buscar" styleClass="btn-oscuro"
-                                 process="@form"
-                                 actionListener="#{productoTipoProductoFrm.buscarProductos}"
-                                 update=":frmDlgProd:tblProd"/>
             </p:panelGrid>
 
-            <p:dataTable id="tblProd"
-                         value="#{productoTipoProductoFrm.resultadosBusquedaProducto}"
-                         var="p" paginator="true" rows="8"
-                         emptyMessage="Sin resultados">
-                <p:column headerText="ID" style="width:320px"><h:outputText value="#{p.id}" /></p:column>
-                <p:column headerText="Nombre"><h:outputText value="#{p.nombreProducto}" /></p:column>
-                <p:column headerText="Activo" style="width:100px"><h:outputText value="#{p.activo ? 'Sí' : 'No'}" /></p:column>
-                <p:column style="width:140px; text-align:center">
-                    <p:commandButton value="Elegir" styleClass="btn-rojo"
-                                     process="@this"
-                                     actionListener="#{productoTipoProductoFrm.seleccionarProducto(p)}"
-                                     update=":pnlDetalle :frmTop:messages"
-                                     oncomplete="PF('dlgBuscarProdWV').hide();"/>
-                </p:column>
-            </p:dataTable>
+            <p:panelGrid columns="3" style="margin-top: 15px;">
+                <p:commandButton value="Crear Producto" styleClass="btn-rojo"
+                                 actionListener="#{productoFrm.btnGuardarHandler}"
+                                 rendered="#{productoFrm.estado.name() eq 'CREAR'}"
+                                 update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                <p:commandButton value="Modificar Producto" styleClass="btn-oscuro"
+                                 actionListener="#{productoFrm.btnModificarHandler}"
+                                 rendered="#{productoFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
+                <p:commandButton value="Eliminar Producto" styleClass="btn-rojo"
+                                 actionListener="#{productoFrm.btnEliminarHandler}"
+                                 rendered="#{productoFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":frmTop:messages :pnlDetalle :pnlTabla"/>
+            </p:panelGrid>
         </h:form>
-    </p:dialog>
+    </h:panelGroup>
 
 </h:body>
 </html>

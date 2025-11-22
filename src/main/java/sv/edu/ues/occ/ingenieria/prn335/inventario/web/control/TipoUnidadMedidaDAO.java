@@ -12,7 +12,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoUnidadMed
 @Stateless
 public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadMedida> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public TipoUnidadMedidaDAO() {
@@ -24,10 +24,9 @@ public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadM
         return em;
     }
 
-    /* =========================
-       Consultas especializadas
-       ========================= */
+    //Consultas especializadas
 
+    // Obtener todos los tipos de unidad de medida activos (version anterior)
     public List<TipoUnidadMedida> findActivos() {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoUnidadMedida> cq = cb.createQuery(TipoUnidadMedida.class);
@@ -36,6 +35,7 @@ public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadM
         return em.createQuery(cq).getResultList();
     }
 
+    // Buscar tipos de unidad de medida por nombre con paginación (version anterior)
     public List<TipoUnidadMedida> findByNombreLike(String texto, int first, int max) {
         Objects.requireNonNull(texto);
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -52,6 +52,7 @@ public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadM
         return q.getResultList();
     }
 
+    // Verificar existencia de un tipo de unidad de medida por nombre (version anterior)
     public boolean existsByNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) return false;
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -63,6 +64,7 @@ public class TipoUnidadMedidaDAO extends InventarioDefaultDataAccess<TipoUnidadM
         return c != null && c > 0;
     }
 
+    // Activar o desactivar un tipo de unidad de medida por ID
     public void setActivo(Integer id, boolean activo) {
         Objects.requireNonNull(id);
         TipoUnidadMedida t = em.find(TipoUnidadMedida.class, id);

@@ -47,13 +47,13 @@
                     <p:column headerText="Observaciones"><h:outputText value="#{reg.observaciones}" /></p:column>
                 </p:dataTable>
 
-                <p:commandButton id="btnNuevo" value="Nuevo" styleClass="btn-rojo"
+                <p:commandButton id="btnNuevo" value="Nuevo Proveedor" styleClass="btn-rojo"
                                  icon="pi pi-plus"
                                  rendered="#{proveedorFrm.estado == 'NADA'}"
                                  actionListener="#{proveedorFrm.btnNuevoHandler}"
                                  update=":pnlDetalle :pnlTabla :messages"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="Cancelar Proveedor" styleClass="btn-oscuro"
                                  icon="pi pi-times"
                                  rendered="#{proveedorFrm.estado != 'NADA'}"
                                  actionListener="#{proveedorFrm.btnCancelarHandler}"
@@ -117,19 +117,19 @@
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
 
-                <p:commandButton value="Crear" styleClass="btn-rojo"
+                <p:commandButton value="Crear Proveedor" styleClass="btn-rojo"
                                  icon="pi pi-check"
                                  actionListener="#{proveedorFrm.btnGuardarHandler}"
                                  rendered="#{proveedorFrm.estado == 'CREAR'}"
                                  update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Modificar" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Proveedor" styleClass="btn-oscuro"
                                  icon="pi pi-pencil"
                                  actionListener="#{proveedorFrm.btnModificarHandler}"
                                  rendered="#{proveedorFrm.estado == 'MODIFICAR'}"
                                  update=":messages :pnlDetalle :pnlTabla" process="@form"/>
 
-                <p:commandButton value="Eliminar" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Proveedor" styleClass="btn-rojo"
                                  icon="pi pi-trash"
                                  actionListener="#{proveedorFrm.btnEliminarHandler}"
                                  rendered="#{proveedorFrm.estado == 'MODIFICAR'}"

@@ -108,7 +108,6 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
     // ---------------------- Implementación del Método Abstracto ----------------------
 
-    @Override
     public void inicializarListas() {
         try {
             // Inicializamos las listas de proveedores y estados

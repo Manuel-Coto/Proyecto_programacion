@@ -1,419 +1,415 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 
-import jakarta.annotation.PostConstruct;
+import jakarta.el.MethodExpression;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
+import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.TreeNode;
-
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CaracteristicaDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoCaracteristicaDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.TipoProductoDAO;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Caracteristica;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoCaracteristica;
 
 @Named("tipoProductoFrm")
 @ViewScoped
 public class TipoProductoFrm extends DefaultFrm<TipoProducto> implements Serializable {
 
-    @Inject private TipoProductoDAO tipoProductoDao;
-    @Inject private CaracteristicaDAO caracteristicaDao;
-    @Inject private TipoProductoCaracteristicaDAO tipoProductoCaracteristicaDao;
+    @Inject
+    FacesContext facesContext;
 
-    private TreeNode<TipoProducto> root;
-    private TreeNode<TipoProducto> selectedNode;
+    @Inject
+    TipoProductoDAO tipoProductoDao;
 
-    public static class OpcionPadre {
-        private final Long id;
-        private final String label;
-        public OpcionPadre(Long id, String label) { this.id = id; this.label = label; }
-        public Long getId() { return id; }
-        public String getLabel() { return label; }
-    }
-    private List<OpcionPadre> opcionesPadre;
-    private Long padreSeleccionadoId;
+    private List<SelectItem> tiposProductoHierarchy;
+    private Long tipoProductoPadreSeleccionado;
+    private TreeNode root;
+    private TreeNode selectedNode;
 
-
-    private List<TipoProductoCaracteristica> listaTPC;
-    private TipoProductoCaracteristica tpcRegistro;
-    private boolean tpcMostrandoFormulario = false;
-
-    // Diálogo buscar/seleccionar característica (solo para lógica de búsqueda)
-    private String filtroCaracteristica;
-    private List<Caracteristica> resultadosBusqueda;
-
-    @PostConstruct
-    @Override
-    public void inicializar() {
+    public TipoProductoFrm() {
         this.nombreBean = "Tipo de Producto";
-        super.inicializar();
-        construirArbol();
-        cargarOpcionesPadre();
-        cargarTPC();
-        prepararNuevoTPC();
     }
 
-    @Override protected FacesContext getFacesContext() { return FacesContext.getCurrentInstance(); }
-    @Override protected InventarioDefaultDataAccess<TipoProducto> getDao() { return tipoProductoDao; }
+    @Override
+    protected FacesContext getFacesContext() {
+        return facesContext;
+    }
+
+    @Override
+    protected InventarioDefaultDataAccess<TipoProducto> getDao() {
+        return tipoProductoDao;
+    }
 
     @Override
     protected TipoProducto nuevoRegistro() {
-        TipoProducto t = new TipoProducto();
-        t.setNombre("");
-        t.setActivo(Boolean.TRUE);
-        t.setComentarios("");
-        t.setIdTipoProductoPadre(null);
-        padreSeleccionadoId = null;
-        cargarOpcionesPadre();
-        cargarTPC();
-        prepararNuevoTPC();
-        return t;
+        TipoProducto tp = new TipoProducto();
+        tp.setActivo(true);
+        tipoProductoPadreSeleccionado = null;
+        return tp;
     }
 
     @Override
     protected TipoProducto buscarRegistroPorId(Object id) {
-        if (id == null) return null;
-        try {
-            Long lid = (id instanceof Long) ? (Long) id : Long.valueOf(String.valueOf(id));
-            return tipoProductoDao.findById(lid);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    @Override
-    public void inicializarListas() {
-
-    }
-
-    @Override protected String getIdAsText(TipoProducto r) {
-        return (r!=null && r.getId()!=null) ? String.valueOf(r.getId()) : null;
-    }
-    @Override protected TipoProducto getIdByText(String id) {
-        return (id==null) ? null : buscarRegistroPorId(id);
-    }
-
-    @Override
-    public void selectionHandler(SelectEvent<TipoProducto> ev) {
-        super.selectionHandler(ev);
-        padreSeleccionadoId = (registro!=null && registro.getIdTipoProductoPadre()!=null)
-                ? registro.getIdTipoProductoPadre().getId() : null;
-        cargarOpcionesPadre();
-        cargarTPC();
-        prepararNuevoTPC();
-    }
-
-    public void onTreeRowSelect() {
-        if (selectedNode != null) {
-            this.registro = selectedNode.getData();
-            this.estado = ESTADO_CRUD.MODIFICAR;
-            padreSeleccionadoId = (registro!=null && registro.getIdTipoProductoPadre()!=null)
-                    ? registro.getIdTipoProductoPadre().getId() : null;
-            cargarOpcionesPadre();
-            cargarTPC();
-            prepararNuevoTPC();
-        }
-    }
-
-    @Override
-    public void btnNuevoHandler(ActionEvent e) {
-        super.btnNuevoHandler(e);
-        selectedNode = null;
-        padreSeleccionadoId = null;
-        cargarOpcionesPadre();
-        cargarTPC();
-        prepararNuevoTPC();
-    }
-
-    @Override
-    public void btnCancelarHandler(ActionEvent e) {
-        super.btnCancelarHandler(e);
-        padreSeleccionadoId = (registro!=null && registro.getIdTipoProductoPadre()!=null)
-                ? registro.getIdTipoProductoPadre().getId() : null;
-        cargarOpcionesPadre();
-        cargarTPC();
-        prepararNuevoTPC();
-    }
-
-    @Override
-    public void btnGuardarHandler(ActionEvent e) {
-        try {
-            if (registro != null && registro.getId()!=null && padreSeleccionadoId!=null
-                    && registro.getId().equals(padreSeleccionadoId)) {
-                msg(FacesMessage.SEVERITY_WARN, "Padre inválido", "No puede asignarse como su propio padre.");
-                return;
-            }
-            if (padreSeleccionadoId != null && registro.getId()!=null
-                    && getDescendientesIds(registro.getId()).contains(padreSeleccionadoId)) {
-                msg(FacesMessage.SEVERITY_WARN, "Relación inválida", "No puede asignar como padre a un descendiente.");
-                return;
-            }
-
-            registro.setIdTipoProductoPadre(
-                    padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId)
-            );
-
-            super.btnGuardarHandler(e);
-
-            construirArbol();
-            cargarOpcionesPadre();
-            cargarTPC();
-            prepararNuevoTPC();
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al guardar", ex.getMessage());
-        }
-    }
-
-    @Override
-    public void btnModificarHandler(ActionEvent e) {
-        try {
-            if (registro == null) return;
-            if (registro.getId()!=null && padreSeleccionadoId!=null
-                    && registro.getId().equals(padreSeleccionadoId)) {
-                msg(FacesMessage.SEVERITY_WARN, "Padre inválido", "No puede asignarse como su propio padre.");
-                return;
-            }
-            if (padreSeleccionadoId != null && registro.getId()!=null
-                    && getDescendientesIds(registro.getId()).contains(padreSeleccionadoId)) {
-                msg(FacesMessage.SEVERITY_WARN, "Relación inválida", "No puede asignar como padre a un descendiente.");
-                return;
-            }
-
-            registro.setIdTipoProductoPadre(
-                    padreSeleccionadoId == null ? null : buscarRegistroPorId(padreSeleccionadoId)
-            );
-
-            super.btnModificarHandler(e);
-
-            construirArbol();
-            cargarOpcionesPadre();
-            cargarTPC();
-            prepararNuevoTPC();
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al modificar", ex.getMessage());
-        }
-    }
-
-    @Override
-    public void btnEliminarHandler(ActionEvent e) {
-        super.btnEliminarHandler(e);
-        construirArbol();
-        padreSeleccionadoId = null;
-        selectedNode = null;
-        cargarTPC();
-        prepararNuevoTPC();
-    }
-
-    public void construirArbol() {
-        try {
-            root = new DefaultTreeNode<>(null, null);
-            List<TipoProducto> raices = tipoProductoDao.findRoots();
-            if (raices != null) {
-                for (TipoProducto r : raices) {
-                    TreeNode<TipoProducto> n = new DefaultTreeNode<>("nodo", r, root);
-                    cargarHijosRec(n, r);
+        if (id != null && id instanceof Integer buscado && this.modelo.getWrappedData().isEmpty()) {
+            for (TipoProducto tp : (Iterable<TipoProducto>) tipoProductoDao.findAll()) {
+                if (tp.getId().equals(buscado)) {
+                    return tp;
                 }
             }
-            root.setExpanded(true);
-        } catch (Exception ignored) {
-            root = new DefaultTreeNode<>(null, null);
-            root.setExpanded(true);
+        }
+        return null;
+    }
+
+    @Override
+    protected String getIdAsText(TipoProducto r) {
+        if (r != null && r.getId() != null) {
+            return r.getId().toString();
+        }
+        return null;
+    }
+
+    @Override
+    protected TipoProducto getIdByText(String id) {
+        if (id != null && this.modelo != null && !this.modelo.getWrappedData().isEmpty()) {
+            try {
+                Long buscado = Long.parseLong(id);
+                return this.modelo.getWrappedData().stream()
+                        .filter(r -> r.getId() != null && r.getId().equals(buscado))
+                        .findFirst()
+                        .orElse(null);
+            } catch (NumberFormatException e) {
+                System.err.println("ID no es un número válido: " + id);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Carga TODOS los tipos de producto organizados jerárquicamente
+     * Muestra la estructura padre-hijo de forma legible
+     */
+    private void cargarTiposProductoHierarchy() {
+        try {
+            tiposProductoHierarchy = new ArrayList<>();
+            List<TipoProducto> todosTipos = (List<TipoProducto>) tipoProductoDao.findAll();
+
+            if (todosTipos == null || todosTipos.isEmpty()) {
+                System.out.println("No hay tipos de producto en la base de datos");
+                return;
+            }
+
+            // Agregar primero los tipos raíz (sin padre)
+            for (TipoProducto tp : todosTipos) {
+                if (tp.getIdTipoProductoPadre() == null) {
+                    tiposProductoHierarchy.add(new SelectItem(tp.getId(), tp.getNombre()));
+                    System.out.println("Tipo raíz agregado: " + tp.getNombre() + " (ID: " + tp.getId() + ")");
+
+                    // Agregar recursivamente los hijos
+                    agregarHijosAlSelector(tp, todosTipos, "");
+                }
+            }
+
+            System.out.println("Total de tipos cargados: " + tiposProductoHierarchy.size());
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar tipos de producto: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void cargarHijosRec(TreeNode<TipoProducto> padreNode, TipoProducto padreEntity) {
-        List<TipoProducto> hijos = (padreEntity != null && padreEntity.getId()!=null)
-                ? tipoProductoDao.findChildren(padreEntity.getId())
-                : Collections.emptyList();
-        if (hijos == null || hijos.isEmpty()) return;
-        for (TipoProducto h : hijos) {
-            TreeNode<TipoProducto> n = new DefaultTreeNode<>("nodo", h, padreNode);
-            cargarHijosRec(n, h);
+    private void agregarHijosAlSelector(TipoProducto tipoPadre, List<TipoProducto> todosTipos, String prefijo) {
+        // Buscar todos los hijos del tipo padre actual
+        List<TipoProducto> hijos = todosTipos.stream()
+                .filter(tp -> tp.getIdTipoProductoPadre() != null &&
+                        tp.getIdTipoProductoPadre().getId().equals(tipoPadre.getId()))
+                .sorted(Comparator.comparing(TipoProducto::getNombre))
+                .toList();
+
+        for (int i = 0; i < hijos.size(); i++) {
+            TipoProducto hijo = hijos.get(i);
+            boolean esUltimo = (i == hijos.size() - 1);
+
+            // Crear representación visual con símbolos de árbol
+            String simbolo = esUltimo ? "└─ " : "├─ ";
+            String etiqueta = prefijo + simbolo + hijo.getNombre();
+
+            tiposProductoHierarchy.add(new SelectItem(hijo.getId(), etiqueta));
+            System.out.println("Hijo agregado: " + etiqueta + " (ID: " + hijo.getId() + ")");
+
+            // Prefijo para los hijos del hijo actual
+            String nuevoPrefijo = prefijo + (esUltimo ? "   " : "│  ");
+
+            // Agregar recursivamente los hijos del hijo
+            agregarHijosAlSelector(hijo, todosTipos, nuevoPrefijo);
         }
     }
 
-    private void cargarOpcionesPadre() {
-        List<OpcionPadre> out = new ArrayList<>();
-        Set<Long> excluir = new HashSet<>();
-        Long idActual = (this.registro != null) ? this.registro.getId() : null;
-        if (idActual != null) {
-            excluir.add(idActual);
-            excluir.addAll(getDescendientesIds(idActual));
-        }
-        List<TipoProducto> raices = tipoProductoDao.findRoots();
-        if (raices != null) for (TipoProducto r : raices) buildJerarquia(r, 0, excluir, out);
-        this.opcionesPadre = out;
-    }
+    /**
+     * Construye el árbol jerárquico completo de tipos de producto
+     */
+    private void construirArbolTipos() {
+        try {
+            root = new DefaultTreeNode("Tipos de Producto", null);
+            List<TipoProducto> todosTipos = (List<TipoProducto>) tipoProductoDao.findAll();
 
-    private void buildJerarquia(TipoProducto nodo, int depth, Set<Long> excluir, List<OpcionPadre> out) {
-        if (nodo == null || (nodo.getId()!=null && excluir.contains(nodo.getId()))) return;
-        String prefijo = (depth == 0) ? "" : " ".repeat(Math.max(0, depth-1)) + "↳ ";
-        out.add(new OpcionPadre(nodo.getId(), prefijo + nodo.getNombre()));
-        List<TipoProducto> hijos = tipoProductoDao.findChildren(nodo.getId());
-        if (hijos != null) for (TipoProducto h : hijos) buildJerarquia(h, depth + 1, excluir, out);
-    }
-
-    private Set<Long> getDescendientesIds(Long id) {
-        Set<Long> res = new HashSet<>();
-        if (id == null) return res;
-        Deque<Long> st = new ArrayDeque<>();
-        st.push(id);
-        while (!st.isEmpty()) {
-            Long cur = st.pop();
-            List<TipoProducto> hijos = tipoProductoDao.findChildren(cur);
-            if (hijos != null) {
-                for (TipoProducto h : hijos) {
-                    if (h.getId()!=null && res.add(h.getId())) {
-                        st.push(h.getId());
+            if (todosTipos != null && !todosTipos.isEmpty()) {
+                // Agregar solo los tipos raíz (sin padre)
+                for (TipoProducto tp : todosTipos) {
+                    if (tp.getIdTipoProductoPadre() == null) {
+                        TreeNode nodoRaiz = new DefaultTreeNode(tp, root);
+                        agregarHijosRecursivo(tp, nodoRaiz, todosTipos);
                     }
                 }
             }
-        }
-        return res;
-    }
-
-    public void cargarTPC() {
-        if (this.registro != null && this.registro.getId() != null) {
-            this.listaTPC = tipoProductoCaracteristicaDao.findByTipoProductoIdFetch(this.registro.getId());
-        } else {
-            this.listaTPC = Collections.emptyList();
+            System.out.println("Árbol de tipos construido correctamente");
+        } catch (Exception e) {
+            System.err.println("Error al construir árbol: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-
-    private void prepararNuevoTPC() {
-        this.tpcRegistro = new TipoProductoCaracteristica();
-        this.tpcRegistro.setIdTipoProducto(this.registro);
-        this.tpcRegistro.setObligatorio(Boolean.FALSE);
-        this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
-        this.tpcMostrandoFormulario = false;
-
-        this.filtroCaracteristica = "";
-        this.resultadosBusqueda = Collections.emptyList();
-    }
-
-    public void tpcBtnNuevo() {
-        this.tpcRegistro = new TipoProductoCaracteristica();
-        this.tpcRegistro.setIdTipoProducto(this.registro);
-        this.tpcRegistro.setObligatorio(Boolean.FALSE);
-        this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
-        this.tpcMostrandoFormulario = true;
-        this.filtroCaracteristica = "";
-        this.resultadosBusqueda = Collections.emptyList();
-    }
-
-
-    public void tpcBuscarCaracteristicas() {
-        String q = (filtroCaracteristica == null) ? "" : filtroCaracteristica.trim();
-        if (q.isEmpty()) {
-            this.resultadosBusqueda = caracteristicaDao.findAll();
-        } else {
-            this.resultadosBusqueda = caracteristicaDao.findByNombreLike(q, 0, 30);
+    /**
+     * Agrega recursivamente los hijos de un tipo de producto
+     */
+    private void agregarHijosRecursivo(TipoProducto tipoPadre, TreeNode nodoPadre, List<TipoProducto> todosTipos) {
+        for (TipoProducto tp : todosTipos) {
+            if (tp.getIdTipoProductoPadre() != null && tp.getIdTipoProductoPadre().getId().equals(tipoPadre.getId())) {
+                TreeNode nodoHijo = new DefaultTreeNode(tp, nodoPadre);
+                agregarHijosRecursivo(tp, nodoHijo, todosTipos);
+            }
         }
     }
 
-    public void tpcSeleccionarCaracteristica(Caracteristica c) {
-        if (c == null) return;
-        if (this.tpcRegistro == null) this.tpcRegistro = new TipoProductoCaracteristica();
-        this.tpcRegistro.setIdCaracteristica(c);
-        this.tpcMostrandoFormulario = true;
-    }
-
-    public void tpcGuardar() {
-
-        if (this.registro == null || (this.registro.getId() == null && this.estado != ESTADO_CRUD.CREAR)) {
-            msg(FacesMessage.SEVERITY_WARN, "Atención", "Primero cree o seleccione un Tipo de Producto.");
-            return;
-        }
-        if (this.registro.getId() == null && this.estado == ESTADO_CRUD.CREAR) {
-            msg(FacesMessage.SEVERITY_WARN, "Pendiente", "Guarde el Tipo de Producto antes de asociar características.");
-            return;
-        }
-        if (this.tpcRegistro == null || this.tpcRegistro.getIdCaracteristica() == null) {
-            msg(FacesMessage.SEVERITY_WARN, "Validación", "Seleccione una característica.");
-            return;
-        }
-
-        Long idTipo = this.registro.getId();
-        Integer idCar = this.tpcRegistro.getIdCaracteristica().getId();
-
+    /**
+     * Maneja la selección de un nodo en el árbol
+     */
+    public void onTreeRowSelect(org.primefaces.event.NodeSelectEvent event) {
         try {
-            boolean existe = tipoProductoCaracteristicaDao
-                    .existsByTipoProductoAndCaracteristica(idTipo, Long.valueOf(idCar));
+            TreeNode node = event.getTreeNode();
+            if (node != null && node.getData() instanceof TipoProducto) {
+                TipoProducto tp = (TipoProducto) node.getData();
+                this.registro = tp;
+                if (tp.getIdTipoProductoPadre() != null) {
+                    tipoProductoPadreSeleccionado = tp.getIdTipoProductoPadre().getId();
+                } else {
+                    tipoProductoPadreSeleccionado = null;
+                }
+                estado = ESTADO_CRUD.MODIFICAR;
+                System.out.println("Tipo seleccionado: " + tp.getNombre());
+            }
+        } catch (Exception e) {
+            System.err.println("Error al seleccionar nodo: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-            if (!existe) {
-                this.tpcRegistro.setIdTipoProducto(this.registro);
-                if (this.tpcRegistro.getFechaCreacion() == null) {
-                    this.tpcRegistro.setFechaCreacion(OffsetDateTime.now());
+    @Override
+    public void btnGuardarHandler(ActionEvent actionEvent) {
+        try {
+            asignarTipoProductoPadre();
+            super.btnGuardarHandler(actionEvent);
+            cargarTiposProductoHierarchy();
+
+            // Reconstruir árbol pero mantener la rama expandida
+            root = null;
+            construirArbolTipos();
+
+            if (this.registro != null && this.registro.getId() != null) {
+                Long idNodoPadre = null;
+                if (this.registro.getIdTipoProductoPadre() != null) {
+                    idNodoPadre = this.registro.getIdTipoProductoPadre().getId();
                 }
-                tipoProductoCaracteristicaDao.crearYFlush(this.tpcRegistro);
-                msg(FacesMessage.SEVERITY_INFO, "Guardado", "Característica asociada correctamente.");
-            } else {
-                TipoProductoCaracteristica existente =
-                        tipoProductoCaracteristicaDao
-                                .findByTipoProductoAndCaracteristica(idTipo, Long.valueOf(idCar)).orElse(null);
-                if (existente != null) {
-                    existente.setObligatorio(Boolean.TRUE.equals(this.tpcRegistro.getObligatorio()));
-                    tipoProductoCaracteristicaDao.modificarYFlush(existente);
-                    msg(FacesMessage.SEVERITY_INFO, "Actualizado", "Asociación actualizada.");
-                }
+                expandirYSeleccionarNodo(idNodoPadre, this.registro.getId());
             }
 
-            cargarTPC();
-            prepararNuevoTPC();
-
-        } catch (Exception ex) {
-            msg(FacesMessage.SEVERITY_ERROR, "Error al guardar característica", ex.getMessage());
+        } catch (Exception e) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al guardar", e.getMessage()));
         }
     }
 
-    public String getTpcFechaCreacionTexto() {
-        if (tpcRegistro == null || tpcRegistro.getFechaCreacion() == null) return "";
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        return fmt.format(tpcRegistro.getFechaCreacion());
+
+    @Override
+    public void btnModificarHandler(ActionEvent actionEvent) {
+        try {
+            // Guardar el ID del nodo padre antes de modificar
+            Long idNodoPadre = null;
+            if (this.registro != null && this.registro.getIdTipoProductoPadre() != null) {
+                idNodoPadre = this.registro.getIdTipoProductoPadre().getId();
+            }
+
+            asignarTipoProductoPadre();
+            super.btnModificarHandler(actionEvent);
+            cargarTiposProductoHierarchy();
+
+            // Reconstruir árbol pero mantener la rama expandida
+            root = null;
+            construirArbolTipos();
+            expandirYSeleccionarNodo(idNodoPadre, this.registro.getId());
+
+        } catch (Exception e) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al modificar", e.getMessage()));
+        }
+    }
+
+    /**
+     * Expande recursivamente el árbol hasta encontrar y seleccionar el nodo especificado
+     */
+    private void expandirYSeleccionarNodo(Long idNodoPadre, Long idNodoASeleccionar) {
+        if (root == null) return;
+
+        expandirNodosRecursivo(root, idNodoPadre, idNodoASeleccionar);
+    }
+
+    /**
+     * Busca recursivamente y expande los nodos hasta el destino
+     */
+    private void expandirNodosRecursivo(TreeNode nodo, Long idNodoPadre, Long idNodoASeleccionar) {
+        if (nodo.getData() instanceof TipoProducto) {
+            TipoProducto tp = (TipoProducto) nodo.getData();
+
+            // Si encontramos el nodo a seleccionar, lo seleccionamos
+            if (tp.getId().equals(idNodoASeleccionar)) {
+                nodo.setExpanded(true);
+                selectedNode = nodo;
+                System.out.println("Nodo seleccionado y expandido: " + tp.getNombre());
+                return;
+            }
+
+            // Si este es el padre, expandir
+            if (idNodoPadre != null && tp.getId().equals(idNodoPadre)) {
+                nodo.setExpanded(true);
+                System.out.println("Nodo padre expandido: " + tp.getNombre());
+            }
+        }
+
+        // Buscar en los hijos
+        if (nodo.getChildren() != null && !nodo.getChildren().isEmpty()) {
+            for (Object hijo : nodo.getChildren()) {
+                expandirNodosRecursivo((TreeNode) hijo, idNodoPadre, idNodoASeleccionar);
+            }
+        }
     }
 
 
-    private void msg(FacesMessage.Severity s, String sum, String det) {
-        getFacesContext().addMessage(null, new FacesMessage(s, sum, det));
+    @Override
+    public void btnEliminarHandler(ActionEvent actionEvent) {
+        try {
+            super.btnEliminarHandler(actionEvent);
+            cargarTiposProductoHierarchy();
+            root = null; // Reconstruir árbol
+        } catch (Exception e) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al eliminar", e.getMessage()));
+        }
     }
 
-
-    public TreeNode<TipoProducto> getRoot() { return root; }
-    public TreeNode<TipoProducto> getSelectedNode() { return selectedNode; }
-    public void setSelectedNode(TreeNode<TipoProducto> n) { this.selectedNode = n; }
-
-    public List<OpcionPadre> getOpcionesPadreJerarquicas() { return opcionesPadre; }
-    public Long getPadreSeleccionadoId() { return padreSeleccionadoId; }
-    public void setPadreSeleccionadoId(Long id) { this.padreSeleccionadoId = id; }
-
-    public List<TipoProductoCaracteristica> getListaTPC() { return listaTPC; }
-    public TipoProductoCaracteristica getTpcRegistro() { return tpcRegistro; }
-    public void setTpcRegistro(TipoProductoCaracteristica r) {
-        this.tpcRegistro = r;
-        this.tpcMostrandoFormulario = (r != null); // al seleccionar una fila, mostrar formulario
+    @Override
+    public void btnCancelarHandler(ActionEvent actionEvent) {
+        super.btnCancelarHandler(actionEvent);
+        tipoProductoPadreSeleccionado = null;
+        selectedNode = null;
     }
 
-    public boolean isTpcMostrandoFormulario() { return tpcMostrandoFormulario; }
+    @Override
+    public void btnNuevoHandler(ActionEvent actionEvent) {
+        tipoProductoPadreSeleccionado = null;
+        tiposProductoHierarchy = null; // Limpiar cache
+        cargarTiposProductoHierarchy();
+        super.btnNuevoHandler(actionEvent);
+    }
 
-    public String getFiltroCaracteristica() { return filtroCaracteristica; }
-    public void setFiltroCaracteristica(String f) { this.filtroCaracteristica = f; }
+    /**
+     * Sobrescribe selectionHandler para cargar el tipo padre en el selector
+     */
+    @Override
+    public void selectionHandler(org.primefaces.event.SelectEvent<TipoProducto> r) {
+        super.selectionHandler(r);
+        if (this.registro != null && this.registro.getIdTipoProductoPadre() != null) {
+            tipoProductoPadreSeleccionado = this.registro.getIdTipoProductoPadre().getId();
+        } else {
+            tipoProductoPadreSeleccionado = null;
+        }
+    }
 
-    public List<Caracteristica> getResultadosBusqueda() { return resultadosBusqueda; }
+    /**
+     * Asigna el tipo padre seleccionado al registro
+     */
+    private void asignarTipoProductoPadre() {
+        if (this.registro != null) {
+            if (tipoProductoPadreSeleccionado != null && tipoProductoPadreSeleccionado > 0) {
+                // Buscar el tipo padre en la lista de todos los tipos
+                List<TipoProducto> todosTipos = (List<TipoProducto>) tipoProductoDao.findAll();
+                TipoProducto tipoPadre = todosTipos.stream()
+                        .filter(tp -> tp.getId().equals(tipoProductoPadreSeleccionado))
+                        .findFirst()
+                        .orElse(null);
+                this.registro.setIdTipoProductoPadre(tipoPadre);
+                System.out.println("Tipo padre asignado: " + (tipoPadre != null ? tipoPadre.getNombre() : "ninguno"));
+            } else {
+                this.registro.setIdTipoProductoPadre(null);
+                System.out.println("Tipo padre limpiado (será tipo raíz)");
+            }
+        }
+    }
 
+    /**
+     * Getter para el árbol jerárquico
+     */
+    public TreeNode getRoot() {
+        if (root == null) {
+            construirArbolTipos();
+        }
+        return root;
+    }
 
+    /**
+     * Setter para el árbol jerárquico
+     */
+    public void setRoot(TreeNode root) {
+        this.root = root;
+    }
+
+    /**
+     * Getter para el nodo seleccionado
+     */
+    public TreeNode getSelectedNode() {
+        return selectedNode;
+    }
+
+    /**
+     * Setter para el nodo seleccionado
+     */
+    public void setSelectedNode(TreeNode selectedNode) {
+        this.selectedNode = selectedNode;
+    }
+
+    /**
+     * Getter para los tipos de producto - siempre carga fresco
+     */
+    public List<SelectItem> getTiposProductoHierarchy() {
+        if (tiposProductoHierarchy == null) {
+            cargarTiposProductoHierarchy();
+        }
+        return tiposProductoHierarchy;
+    }
+
+    public Long getTipoProductoPadreSeleccionado() {
+        return tipoProductoPadreSeleccionado;
+    }
+
+    public void setTipoProductoPadreSeleccionado(Long tipoProductoPadreSeleccionado) {
+        this.tipoProductoPadreSeleccionado = tipoProductoPadreSeleccionado;
+    }
 }

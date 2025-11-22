@@ -58,8 +58,6 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         this.modoDetalle = false;  // Modo inicial: no detalle
         LOGGER.log(Level.INFO, "CompraDetalleFrm inicializado correctamente");
     }
-
-    @Override
     public void inicializarListas() {
         try {
             comprasDisponibles = compraDao != null ? compraDao.findAll() : new ArrayList<>();

@@ -47,6 +47,8 @@ public class TipoUnidadMedidaFrm extends DefaultFrm<TipoUnidadMedida> implements
         return tipoUnidadMedidaDao;
     }
 
+
+    // Creación y búsqueda de registros
     @Override
     protected TipoUnidadMedida nuevoRegistro() {
         TipoUnidadMedida t = new TipoUnidadMedida();
@@ -71,9 +73,6 @@ public class TipoUnidadMedidaFrm extends DefaultFrm<TipoUnidadMedida> implements
         }
     }
 
-    @Override
-    public void inicializarListas() {
-    }
 
     @Override
     protected String getIdAsText(TipoUnidadMedida r) {
@@ -89,6 +88,7 @@ public class TipoUnidadMedidaFrm extends DefaultFrm<TipoUnidadMedida> implements
     }
 
 
+    // Seleccion y manejo de botones
     public void selectionHandler(org.primefaces.event.SelectEvent<TipoUnidadMedida> ev) {
         super.selectionHandler(ev);
         pnlDetalle = true;
@@ -96,52 +96,6 @@ public class TipoUnidadMedidaFrm extends DefaultFrm<TipoUnidadMedida> implements
         editionMode = true;
     }
 
-    public void rowUnselectHandler() {
-        this.registro = null;
-        this.estado = ESTADO_CRUD.NADA;
-        pnlDetalle = false;
-        mostrarFormulario = false;
-        editionMode = false;
-    }
-
-    public String btnNuevoToolbar() {
-        this.registro = nuevoRegistro();
-        this.estado = ESTADO_CRUD.CREAR;
-        mostrarFormulario = true;
-        editionMode = false;
-        return null;
-    }
-
-    public String volver() {
-        pnlDetalle = false;
-        registro = null;
-        estado = ESTADO_CRUD.NADA;
-        return null;
-    }
-
-    public String btnEditarHandler(TipoUnidadMedida r) {
-        if (r != null) {
-            this.registro = r;
-            this.estado = ESTADO_CRUD.MODIFICAR;
-            this.mostrarFormulario = true;
-            this.editionMode = true;
-        }
-        return null;
-    }
-
-    public void btnGuardarDesdeDialog(ActionEvent e) {
-        if (estado == ESTADO_CRUD.CREAR) {
-            super.btnGuardarHandler(e);
-        } else if (estado == ESTADO_CRUD.MODIFICAR) {
-            super.btnModificarHandler(e);
-        }
-        mostrarFormulario = false;
-    }
-
-    public void btnEliminarDesdeDetalle(ActionEvent e) {
-        super.btnEliminarHandler(e);
-        pnlDetalle = false;
-    }
 
     public boolean isPnlDetalle() {
         return pnlDetalle;

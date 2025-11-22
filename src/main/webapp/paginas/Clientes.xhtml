@@ -60,14 +60,14 @@
             </p:dataTable>
 
             <p:commandButton id="btnNuevo"
-                             value="Nuevo"
+                             value="Nuevo Clientes"
                              styleClass="btn-rojo"
                              rendered="#{clienteFrm.estado == 'NADA'}"
                              actionListener="#{clienteFrm.btnNuevoHandler}"
                              update=":pnlDetalle :pnlTabla :messages"/>
 
             <p:commandButton id="btnCancelar"
-                             value="Cancelar"
+                             value="Cancelar Clientes"
                              styleClass="btn-oscuro"
                              rendered="#{clienteFrm.estado != 'NADA'}"
                              actionListener="#{clienteFrm.btnCancelarHandler}"
@@ -125,21 +125,21 @@
 
         <h:panelGrid columns="3" style="margin-top: 15px;">
 
-            <p:commandButton value="Crear"
+            <p:commandButton value="Crear Clientes"
                              styleClass="btn-rojo"
                              actionListener="#{clienteFrm.btnGuardarHandler}"
                              rendered="#{clienteFrm.estado == 'CREAR'}"
                              process="@form"
                              update=":messages :pnlDetalle :pnlTabla"/>
 
-            <p:commandButton value="Modificar"
+            <p:commandButton value="Modificar Clientes"
                              styleClass="btn-oscuro"
                              actionListener="#{clienteFrm.btnModificarHandler}"
                              rendered="#{clienteFrm.estado == 'MODIFICAR'}"
                              process="@form"
                              update=":messages :pnlDetalle :pnlTabla"/>
 
-            <p:commandButton value="Eliminar"
+            <p:commandButton value="Eliminar Clientes"
                              styleClass="btn-rojo"
                              actionListener="#{clienteFrm.btnEliminarHandler}"
                              rendered="#{clienteFrm.estado == 'MODIFICAR'}"

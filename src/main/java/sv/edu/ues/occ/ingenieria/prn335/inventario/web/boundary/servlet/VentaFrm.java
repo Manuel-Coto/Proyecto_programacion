@@ -1,91 +1,192 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ClienteDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.VentaDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Cliente;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Venta;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Named("ventaFrm")
 @ViewScoped
-public class VentaFrm implements Serializable {
+public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
 
     @Inject
-    private VentaDAO ventaDAO; // Inyecta el DAO de Venta
+    private VentaDAO ventaDao;
 
-    private Venta venta; // Objeto para almacenar la venta actual
-    private List<Venta> ventas; // Lista para almacenar todas las ventas
+    @Inject
+    private ClienteDAO clienteDao;
 
-    // Para manejar la selección de ventas (por ejemplo, para editar o ver detalles)
-    private Venta selectedVenta;
+    private List<Cliente> clientesDisponibles;
 
-    // Método de inicialización
-    @PostConstruct
-    public void init() {
-        ventas = ventaDAO.findAll(); // Cargar todas las ventas al iniciar el formulario
+    private final List<String> estadosDisponibles = List.of("CREADA", "PROCESO", "FINALIZADA", "ANULADA");
+
+    @Override
+    public void inicializar() {
+        System.out.println("Iniciando VentaFrm...");
+        super.inicializar(); // Inicializa el LazyDataModel
+        cargarClientes();
+        this.nombreBean = "Gestión de Ventas";
+        System.out.println("Bean VentaFrm creado - Modelo: " + (modelo != null ? "OK" : "NULL"));
     }
 
-    // Método para crear una nueva venta
-    public void crear() {
+    private void cargarClientes() {
         try {
-            ventaDAO.crear(venta); // Crear la venta usando el DAO
-            ventas.add(venta); // Añadir la venta a la lista
-            venta = new Venta(); // Limpiar el objeto para una nueva venta
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta creada con éxito", ""));
+            this.clientesDisponibles = clienteDao.findAll();
+            System.out.println("Clientes cargados: " + clientesDisponibles.size());
         } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al crear la venta", ""));
+            System.err.println("Error al cargar clientes: " + e.getMessage());
+            e.printStackTrace();
+            this.clientesDisponibles = List.of();
         }
     }
 
-    // Método para modificar una venta
-    public void modificar() {
+    // --- Implementación de Métodos Abstractos ---
+
+    @Override
+    protected FacesContext getFacesContext() {
+        return FacesContext.getCurrentInstance();
+    }
+
+    @Override
+    protected InventarioDefaultDataAccess<Venta> getDao() {
+        return ventaDao;
+    }
+
+    @Override
+    protected Venta nuevoRegistro() {
+        System.out.println("🆕 Creando nuevo registro Venta");
+        Venta v = new Venta();
+        v.setId(UUID.randomUUID());
+        v.setIdCliente(new Cliente());
+        v.setEstado(null);
+        v.setFecha(OffsetDateTime.now());
+        v.setObservaciones("");
+        return v;
+    }
+
+    @Override
+    protected Venta buscarRegistroPorId(Object id) {
         try {
-            ventaDAO.modificar(selectedVenta); // Modificar la venta seleccionada usando el DAO
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta modificada con éxito", ""));
+            if (id != null) {
+                UUID uuid = UUID.fromString(id.toString());
+                return ventaDao.findById(uuid);
+            }
         } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar la venta", ""));
+            System.err.println("Error en buscarRegistroPorId: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    protected String getIdAsText(Venta r) {
+        return r != null && r.getId() != null ? r.getId().toString() : null;
+    }
+
+    @Override
+    protected Venta getIdByText(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        try {
+            UUID uuid = UUID.fromString(id);
+            return ventaDao.findById(uuid);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error al parsear UUID: " + e.getMessage());
+            return null;
         }
     }
 
-    // Método para eliminar una venta
-    public void eliminar() {
-        try {
-            ventaDAO.eliminar(selectedVenta); // Eliminar la venta seleccionada usando el DAO
-            ventas.remove(selectedVenta); // Eliminar de la lista
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Venta eliminada con éxito", ""));
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al eliminar la venta", ""));
+    @Override
+    protected boolean esNombreVacio(Venta registro) {
+        if (registro == null || registro.getIdCliente() == null || registro.getIdCliente().getId() == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un cliente."));
+            return true;
+        }
+        if (registro.getEstado() == null || registro.getEstado().isEmpty()) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un estado."));
+            return true;
+        }
+        if (registro.getFecha() == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar una fecha."));
+            return true;
+        }
+        return false;
+    }
+
+    // --- Manejadores de Botones ---
+
+    @Override
+    public void btnGuardarHandler(ActionEvent actionEvent) {
+        System.out.println("Intentando guardar venta...");
+        if (this.registro != null) {
+            try {
+                // 1. Validar
+                if (esNombreVacio(this.registro)) {
+                    System.out.println("Validación fallida");
+                    return;
+                }
+
+                // 2. Sincronizar Cliente completo
+                UUID idClienteSeleccionado = this.registro.getIdCliente().getId();
+                Cliente clienteEntidad = clienteDao.findById(idClienteSeleccionado);
+
+                if (clienteEntidad == null) {
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Cliente no encontrado"));
+                    return;
+                }
+
+                this.registro.setIdCliente(clienteEntidad);
+                System.out.println("Cliente sincronizado: " + clienteEntidad.getNombre());
+
+                // 3. Persistir
+                getDao().crear(this.registro);
+                System.out.println("Venta guardada con ID: " + this.registro.getId());
+
+                // 4. Limpieza y Notificación
+                this.registro = null;
+                this.estado = ESTADO_CRUD.NADA;
+                this.modelo = null;
+                inicializarRegistros();
+
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro guardado correctamente"));
+            } catch (Exception e) {
+                System.err.println("Error al guardar: " + e.getMessage());
+                e.printStackTrace();
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar", e.getMessage()));
+            }
+        } else {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para guardar"));
         }
     }
 
-    // Getters y Setters
-    public Venta getVenta() {
-        return venta;
+    // --- Getters para JSF ---
+
+    public List<Cliente> getClientesDisponibles() {
+        if (clientesDisponibles == null || clientesDisponibles.isEmpty()) {
+            cargarClientes();
+        }
+        return clientesDisponibles;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public List<Venta> getVentas() {
-        return ventas;
-    }
-
-    public void setVentas(List<Venta> ventas) {
-        this.ventas = ventas;
-    }
-
-    public Venta getSelectedVenta() {
-        return selectedVenta;
-    }
-
-    public void setSelectedVenta(Venta selectedVenta) {
-        this.selectedVenta = selectedVenta;
+    public List<String> getEstadosDisponibles() {
+        return estadosDisponibles;
     }
 }

@@ -4,18 +4,15 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.UnidadMedida;
-
+import jakarta.persistence.criteria.*;
 import java.util.List;
 import java.util.Objects;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.UnidadMedida;
 
 @Stateless
 public class UnidadMedidaDAO extends InventarioDefaultDataAccess<UnidadMedida> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public UnidadMedidaDAO() {
@@ -27,9 +24,9 @@ public class UnidadMedidaDAO extends InventarioDefaultDataAccess<UnidadMedida> {
         return em;
     }
 
-    // ================================
     // Consultas específicas
-    // ================================
+
+    // Buscar unidades de medida por tipo con paginación
     public List<UnidadMedida> findByTipoUnidadMedida(Integer idTipo, int first, int max) {
         Objects.requireNonNull(idTipo, "El idTipo no puede ser nulo");
         CriteriaBuilder cb = em.getCriteriaBuilder();

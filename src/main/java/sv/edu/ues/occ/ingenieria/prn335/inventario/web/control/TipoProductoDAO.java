@@ -14,7 +14,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
 @Stateless
 public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public TipoProductoDAO() { super(TipoProducto.class); }
@@ -22,6 +22,7 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
     @Override
     public EntityManager getEntityManager() { return em; }
 
+    // Método lista los tipos de producto que no tienen padre (raíces)
     public List<TipoProducto> findRoots() {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoProducto> cq = cb.createQuery(TipoProducto.class);
@@ -30,6 +31,7 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
         return em.createQuery(cq).getResultList();
     }
 
+    // Busca los hijos de un tipo de producto padre
     public List<TipoProducto> findChildren(Long parentId) {
         Objects.requireNonNull(parentId, "parentId no puede ser null");
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -39,6 +41,7 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
         return em.createQuery(cq).getResultList();
     }
 
+    // Lista todos los tipos de producto con su padre cargado (version anterior)
     public List<TipoProducto> findAllFetchPadre() {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<TipoProducto> cq = cb.createQuery(TipoProducto.class);
@@ -48,6 +51,7 @@ public class TipoProductoDAO extends InventarioDefaultDataAccess<TipoProducto> {
         return em.createQuery(cq).getResultList();
     }
 
+    // Búsqueda por nombre con paginación
     public List<TipoProducto> findByNombreLike(String texto, int first, int max) {
         Objects.requireNonNull(texto, "texto no puede ser null");
         if (first < 0 || max < 1) throw new IllegalArgumentException("first>=0 y max>=1");

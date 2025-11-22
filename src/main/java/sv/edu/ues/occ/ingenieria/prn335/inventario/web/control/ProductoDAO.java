@@ -7,15 +7,16 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
 
 import java.util.List;
 import java.util.UUID;
 
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
+
 @Stateless
 public class ProductoDAO extends InventarioDefaultDataAccess<Producto> {
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public ProductoDAO() { super(Producto.class); }
@@ -23,8 +24,10 @@ public class ProductoDAO extends InventarioDefaultDataAccess<Producto> {
     @Override
     public EntityManager getEntityManager() { return em; }
 
+    // Método adicional específico para Producto
     public Producto findById(UUID id) { return em.find(Producto.class, id); }
 
+    // Método para buscar productos por nombre con paginación
     public List<Producto> findByNombreLike(String texto, int first, int max) {
         if (first < 0 || max < 1) throw new IllegalArgumentException("first>=0 y max>=1");
         CriteriaBuilder cb = em.getCriteriaBuilder();

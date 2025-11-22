@@ -58,9 +58,6 @@ public class TipoAlmacenFrm extends DefaultFrm<TipoAlmacen> implements Serializa
         return null;
     }
 
-    @Override
-    public void inicializarListas() {
-    }
 
     @Override
     protected String getIdAsText(TipoAlmacen r) {

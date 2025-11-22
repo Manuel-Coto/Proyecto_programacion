@@ -22,9 +22,9 @@ public interface InventarioDAOInterface<T> {
 
     public List<T> findRange(int first, int max) throws IllegalArgumentException;
 
-    public int count() throws IllegalArgumentException;
+    public Long count() throws IllegalArgumentException;
 
-    void modificar(T registro) throws IllegalArgumentException;
+    T modificar(T registro) throws IllegalArgumentException;
 
     void eliminar(T entity) throws IllegalArgumentException;
 
