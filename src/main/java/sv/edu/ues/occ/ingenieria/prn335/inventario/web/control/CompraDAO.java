@@ -4,10 +4,12 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Compra;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,5 +101,30 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
                 throw new IllegalArgumentException("El proveedor con ID " + idProveedor + " no existe");
             }
         }
+    }
+
+    // Nueva función que maneja la conversión de Long a Integer y luego busca la Compra
+    public Compra findCompraById(Long idLong) {
+        Integer idInteger = convertirLongAInteger(idLong);  // Convertimos Long a Integer
+        if (idInteger != null) {
+            // Realizamos la búsqueda usando el id convertido a Integer
+            TypedQuery<Compra> query = em.createQuery("SELECT c FROM Compra c WHERE c.idCompra = :idCompra", Compra.class);
+            query.setParameter("idCompra", idInteger);
+            return query.getSingleResult();  // Devuelve el resultado si lo encuentra
+        }
+        return null;  // Si no se puede convertir, retorna null
+    }
+
+    // Conversión de Long a Integer
+    private Integer convertirLongAInteger(Long idLong) {
+        if (idLong == null) return null;
+        return idLong.intValue();  // Convertimos el Long a Integer
+    }
+
+    // Método para obtener todas las compras
+    public List<Compra> findAllCompras() {
+        LOGGER.log(Level.FINE, "Buscando todas las compras");
+        TypedQuery<Compra> query = em.createQuery("SELECT c FROM Compra c", Compra.class);
+        return query.getResultList();
     }
 }

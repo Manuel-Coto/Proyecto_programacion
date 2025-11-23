@@ -2,6 +2,7 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.Converte.LongIntegerAttributeConverter;
 
 import java.time.OffsetDateTime;
 
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 public class Compra {
     @Id
     @Column(name = "id_compra", nullable = false)
+    @Convert(converter = LongIntegerAttributeConverter.class)
     private Long id;
 
     @MapsId

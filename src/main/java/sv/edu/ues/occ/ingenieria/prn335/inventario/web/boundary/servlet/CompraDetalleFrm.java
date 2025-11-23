@@ -9,9 +9,8 @@ import jakarta.inject.Named;
 
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDetalleDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDAO;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
-
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProductoDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.CompraDetalle;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Compra;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Producto;
@@ -88,7 +87,7 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         cd.setCantidad(BigDecimal.ZERO);
         cd.setPrecio(BigDecimal.ZERO);
         cd.setEstado("PENDIENTE");
-        cd.setIdCompra(new Compra());  // Asegúrate de que el ID de compra es Long
+        cd.setIdCompra(new Compra());
         cd.setIdProducto(new Producto());
         return cd;
     }
@@ -119,7 +118,8 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     protected boolean esNombreVacio(CompraDetalle registro) {
         boolean error = false;
 
-        if (registro.getIdCompra() == null || registro.getIdCompra().getId() == null) {
+        Object compraId = registro.getIdCompra() != null ? registro.getIdCompra().getId() : null;
+        if (compraId == null || !isNumericId(compraId)) {
             mensaje("Debe seleccionar una Compra");
             error = true;
         }
@@ -154,8 +154,27 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
 
     // ---------------------- Guardar / Modificar ----------------------
 
-    private Compra obtenerCompraCompleta(Long id) {
-        return compraDao.findById(id);
+    private Compra obtenerCompraCompleta(Object idObj) {
+        if (idObj == null) return null;
+        try {
+            Long idLong;
+            if (idObj instanceof Long) {
+                idLong = (Long) idObj;
+            } else if (idObj instanceof Integer) {
+                idLong = ((Integer) idObj).longValue();
+            } else if (idObj instanceof Number) {
+                idLong = ((Number) idObj).longValue();
+            } else if (idObj instanceof String) {
+                idLong = Long.parseLong((String) idObj);
+            } else {
+                LOGGER.log(Level.WARNING, "Tipo de id de compra no soportado: {0}", idObj.getClass());
+                return null;
+            }
+            return compraDao.findCompraById(idLong);  // Llamamos al método de conversión en el DAO
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener Compra por id", e);
+            return null;
+        }
     }
 
     private Producto obtenerProductoCompleto(UUID id) {
@@ -166,6 +185,7 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     public void btnGuardarHandler(jakarta.faces.event.ActionEvent actionEvent) {
         if (registro == null || esNombreVacio(registro)) return;
 
+        // Llamamos a obtenerCompraCompleta, que ahora usa findCompraById con la conversión
         Compra compra = obtenerCompraCompleta(registro.getIdCompra().getId());
         Producto producto = obtenerProductoCompleto(registro.getIdProducto().getId());
 
@@ -184,6 +204,7 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     public void btnModificarHandler(jakarta.faces.event.ActionEvent actionEvent) {
         if (registro == null || esNombreVacio(registro)) return;
 
+        // Llamamos a obtenerCompraCompleta, que ahora usa findCompraById con la conversión
         Compra compra = obtenerCompraCompleta(registro.getIdCompra().getId());
         Producto producto = obtenerProductoCompleto(registro.getIdProducto().getId());
 
@@ -196,6 +217,22 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         registro = null;
         estado = ESTADO_CRUD.NADA;
         inicializarRegistros();
+    }
+
+    // ---------------------- Helpers ----------------------
+
+    private boolean isNumericId(Object id) {
+        if (id == null) return false;
+        if (id instanceof Number) return true;
+        if (id instanceof String) {
+            try {
+                Long.parseLong((String) id);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     // ---------------------- Getters ----------------------

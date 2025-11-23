@@ -67,8 +67,8 @@
                         <h:panelGroup id="txtIdPanel">
                             <h:outputText rendered="#{empty compraDetalleFrm.registro.id}"
                                           value="(Se asignará automáticamente al guardar)"/>
-                            <h:inputText id="txtIdGeneral" value="#{compraDetalleFrm.registro.id}"
-                                         rendered="#{not empty compraDetalleFrm.registro.id}" readonly="true"/>
+                            <h:outputText id="txtIdGeneral" value="#{compraDetalleFrm.registro.id}"
+                                          rendered="#{not empty compraDetalleFrm.registro.id}" readonly="true"/>
                         </h:panelGroup>
 
                         <h:outputLabel for="txtCantidad" value="Cantidad:"/>
@@ -89,15 +89,15 @@
                     <p:panelGrid columns="3" style="margin-top: 15px;">
                         <p:commandButton value="Crear Detalle" styleClass="btn-rojo"
                                          actionListener="#{compraDetalleFrm.btnGuardarHandler}"
-                                         rendered="#{compraDetalleFrm.estado.name() eq 'CREAR'}"
+                                         rendered="#{compraDetalleFrm.estado == 'CREAR'}"
                                          update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
                         <p:commandButton value="Modificar Detalle" styleClass="btn-oscuro"
                                          actionListener="#{compraDetalleFrm.btnModificarHandler}"
-                                         rendered="#{compraDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                         rendered="#{compraDetalleFrm.estado == 'MODIFICAR'}"
                                          update=":frmTop:messages :pnlDetalle :pnlTabla" process="@form"/>
                         <p:commandButton value="Eliminar Detalle" styleClass="btn-rojo"
                                          actionListener="#{compraDetalleFrm.btnEliminarHandler}"
-                                         rendered="#{compraDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                         rendered="#{compraDetalleFrm.estado == 'MODIFICAR'}"
                                          update=":frmTop:messages :pnlDetalle :pnlTabla"/>
                     </p:panelGrid>
                 </p:tab>
