@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{ventaDetalleFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+<h:body>
+
+    <!-- Topbar -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{ventaDetalleFrm.nombreBean}</h1>
+
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tabla-top"
+                             lazy="true"
+                             rendered="#{ventaDetalleFrm.estado.name() eq 'NADA'}"
+                             rows="#{ventaDetalleFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             value="#{ventaDetalleFrm.modelo}"
+                             var="reg"
+                             selectionMode="single"
+                             selection="#{ventaDetalleFrm.registro}"
+                             rowKey="#{reg.id}">
+
+                    <p:ajax event="rowSelect" listener="#{ventaDetalleFrm.selectionHandler}" update=":pnlTabla :pnlDetalle"/>
+
+                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
+                    <p:column headerText="Venta"><h:outputText value="#{reg.idVenta.id}" /></p:column>
+                    <p:column headerText="Producto"><h:outputText value="#{reg.idProducto.nombreProducto}" /></p:column>
+                    <p:column headerText="Cantidad"><h:outputText value="#{reg.cantidad}" /></p:column>
+                    <p:column headerText="Precio"><h:outputText value="#{reg.precio}">
+                        <f:convertNumber type="currency" currencySymbol="$"/>
+                    </h:outputText></p:column>
+                    <p:column headerText="Estado"><h:outputText value="#{reg.estado}" /></p:column>
+                </p:dataTable>
+
+                <p:commandButton id="btnNuevo" value="Nuevo Detalle" styleClass="btn-rojo"
+                                 rendered="#{ventaDetalleFrm.estado.name() eq 'NADA'}"
+                                 actionListener="#{ventaDetalleFrm.btnNuevoHandler}"
+                                 update=":pnlDetalle :pnlTabla"
+                                 process="@this" immediate="true"/>
+
+                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                                 rendered="#{ventaDetalleFrm.estado.name() ne 'NADA'}"
+                                 actionListener="#{ventaDetalleFrm.btnCancelarHandler}"
+                                 update=":pnlDetalle :pnlTabla"
+                                 process="@this" immediate="true"/>
+
+                <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+            </h:form>
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{ventaDetalleFrm.estado.name() ne 'NADA'}">
+            <h:panelGrid columns="2" columnClasses="col-label,col-field">
+
+                <h:outputLabel for="cmbVenta" value="Venta:"/>
+                <p:selectOneMenu id="cmbVenta"
+                                 value="#{ventaDetalleFrm.registro.idVenta}"
+                                 converter="omnifaces.SelectItemsConverter"
+                                 style="width:100%"
+                                 disabled="#{ventaDetalleFrm.estado.name() eq 'MODIFICAR'}">
+                    <f:selectItem itemLabel="-- Seleccionar venta --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{ventaDetalleFrm.ventasDisponibles}"
+                                   var="venta"
+                                   itemLabel="#{venta.id}"
+                                   itemValue="#{venta}"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="cmbProducto" value="Producto:"/>
+                <p:selectOneMenu id="cmbProducto"
+                                 value="#{ventaDetalleFrm.registro.idProducto}"
+                                 converter="omnifaces.SelectItemsConverter"
+                                 style="width:100%"
+                                 disabled="#{ventaDetalleFrm.estado.name() eq 'MODIFICAR'}">
+                    <f:selectItem itemLabel="-- Seleccionar producto --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{ventaDetalleFrm.productosDisponibles}"
+                                   var="producto"
+                                   itemLabel="#{producto.nombreProducto}"
+                                   itemValue="#{producto}"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="txtCantidad" value="Cantidad:"/>
+                <p:inputNumber id="txtCantidad"
+                               value="#{ventaDetalleFrm.registro.cantidad}"
+                               style="width:100%"
+                               decimalPlaces="2"
+                               minValue="0"/>
+
+                <h:outputLabel for="txtPrecio" value="Precio:"/>
+                <p:inputNumber id="txtPrecio"
+                               value="#{ventaDetalleFrm.registro.precio}"
+                               style="width:100%"
+                               decimalPlaces="2"
+                               symbol="$"
+                               minValue="0"/>
+
+                <h:outputLabel for="cmbEstado" value="Estado:"/>
+                <p:selectOneMenu id="cmbEstado"
+                                 value="#{ventaDetalleFrm.registro.estado}"
+                                 style="width:100%">
+                    <f:selectItem itemLabel="-- Seleccionar estado --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{ventaDetalleFrm.estadosDisponibles}"
+                                   var="estado"
+                                   itemLabel="#{estado}"
+                                   itemValue="#{estado}"/>
+                </p:selectOneMenu>
+
+            </h:panelGrid>
+
+            <h:panelGrid columns="3" style="margin-top: 15px;">
+                <p:commandButton value="Guardar"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-save"
+                                 actionListener="#{ventaDetalleFrm.btnGuardarHandler}"
+                                 rendered="#{ventaDetalleFrm.estado.name() eq 'CREAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
+
+                <p:commandButton value="Modificar"
+                                 styleClass="btn-oscuro"
+                                 icon="pi pi-pencil"
+                                 actionListener="#{ventaDetalleFrm.btnModificarHandler}"
+                                 rendered="#{ventaDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
+
+                <p:commandButton value="Eliminar"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-trash"
+                                 actionListener="#{ventaDetalleFrm.btnEliminarHandler}"
+                                 rendered="#{ventaDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"/>
+            </h:panelGrid>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>
