@@ -64,8 +64,6 @@
                             </p:column>
 
                             <p:column headerText="Proveedor">
-                                <!-- Ajusta según tu entidad: n.proveedor.nombre o n.idProveedor -->
-                                <!-- <h:outputText value="#{n.proveedor.nombre}" /> -->
                                 <h:outputText value="#{n.proveedor.nombre}" />
                             </p:column>
 
@@ -81,8 +79,6 @@
                         </p:dataTable>
 
                         <!-- Barra de botones debajo de la tabla -->
-                        <p:toolbar styleClass="toolbar-acciones" style="margin-top: 1rem;">
-                            <p:toolbarGroup align="left">
                                 <p:commandButton id="btnNuevo"
                                                  value="Nueva Compra"
                                                  icon="pi pi-plus"
@@ -92,9 +88,6 @@
                                                  process="@this"
                                                  immediate="true"
                                                  update=":pnlDetalle :pnlTabla :frmTop:messages" />
-                            </p:toolbarGroup>
-
-                            <p:toolbarGroup align="right">
                                 <p:commandButton id="btnCancelar"
                                                  value="Cancelar Compra"
                                                  icon="pi pi-times"
@@ -104,8 +97,6 @@
                                                  process="@this"
                                                  immediate="true"
                                                  update=":pnlDetalle :pnlTabla :frmTop:messages" />
-                            </p:toolbarGroup>
-                        </p:toolbar>
 
                     </h:form>
                 </h:panelGroup>
@@ -113,10 +104,8 @@
                 <!-- =========================
                      DETALLE / FORMULARIO
                      ========================= -->
-                <h:panelGroup id="pnlDetalle" layout="block">
-                    <h:form id="frmCrear"
-                            rendered="#{compraFrm.modoDetalle}">
-
+                <h:panelGroup id="pnlDetalle">
+                    <h:form id="frmCrear" rendered="#{compraFrm.modoDetalle}">
                         <p:messages id="msgGlobal"
                                     showDetail="true"
                                     autoUpdate="true" />
@@ -159,12 +148,16 @@
                                     </p:selectOneMenu>
 
                                     <!-- Estado -->
-                                    <h:outputLabel for="txtEstado" value="Estado:" />
-                                    <p:inputText id="txtEstado"
-                                                 value="#{compraFrm.registro.estado}"
-                                                 maxlength="10"
-                                                 styleClass="inp"
-                                                 label="Estado" />
+                                    <h:outputLabel for="cmbEstado" value="Estado:"/>
+                                    <p:selectOneMenu id="cmbEstado"
+                                                     value="#{compraFrm.registro.estado}"
+                                                     style="width:100%">
+                                        <f:selectItem itemLabel="-- Seleccionar estado --" itemValue="#{null}" noSelectionOption="true"/>
+                                        <f:selectItems value="#{compraFrm.estadosDisponibles}"
+                                                       var="estado"
+                                                       itemLabel="#{estado}"
+                                                       itemValue="#{estado}"/>
+                                    </p:selectOneMenu>
 
                                     <!-- Observaciones -->
                                     <h:outputLabel for="txtObservaciones" value="Observaciones:" />
@@ -183,9 +176,7 @@
                                               style="margin-top: 0.25rem; display:block;" />
 
                                 <!-- Botones CRUD -->
-                                <p:panelGrid columns="3"
-                                             style="margin-top: 15px;"
-                                             styleClass="grid-acciones">
+                                <h:panelGrid columns="3" style="margin-top: 15px;">
                                     <p:commandButton value="Crear Compra"
                                                      icon="pi pi-save"
                                                      styleClass="btn-rojo"
@@ -208,7 +199,7 @@
                                                      actionListener="#{compraFrm.btnEliminarHandler}"
                                                      rendered="#{compraFrm.estado.name() eq 'MODIFICAR'}"
                                                      update=":frmTop:messages :pnlDetalle :pnlTabla" />
-                                </p:panelGrid>
+                                </h:panelGrid>
 
                             </p:tab>
                         </p:tabView>

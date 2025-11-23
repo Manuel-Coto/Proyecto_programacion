@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="new server">
+
+    <featureManager>
+        <feature>jakartaee-10.0</feature>
+        <feature>jdbc-4.3</feature>
+    </featureManager>
+
+
+    <library id="postgresLib">
+        <!-- Apunta a /usr/.../servers/prn335_2025/drivers/postgresql -->
+        <fileset dir="${server.config.dir}/resources/jdbc" includes="postgresql-*.jar"/>
+
+    </library>
+
+    <jdbcDriver id="postgres-drivers" libraryRef="postgresLib"/>
+
+    <!-- Driver JDBC que usa la librería -->
+
+
+    <!-- DataSource JNDI: jdbc/pgdb -->
+    <dataSource id="InventarioDataSource"
+                jndiName="jdbc/pgdb"
+                jdbcDriverRef="postgres-drivers"
+                type="javax.sql.DataSource"
+                transactional="true">
+        <properties.postgresql
+                serverName="localhost"
+                portNumber="5432"
+                databaseName="parcial1_prn335"
+                user="postgres"
+                password="fran123"/>
+    </dataSource>
+
+</server>

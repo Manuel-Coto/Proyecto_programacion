@@ -20,7 +20,7 @@ public class KardexDAO extends InventarioDefaultDataAccess<Kardex> implements Se
 
     private static final Logger LOGGER = Logger.getLogger(KardexDAO.class.getName());
 
-    @PersistenceContext(unitName = "inventarioPU")
+    @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
     public KardexDAO() {

@@ -2,7 +2,6 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.Converte.LongIntegerAttributeConverter;
 
 import java.time.OffsetDateTime;
 
@@ -10,9 +9,9 @@ import java.time.OffsetDateTime;
 @Table(name = "compra", schema = "public")
 public class Compra {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_compra", nullable = false)
-    @Convert(converter = LongIntegerAttributeConverter.class)
-    private Long id;
+    private Integer id;
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -33,11 +32,11 @@ public class Compra {
     @Column(name = "observaciones")
     private String observaciones;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -80,5 +79,4 @@ public class Compra {
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
     }
-
 }

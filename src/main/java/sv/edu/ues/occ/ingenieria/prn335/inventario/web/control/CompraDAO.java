@@ -4,6 +4,7 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Compra;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
@@ -50,10 +51,22 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
             // Asignar la entidad completa del proveedor
             entidad.setProveedor(proveedor);
 
-            // Asegurarse de que el ID sea null para que la secuencia lo genere
-            entidad.setId(null);
+            // Generar el ID usando la secuencia de compra si no tiene ID
+            if (entidad.getId() == null) {
+                try {
+                    // Obtener el siguiente valor de la secuencia de compra
+                    Query query = em.createNativeQuery("SELECT nextval('compra_id_compra_seq'::regclass)");
+                    Number nextId = (Number) query.getSingleResult();
+                    entidad.setId(nextId.intValue());  // Usar intValue() en lugar de longValue()
 
-            LOGGER.log(Level.INFO, "Guardando compra: {0}", entidad);
+                    LOGGER.log(Level.INFO, "ID generado para compra: {0}", entidad.getId());
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "No se pudo obtener ID de secuencia, dejando que JPA lo genere", e);
+                    // Si falla, dejar que JPA lo genere automáticamente
+                }
+            }
+
+            LOGGER.log(Level.INFO, "Guardando compra con ID: {0}", entidad.getId());
 
             // Persistir usando el método de la clase base
             super.crear(entidad);
@@ -93,7 +106,9 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
         return super.findById(id);
     }
 
-    // Método auxiliar para validar el proveedor antes de modificar
+    /**
+     * Método auxiliar para validar el proveedor antes de modificar
+     */
     public void validarProveedor(Integer idProveedor) {
         if (idProveedor != null) {
             Proveedor proveedor = em.find(Proveedor.class, idProveedor);
@@ -103,28 +118,35 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
         }
     }
 
-    // Nueva función que maneja la conversión de Long a Integer y luego busca la Compra
+    /**
+     * Busca una compra por su ID (Long)
+     * Este método convierte automáticamente tipos si es necesario
+     */
     public Compra findCompraById(Long idLong) {
-        Integer idInteger = convertirLongAInteger(idLong);  // Convertimos Long a Integer
-        if (idInteger != null) {
-            // Realizamos la búsqueda usando el id convertido a Integer
-            TypedQuery<Compra> query = em.createQuery("SELECT c FROM Compra c WHERE c.idCompra = :idCompra", Compra.class);
-            query.setParameter("idCompra", idInteger);
-            return query.getSingleResult();  // Devuelve el resultado si lo encuentra
+        if (idLong == null) {
+            return null;
         }
-        return null;  // Si no se puede convertir, retorna null
+
+        try {
+            LOGGER.log(Level.FINE, "Buscando compra con ID: {0}", idLong);
+            return em.find(Compra.class, idLong);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al buscar compra por ID", e);
+            return null;
+        }
     }
 
-    // Conversión de Long a Integer
-    private Integer convertirLongAInteger(Long idLong) {
-        if (idLong == null) return null;
-        return idLong.intValue();  // Convertimos el Long a Integer
-    }
-
-    // Método para obtener todas las compras
+    /**
+     * Obtiene todas las compras
+     */
     public List<Compra> findAllCompras() {
         LOGGER.log(Level.FINE, "Buscando todas las compras");
-        TypedQuery<Compra> query = em.createQuery("SELECT c FROM Compra c", Compra.class);
-        return query.getResultList();
+        try {
+            TypedQuery<Compra> query = em.createQuery("SELECT c FROM Compra c ORDER BY c.id DESC", Compra.class);
+            return query.getResultList();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener todas las compras", e);
+            return List.of();
+        }
     }
 }

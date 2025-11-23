@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{kardexFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- Topbar -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{kardexFrm.nombreBean}</h1>
+
+    <!-- ===== TABLA PRINCIPAL ===== -->
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tablaKardex"
+                             lazy="true"
+                             rendered="#{kardexFrm.estado.name() eq 'NADA'}"
+                             value="#{kardexFrm.modelo}"
+                             var="n"
+                             rows="#{kardexFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             selectionMode="single"
+                             selection="#{kardexFrm.registro}"
+                             rowKey="#{n.id}">
+
+                    <p:ajax event="rowSelect"
+                            listener="#{kardexFrm.selectionHandler}"
+                            update=":pnlDetalle :frmTop:messages"/>
+
+                    <p:column headerText="ID" style="width:280px;">
+                        <h:outputText value="#{n.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Producto" style="width:200px;">
+                        <h:outputText value="#{n.idProducto != null ? n.idProducto.nombreProducto : '-'}"/>
+                    </p:column>
+
+                    <p:column headerText="Almacén" style="width:150px;">
+                        <h:outputText value="#{n.idAlmacen != null ? n.idAlmacen.id : '-'}"/>
+                    </p:column>
+
+                    <p:column headerText="Tipo Movimiento" style="width:180px;">
+                        <h:outputText value="#{n.tipoMovimiento}"/>
+                    </p:column>
+
+                    <p:column headerText="Cantidad" style="width:120px;">
+                        <h:outputText value="#{n.cantidad}"/>
+                    </p:column>
+
+                    <p:column headerText="Precio" style="width:120px;">
+                        <h:outputText value="#{n.precio}"/>
+                    </p:column>
+
+                    <p:column headerText="Fecha" style="width:180px;">
+                        <h:outputText value="#{n.fecha}"/>
+                    </p:column>
+                </p:dataTable>
+
+                <!-- BOTONES PRINCIPALES -->
+                <p:commandButton id="btnNuevo"
+                                 value="Nuevo Movimiento Kardex"
+                                 icon="pi pi-plus"
+                                 styleClass="btn-rojo"
+                                 rendered="#{kardexFrm.estado.name() eq 'NADA'}"
+                                 actionListener="#{kardexFrm.btnNuevoHandler}"
+                                 process="@this"
+                                 immediate="true"
+                                 update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+                <p:commandButton id="btnCancelar"
+                                 value="Cancelar"
+                                 icon="pi pi-times"
+                                 styleClass="btn-oscuro"
+                                 rendered="#{kardexFrm.estado.name() ne 'NADA'}"
+                                 actionListener="#{kardexFrm.btnCancelarHandler}"
+                                 process="@this"
+                                 immediate="true"
+                                 update=":pnlDetalle :pnlTabla :frmTop:messages"/>
+
+                <p:growl id="messages" showDetail="true" life="5000" sticky="false"/>
+            </h:form>
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <!-- ===== DETALLE / FORMULARIO ===== -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{kardexFrm.estado.name() ne 'NADA'}">
+            <h:panelGrid columns="2" columnClasses="col-label,col-field">
+
+                <!-- ID -->
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty kardexFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"
+                                  styleClass="id-info-text"/>
+                    <h:inputText id="txtId"
+                                 value="#{kardexFrm.registro.id}"
+                                 rendered="#{not empty kardexFrm.registro.id}"
+                                 disabled="true"/>
+                </h:panelGroup>
+
+                <!-- Producto -->
+                <h:outputLabel for="selProducto" value="Producto:"/>
+                <p:selectOneMenu id="selProducto"
+                                 value="#{kardexFrm.registro.idProducto}"
+                                 converter="omnifaces.SelectItemsConverter"
+                                 style="width:100%"
+                                 required="true"
+                                 requiredMessage="Debe seleccionar un producto">
+                    <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{kardexFrm.productosDisponibles}"
+                                   var="prod"
+                                   itemLabel="#{prod.nombreProducto}"
+                                   itemValue="#{prod}"/>
+                </p:selectOneMenu>
+
+                <!-- Almacén -->
+                <h:outputLabel for="selAlmacen" value="Almacén:"/>
+                <p:selectOneMenu id="selAlmacen"
+                                 value="#{kardexFrm.registro.idAlmacen}"
+                                 converter="omnifaces.SelectItemsConverter"
+                                 style="width:100%"
+                                 required="true"
+                                 requiredMessage="Debe seleccionar un almacén">
+                    <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{kardexFrm.almacenesDisponibles}"
+                                   var="alm"
+                                   itemLabel="#{alm.id}"
+                                   itemValue="#{alm}"/>
+                </p:selectOneMenu>
+
+                <!-- Tipo de Movimiento -->
+                <h:outputLabel for="selTipoMov" value="Tipo de Movimiento:"/>
+                <p:selectOneMenu id="selTipoMov"
+                                 value="#{kardexFrm.registro.tipoMovimiento}"
+                                 style="width:100%"
+                                 required="true"
+                                 requiredMessage="Debe seleccionar un tipo de movimiento">
+                    <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{kardexFrm.tiposMovimiento}"
+                                   var="tipo"
+                                   itemLabel="#{tipo}"
+                                   itemValue="#{tipo}"/>
+                </p:selectOneMenu>
+
+                <!-- Cantidad -->
+                <h:outputLabel for="txtCantidad" value="Cantidad:"/>
+                <p:inputNumber id="txtCantidad"
+                               value="#{kardexFrm.registro.cantidad}"
+                               minValue="0"
+                               step="0.01"
+                               required="true"
+                               requiredMessage="La cantidad es obligatoria"/>
+
+                <!-- Precio -->
+                <h:outputLabel for="txtPrecio" value="Precio:"/>
+                <p:inputNumber id="txtPrecio"
+                               value="#{kardexFrm.registro.precio}"
+                               minValue="0"
+                               step="0.01"
+                               required="true"
+                               requiredMessage="El precio es obligatorio"/>
+
+                <!-- Fecha -->
+                <h:outputLabel for="dtpFecha" value="Fecha:"/>
+                <p:calendar id="dtpFecha"
+                            value="#{kardexFrm.registro.fecha}"
+                            pattern="dd/MM/yyyy HH:mm"
+                            showTime="true"
+                            timeZone="America/El_Salvador"
+                            navigator="true"
+                            converter="offsetDateTimeConverter"
+                            required="true"
+                            requiredMessage="La fecha es obligatoria"/>
+
+                <!-- Observaciones -->
+                <h:outputLabel for="txtObs" value="Observaciones:"/>
+                <h:inputTextarea id="txtObs"
+                                 value="#{kardexFrm.registro.observaciones}"
+                                 rows="3"
+                                 cols="50"/>
+
+            </h:panelGrid>
+
+            <!-- BOTONES CRUD -->
+            <h:panelGrid columns="3" style="margin-top: 15px;">
+                <p:commandButton value="Crear Movimiento"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-save"
+                                 actionListener="#{kardexFrm.btnGuardarHandler}"
+                                 rendered="#{kardexFrm.estado.name() eq 'CREAR'}"
+                                 update=":frmTop:messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
+
+                <p:commandButton value="No Permitido"
+                                 styleClass="btn-oscuro"
+                                 icon="pi pi-lock"
+                                 disabled="true"
+                                 rendered="#{kardexFrm.estado.name() eq 'MODIFICAR'}"
+                                 title="No se permite modificar registros de kardex"/>
+
+                <p:commandButton value="No Permitido"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-lock"
+                                 disabled="true"
+                                 rendered="#{kardexFrm.estado.name() eq 'MODIFICAR'}"
+                                 title="No se permite eliminar registros de kardex"/>
+            </h:panelGrid>
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>

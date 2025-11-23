@@ -132,7 +132,7 @@
                 <artifactId>liberty-maven-plugin</artifactId>
                 <version>3.8.2</version>
                 <configuration>
-                    <installDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp/</installDirectory>
+                    <installDirectory>/home/tztyfrank/wlp_25.0.0.8</installDirectory>
                     <serverName>prn335_2025</serverName>
                 </configuration>
 

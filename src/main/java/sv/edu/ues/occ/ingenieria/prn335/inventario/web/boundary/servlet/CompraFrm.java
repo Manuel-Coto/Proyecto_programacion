@@ -15,6 +15,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,13 +26,15 @@ import java.util.logging.Logger;
 @ViewScoped
 public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
+    private static final Logger LOGGER = Logger.getLogger(CompraFrm.class.getName());
+
     @Inject
     private CompraDAO compraDao;
 
     @Inject
     private ProveedorDAO proveedorDao;
 
-    private List<Proveedor> proveedoresDisponibles;
+    private List<Proveedor> listaProveedores;
     private List<EstadoCompra> estadosDisponibles;
 
     @Override
@@ -53,11 +56,11 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
     @Override
     protected Compra buscarRegistroPorId(Object id) {
-        if (id instanceof Long) {
+        if (id instanceof Integer) {
             try {
-                return compraDao.findById((Long) id);
+                return compraDao.findById((id));
             } catch (Exception e) {
-                Logger.getLogger(CompraFrm.class.getName()).log(Level.SEVERE, "Error buscando Compra por ID", e);
+                LOGGER.log(Level.SEVERE, "Error buscando Compra por ID", e);
             }
         }
         return null;
@@ -95,8 +98,9 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
     @Override
     protected Compra getIdByText(String id) {
         try {
-            return buscarRegistroPorId(Long.parseLong(id));
+            return buscarRegistroPorId(Integer.parseInt(id));
         } catch (NumberFormatException e) {
+            LOGGER.log(Level.WARNING, "ID no es un número válido: {0}", id);
             return null;
         }
     }
@@ -106,21 +110,21 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         return registro == null || registro.getIdProveedor() == null;
     }
 
-    // ---------------------- Implementación del Método Abstracto ----------------------
+    // ---------------------- Inicialización de Listas ----------------------
 
     public void inicializarListas() {
         try {
-            // Inicializamos las listas de proveedores y estados
-            this.proveedoresDisponibles = proveedorDao.findAll();
+            // Inicializamos la lista de proveedores
+            this.listaProveedores = proveedorDao != null ? proveedorDao.findAll() : new ArrayList<>();
             this.estadosDisponibles = Arrays.asList(EstadoCompra.values());
 
-            // Registro en los logs para asegurar que se inicializaron correctamente
-            Logger.getLogger(CompraFrm.class.getName()).log(Level.INFO, "Listas inicializadas correctamente");
+            LOGGER.log(Level.INFO, "Listas inicializadas: {0} proveedores",
+                    listaProveedores.size());
 
         } catch (Exception e) {
-            Logger.getLogger(CompraFrm.class.getName()).log(Level.SEVERE, "Error al inicializar listas", e);
+            LOGGER.log(Level.SEVERE, "Error al inicializar listas", e);
             // En caso de error, asignamos listas vacías para evitar null pointers
-            this.proveedoresDisponibles = Collections.emptyList();
+            this.listaProveedores = new ArrayList<>();
             this.estadosDisponibles = Collections.emptyList();
         }
     }
@@ -128,7 +132,9 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
     @PostConstruct
     public void init() {
         super.inicializar();
-        inicializarListas();  // Llamamos a inicializarListas al momento de la inicialización
+        this.nombreBean = "Gestión de Compras";
+        inicializarListas();
+        LOGGER.log(Level.INFO, "CompraFrm inicializado correctamente");
     }
 
     // ---------------------- Métodos de Guardado y Modificación ----------------------
@@ -187,13 +193,70 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro guardado correctamente"));
 
         } catch (Exception e) {
-            Logger.getLogger(CompraFrm.class.getName()).log(Level.SEVERE, "Error al guardar compra", e);
+            LOGGER.log(Level.SEVERE, "Error al guardar compra", e);
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar", e.getMessage()));
         }
     }
 
-    // ---------------------- Getters ----------------------
+    @Override
+    public void btnModificarHandler(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para modificar"));
+            return;
+        }
+
+        try {
+            // Validación del proveedor
+            if (esNombreVacio(this.registro)) {
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un proveedor"));
+                return;
+            }
+
+            // Validación del estado
+            if (registro.getEstado() == null || registro.getEstado().isBlank()) {
+                getFacesContext().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un estado"));
+                return;
+            }
+
+            // Validar que el proveedor exista antes de modificar
+            compraDao.validarProveedor(this.registro.getIdProveedor());
+
+            // Cargar el proveedor completo
+            Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
+            this.registro.setProveedor(proveedor);
+
+            getDao().modificar(this.registro);
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            inicializarRegistros();
+
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al modificar compra", e);
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", e.getMessage()));
+        }
+    }
+
+    // ---------------------- Getters y Setters ----------------------
+
+    public List<Proveedor> getListaProveedores() {
+        if (listaProveedores == null || listaProveedores.isEmpty()) {
+            inicializarListas();
+        }
+        return listaProveedores;
+    }
+
+    public void setListaProveedores(List<Proveedor> listaProveedores) {
+        this.listaProveedores = listaProveedores;
+    }
 
     public boolean isModoLista() {
         return this.estado == ESTADO_CRUD.NADA;
@@ -203,11 +266,14 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         return this.estado != ESTADO_CRUD.NADA;
     }
 
-    public List<Proveedor> getProveedoresDisponibles() {
-        return proveedoresDisponibles;
+    public List<EstadoCompra> getEstadosDisponibles() {
+        if (estadosDisponibles == null || estadosDisponibles.isEmpty()) {
+            inicializarListas();
+        }
+        return estadosDisponibles;
     }
 
-    public List<EstadoCompra> getEstadosDisponibles() {
-        return estadosDisponibles;
+    public void setEstadosDisponibles(List<EstadoCompra> estadosDisponibles) {
+        this.estadosDisponibles = estadosDisponibles;
     }
 }

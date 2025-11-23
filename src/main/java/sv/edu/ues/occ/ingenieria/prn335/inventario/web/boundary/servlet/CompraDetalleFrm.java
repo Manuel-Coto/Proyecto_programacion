@@ -157,7 +157,7 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     private Compra obtenerCompraCompleta(Object idObj) {
         if (idObj == null) return null;
         try {
-            Long idLong;
+            long idLong;
             if (idObj instanceof Long) {
                 idLong = (Long) idObj;
             } else if (idObj instanceof Integer) {
