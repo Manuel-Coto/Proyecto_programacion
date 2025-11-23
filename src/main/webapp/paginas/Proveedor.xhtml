@@ -5,21 +5,22 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:ui="jakarta.faces.facelets"
       xmlns:f="jakarta.faces.core">
+
 <h:head>
     <meta charset="UTF-8"/>
     <title>#{proveedorFrm.nombreBean}</title>
-
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
 </h:head>
+
 <h:body>
 
-    <!-- Topbar  -->
+    <!-- Topbar -->
     <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
 
     <h1>#{proveedorFrm.nombreBean}</h1>
 
-    <!-- LISTADO -->
+    <!-- ===== TABLA ===== -->
     <h:panelGroup id="pnlTabla">
         <h:panelGrid>
             <h:form id="frmTop">
@@ -37,39 +38,65 @@
 
                     <p:ajax event="rowSelect"
                             listener="#{proveedorFrm.selectionHandler}"
-                            update=":pnlTabla :pnlDetalle :messages"/>
+                            update=":pnlTabla :pnlDetalle :frmTop:messages"/>
 
-                    <p:column headerText="ID"><h:outputText value="#{reg.id}" /></p:column>
-                    <p:column headerText="Nombre"><h:outputText value="#{reg.nombre}" /></p:column>
-                    <p:column headerText="Razón Social"><h:outputText value="#{reg.razonSocial}" /></p:column>
-                    <p:column headerText="NIT"><h:outputText value="#{reg.nit}" /></p:column>
-                    <p:column headerText="Estado"><h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/></p:column>
-                    <p:column headerText="Observaciones"><h:outputText value="#{reg.observaciones}" /></p:column>
+                    <p:column headerText="ID" style="width:80px;">
+                        <h:outputText value="#{reg.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" style="width:200px;">
+                        <h:outputText value="#{reg.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Razón Social" style="width:200px;">
+                        <h:outputText value="#{reg.razonSocial}"/>
+                    </p:column>
+
+                    <p:column headerText="NIT" style="width:150px;">
+                        <h:outputText value="#{reg.nit}"/>
+                    </p:column>
+
+                    <p:column headerText="Estado" style="width:100px;">
+                        <h:outputText value="#{reg.activo ? 'Activo' : 'Inactivo'}"/>
+                    </p:column>
+
+                    <p:column headerText="Observaciones">
+                        <h:outputText value="#{reg.observaciones}"/>
+                    </p:column>
                 </p:dataTable>
 
-                <p:commandButton id="btnNuevo" value="Nuevo Proveedor" styleClass="btn-rojo"
+                <!-- BOTONES PRINCIPALES -->
+                <p:commandButton id="btnNuevo"
+                                 value="Nuevo Proveedor"
                                  icon="pi pi-plus"
+                                 styleClass="btn-rojo"
                                  rendered="#{proveedorFrm.estado == 'NADA'}"
                                  actionListener="#{proveedorFrm.btnNuevoHandler}"
-                                 update=":pnlDetalle :pnlTabla :messages"/>
+                                 update=":pnlDetalle :pnlTabla :frmTop:messages"
+                                 process="@this"
+                                 immediate="true"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar Proveedor" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar"
+                                 value="Cancelar"
                                  icon="pi pi-times"
+                                 styleClass="btn-oscuro"
                                  rendered="#{proveedorFrm.estado != 'NADA'}"
                                  actionListener="#{proveedorFrm.btnCancelarHandler}"
-                                 update=":pnlDetalle :pnlTabla :messages"/>
-            </h:form>
+                                 update=":pnlDetalle :pnlTabla :frmTop:messages"
+                                 process="@this"
+                                 immediate="true"/>
 
-            <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+                <p:growl id="messages" showDetail="true" life="5000" sticky="false"/>
+            </h:form>
         </h:panelGrid>
     </h:panelGroup>
 
-    <!-- DETALLE / EDICIÓN -->
+    <!-- ===== DETALLE ===== -->
     <h:panelGroup id="pnlDetalle">
         <h:form id="frmCrear" rendered="#{proveedorFrm.estado != 'NADA'}">
-            <h:panelGrid columns="2">
+            <h:panelGrid columns="2" columnClasses="col-label,col-field">
 
-                <!-- ID (autogenerado por la BD) -->
+                <!-- ID -->
                 <h:outputLabel for="txtIdPanel" value="ID:"/>
                 <h:panelGroup id="txtIdPanel">
                     <h:outputText rendered="#{empty proveedorFrm.registro.id}"
@@ -87,7 +114,7 @@
                                  value="#{proveedorFrm.registro.nombre}"
                                  rows="2"
                                  required="true"
-                                 requiredMessage="El nombre es obligatorio."/>
+                                 requiredMessage="El nombre es obligatorio"/>
 
                 <!-- Razón Social -->
                 <h:outputLabel for="txtRazon" value="Razón Social:"/>
@@ -100,7 +127,8 @@
                 <h:inputText id="txtNit"
                              value="#{proveedorFrm.registro.nit}"
                              maxlength="14"
-                             placeholder="06140101010101"/>
+                             placeholder="06140101010101"
+                             size="50"/>
 
                 <!-- Activo -->
                 <h:outputLabel for="chkActivo" value="Activo:"/>
@@ -111,25 +139,30 @@
                 <h:outputLabel for="txtObs" value="Observaciones:"/>
                 <h:inputTextarea id="txtObs"
                                  value="#{proveedorFrm.registro.observaciones}"
-                                 rows="3" cols="60"
-                                 placeholder="Notas u observaciones"/>
+                                 rows="3"
+                                 cols="50"/>
             </h:panelGrid>
 
+            <!-- BOTONES CRUD -->
             <h:panelGrid columns="3" style="margin-top: 15px;">
-
-                <p:commandButton value="Crear Proveedor" styleClass="btn-rojo"
-                                 icon="pi pi-check"
+                <p:commandButton value="Crear Proveedor"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-save"
                                  actionListener="#{proveedorFrm.btnGuardarHandler}"
                                  rendered="#{proveedorFrm.estado == 'CREAR'}"
-                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
 
-                <p:commandButton value="Modificar Proveedor" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Proveedor"
+                                 styleClass="btn-oscuro"
                                  icon="pi pi-pencil"
                                  actionListener="#{proveedorFrm.btnModificarHandler}"
                                  rendered="#{proveedorFrm.estado == 'MODIFICAR'}"
-                                 update=":messages :pnlDetalle :pnlTabla" process="@form"/>
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
 
-                <p:commandButton value="Eliminar Proveedor" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Proveedor"
+                                 styleClass="btn-rojo"
                                  icon="pi pi-trash"
                                  actionListener="#{proveedorFrm.btnEliminarHandler}"
                                  rendered="#{proveedorFrm.estado == 'MODIFICAR'}"

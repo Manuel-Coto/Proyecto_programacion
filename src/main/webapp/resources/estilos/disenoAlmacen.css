@@ -1,554 +1,492 @@
-/* Reset general */
+/* ============================================================
+   RESET Y ESTILOS GLOBALES
+   ============================================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Fondo y tipografía */
 body {
     font-family: "Segoe UI", Roboto, sans-serif;
     background: linear-gradient(135deg, #0f0f11, #1b1b1f);
     color: #f5f5f5;
     min-height: 100vh;
     padding: 30px;
-    text-align: center;
 }
 
-/* Título principal */
 h1 {
     font-size: 2.2em;
     color: #e11d2f;
     margin-bottom: 25px;
     text-shadow: 0 4px 15px rgba(225, 29, 47, 0.35);
+    text-align: center;
 }
 
-/* ===========================
-   🔘 BOTONES PERSONALIZADOS
-   =========================== */
+/* ============================================================
+   DATATABLE - TABLA ORDENADA Y LIMPIA
+   ============================================================ */
+.ui-datatable {
+    width: 100%;
+    margin: 0 auto 25px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #121214 !important;
+    border: 1px solid rgba(225, 29, 47, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
 
-/* ---- BOTÓN ROJO ---- */
+.ui-datatable.ui-widget {
+    border: 1px solid rgba(225, 29, 47, 0.15) !important;
+}
+
+/* HEADERS */
+.ui-datatable thead th {
+    background: linear-gradient(135deg, #8a0c14, #e11d2f) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95em !important;
+    padding: 14px 12px !important;
+    text-align: center !important;
+    border: none !important;
+    vertical-align: middle;
+}
+
+.ui-datatable thead th.ui-sortable-column:hover {
+    background: linear-gradient(135deg, #9a0c14, #f11d2f) !important;
+}
+
+/* FILAS */
+.ui-datatable tbody tr {
+    background: #1a1a1d !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ui-datatable tbody tr:hover {
+    background: rgba(225, 29, 47, 0.12) !important;
+    cursor: pointer;
+}
+
+.ui-datatable tbody tr.ui-state-highlight td {
+    background: #8a0c14 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* CELDAS */
+.ui-datatable tbody td {
+    background: #1a1a1d !important;
+    color: #f2f2f2 !important;
+    padding: 12px !important;
+    border: none !important;
+    text-align: center !important;
+    font-size: 0.95em !important;
+    transition: all 0.2s ease;
+}
+
+.ui-datatable tbody td:first-child {
+    text-align: left !important;
+    font-weight: 500;
+}
+
+/* ============================================================
+   TREETABLE - TABLA JERÁRQUICA CON MISMO ESTILO
+   ============================================================ */
+.ui-treetable {
+    width: 100%;
+    margin: 0 auto 25px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #121214 !important;
+    border: 1px solid rgba(225, 29, 47, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.ui-treetable.ui-widget {
+    border: 1px solid rgba(225, 29, 47, 0.15) !important;
+}
+
+/* HEADERS TREETABLE */
+.ui-treetable thead th {
+    background: linear-gradient(135deg, #8a0c14, #e11d2f) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95em !important;
+    padding: 14px 12px !important;
+    text-align: center !important;
+    border: none !important;
+    vertical-align: middle;
+}
+
+.ui-treetable thead th.ui-sortable-column:hover {
+    background: linear-gradient(135deg, #9a0c14, #f11d2f) !important;
+}
+
+/* FILAS TREETABLE */
+.ui-treetable tbody tr {
+    background: #1a1a1d !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ui-treetable tbody tr:hover {
+    background: rgba(225, 29, 47, 0.12) !important;
+    cursor: pointer;
+}
+
+.ui-treetable tbody tr.ui-state-highlight td {
+    background: #8a0c14 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.ui-treetable .ui-treetable-row.ui-state-highlight > td {
+    background: #8a0c14 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* CELDAS TREETABLE */
+.ui-treetable tbody td {
+    background: #1a1a1d !important;
+    color: #f2f2f2 !important;
+    padding: 12px !important;
+    border: none !important;
+    text-align: center !important;
+    font-size: 0.95em !important;
+    transition: all 0.2s ease;
+}
+
+.ui-treetable tbody td:first-child {
+    text-align: left !important;
+    font-weight: 500;
+}
+
+/* EXPANDER (botón para abrir/cerrar jerarquía) */
+.ui-treetable .ui-treetable-toggler {
+    color: #ffffff !important;
+    margin-right: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+.ui-treetable .ui-treetable-toggler:hover {
+    color: #e11d2f !important;
+    text-shadow: 0 0 8px rgba(225, 29, 47, 0.5);
+}
+
+/* PAGINADOR */
+.ui-paginator {
+    background: #161618 !important;
+    border: none !important;
+    padding: 10px !important;
+    border-top: 1px solid rgba(225, 29, 47, 0.15) !important;
+}
+
+.ui-paginator .ui-paginator-page,
+.ui-paginator .ui-paginator-next,
+.ui-paginator .ui-paginator-prev,
+.ui-paginator .ui-paginator-first,
+.ui-paginator .ui-paginator-last {
+    background: #2b2b30 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+    margin: 0 2px !important;
+    transition: all 0.2s ease;
+}
+
+.ui-paginator .ui-paginator-page:hover,
+.ui-paginator .ui-paginator-next:hover,
+.ui-paginator .ui-paginator-prev:hover,
+.ui-paginator .ui-paginator-first:hover,
+.ui-paginator .ui-paginator-last:hover {
+    background: #e11d2f !important;
+    border-color: #e11d2f !important;
+}
+
+.ui-paginator .ui-paginator-page.ui-state-active {
+    background: #e11d2f !important;
+    border-color: #e11d2f !important;
+    color: #ffffff !important;
+}
+
+/* PAGINADOR TREETABLE */
+.ui-treetable .ui-paginator {
+    background: #161618 !important;
+    border: none !important;
+    padding: 10px !important;
+    border-top: 1px solid rgba(225, 29, 47, 0.15) !important;
+}
+
+.ui-treetable .ui-paginator .ui-paginator-page,
+.ui-treetable .ui-paginator .ui-paginator-next,
+.ui-treetable .ui-paginator .ui-paginator-prev,
+.ui-treetable .ui-paginator .ui-paginator-first,
+.ui-treetable .ui-paginator .ui-paginator-last {
+    background: #2b2b30 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+    margin: 0 2px !important;
+    transition: all 0.2s ease;
+}
+
+.ui-treetable .ui-paginator .ui-paginator-page:hover,
+.ui-treetable .ui-paginator .ui-paginator-next:hover,
+.ui-treetable .ui-paginator .ui-paginator-prev:hover,
+.ui-treetable .ui-paginator .ui-paginator-first:hover,
+.ui-treetable .ui-paginator .ui-paginator-last:hover {
+    background: #e11d2f !important;
+    border-color: #e11d2f !important;
+}
+
+.ui-treetable .ui-paginator .ui-paginator-page.ui-state-active {
+    background: #e11d2f !important;
+    border-color: #e11d2f !important;
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   BOTONES PERSONALIZADOS
+   ============================================================ */
+
+/* BOTÓN ROJO */
 .ui-button.btn-rojo {
     background: linear-gradient(135deg, #8a0c14, #e11d2f) !important;
     color: #ffffff !important;
     border: 1px solid #a20f1f !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
-    padding: 8px 18px !important;
-    min-height: 36px;
-    box-shadow: 0 0 10px rgba(225, 29, 47, 0.25) !important;
-    transition: transform 0.25s ease, box-shadow 0.3s ease, filter 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 8px 16px !important;
+    min-height: 36px !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 47, 0.25) !important;
+    transition: all 0.25s ease;
+    cursor: pointer;
 }
 
-/* Elimina doble fondo (PrimeFaces span interno) */
 .ui-button.btn-rojo .ui-button-text {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
-    margin: 0 !important;
     color: inherit !important;
-    line-height: 1.2;
-}
-
-/* Glow animado */
-.ui-button.btn-rojo::after {
-    content: "";
-    position: absolute;
-    top: -40%;
-    left: -40%;
-    width: 180%;
-    height: 180%;
-    background: radial-gradient(circle, rgba(225, 29, 47, 0.3) 0%, transparent 70%);
-    opacity: 0;
-    border-radius: 50%;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
-
-.ui-button.btn-rojo:hover::after {
-    opacity: 1;
-    animation: glowPulse 1.5s infinite ease-in-out;
-}
-
-@keyframes glowPulse {
-    0% { box-shadow: 0 0 15px rgba(225, 29, 47, 0.4); }
-    50% { box-shadow: 0 0 25px rgba(225, 29, 47, 0.7); }
-    100% { box-shadow: 0 0 15px rgba(225, 29, 47, 0.4); }
 }
 
 .ui-button.btn-rojo:hover {
     transform: translateY(-2px);
-    filter: brightness(1.06);
-    box-shadow: 0 0 22px rgba(225, 29, 47, 0.55) !important;
+    box-shadow: 0 6px 18px rgba(225, 29, 47, 0.45) !important;
+    filter: brightness(1.05);
 }
 
-.ui-button.btn-rojo:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(225, 29, 47, 0.25);
+.ui-button.btn-rojo:active {
+    transform: translateY(0);
 }
 
+.ui-button.btn-rojo:disabled,
 .ui-button.btn-rojo.ui-state-disabled {
-    opacity: 0.6;
-    filter: grayscale(20%);
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
 }
 
-/* ---- BOTÓN OSCURO ---- */
+/* BOTÓN OSCURO */
 .ui-button.btn-oscuro {
     background: linear-gradient(135deg, #232327, #2b2b30) !important;
     color: #ffffff !important;
     border: 1px solid #3a3a40 !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
-    padding: 8px 18px !important;
-    min-height: 36px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    padding: 8px 16px !important;
+    min-height: 36px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.25s ease;
+    cursor: pointer;
 }
 
 .ui-button.btn-oscuro .ui-button-text {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
-    margin: 0 !important;
     color: inherit !important;
-    line-height: 1.2;
 }
 
 .ui-button.btn-oscuro:hover {
     transform: translateY(-2px);
-    filter: brightness(1.06);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.35) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4) !important;
+    filter: brightness(1.08);
 }
 
-.ui-button.btn-oscuro:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+.ui-button.btn-oscuro:active {
+    transform: translateY(0);
 }
 
-/* ---- BOTÓN HTML “Volver al inicio” ---- */
-.btn-volver {
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #232327, #2b2b30);
-    color: #ffffff;
-    border: 1px solid #3a3a40;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
-}
-.btn-volver:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.06);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-}
+/* ============================================================
+   FORMULARIOS
+   ============================================================ */
 
-/* ===========================
-   📋 TABLA
-   =========================== */
-.ui-datatable {
-    width: 100%;
-    margin: 0 auto 25px auto;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #121214;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-}
-
-.ui-datatable thead th {
-    background: linear-gradient(135deg, #8a0c14, #e11d2f);
-    color: #ffffff;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.9em;
-    padding: 12px;
-    text-align: center;
-}
-
-.ui-datatable tbody td {
-    background: #1a1a1d;
-    color: #f2f2f2;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 10px;
-    text-align: center;
-    transition: background-color 0.2s ease;
-}
-
-.ui-datatable tbody tr:hover td {
-    background: rgba(225, 29, 47, 0.1);
-}
-
-/* Paginador */
-.ui-paginator {
-    background: #1a1a1d;
-    border: none;
-}
-
-.ui-paginator .ui-paginator-page,
-.ui-paginator .ui-paginator-next,
-.ui-paginator .ui-paginator-prev {
-    background: #2b2b30;
-    color: #ffffff;
-    border-radius: 50%;
-    border: none;
-    margin: 0 3px;
-    transition: all 0.3s ease;
-}
-
-.ui-paginator .ui-paginator-page:hover {
-    background: #e11d2f;
-}
-
-/* ===========================
-   🧾 FORMULARIO
-   =========================== */
-
-h\:form {
+h\:panelGrid {
     margin-top: 15px;
 }
 
+.col-label {
+    color: #d8d8d8;
+    font-weight: 600;
+    text-align: right;
+    padding-right: 12px;
+    padding-bottom: 8px;
+    width: 180px;
+}
+
+.col-field {
+    padding-bottom: 8px;
+}
+
 h\:inputText,
-h\:selectBooleanCheckbox {
-    font-size: 1em;
+h\:inputTextarea,
+p\:inputText {
+    width: 100% !important;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    border: 2px solid #2a2a2e !important;
+    background: #0f0f11 !important;
+    color: #ffffff !important;
+    font-size: 0.95em !important;
+    transition: all 0.3s ease;
 }
 
-h\:inputText {
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 2px solid #2a2a2e;
-    background: #0f0f11;
-    color: #ffffff;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+h\:inputText:focus,
+h\:inputTextarea:focus,
+p\:inputText:focus {
+    border-color: #e11d2f !important;
+    box-shadow: 0 0 0 2px rgba(225, 29, 47, 0.25) !important;
+    outline: none !important;
 }
 
-h\:inputText:focus {
-    border-color: #e11d2f;
-    box-shadow: 0 0 0 2px rgba(225, 29, 47, 0.25);
-    outline: none;
+h\:inputText:disabled,
+h\:inputTextarea:disabled {
+    background: #161618 !important;
+    color: #888888 !important;
+    cursor: not-allowed !important;
 }
 
-/* ===========================
-   🔔 MENSAJES
-   =========================== */
+/* ============================================================
+   MENSAJES (GROWL)
+   ============================================================ */
+
 .ui-growl {
-    color: #fff;
-    background: #1a1a1d;
+    margin-top: 10px;
 }
 
-/* ===========================
-   📱 RESPONSIVE
-   =========================== */
+.ui-growl .ui-growl-item {
+    border-left: 5px solid;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ui-growl .ui-growl-item.ui-growl-message-info {
+    background: #1a3a52 !important;
+    border-left-color: #0b5ed7 !important;
+}
+
+.ui-growl .ui-growl-item.ui-growl-message-warn {
+    background: #4a3a1a !important;
+    border-left-color: #ff9800 !important;
+}
+
+.ui-growl .ui-growl-item.ui-growl-message-error {
+    background: #3a1a1a !important;
+    border-left-color: #e11d2f !important;
+}
+
+.ui-growl .ui-growl-item.ui-growl-message-success {
+    background: #1a3a2a !important;
+    border-left-color: #28a745 !important;
+}
+
+/* ============================================================
+   TOPBAR (MENUBAR)
+   ============================================================ */
+
+.topbar.ui-menubar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, #161618, #1f1f23) !important;
+    border: 1px solid rgba(225, 29, 47, 0.15) !important;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.35rem;
+}
+
+.topbar .ui-menuitem-link {
+    color: #f2f2f2 !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    padding: 0.6rem 0.9rem !important;
+    transition: all 0.2s ease;
+}
+
+.topbar .ui-menuitem-link:hover {
+    background: rgba(225, 29, 47, 0.15) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(225, 29, 47, 0.25);
+}
+
+.topbar .ui-submenu .ui-menu-child {
+    background: #1a1a1d !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 6px;
+}
+
+.topbar .pi {
+    margin-right: 0.35rem;
+    font-size: 1rem;
+}
+
+/* ============================================================
+   ID INFO TEXT
+   ============================================================ */
+
+.id-info-text {
+    color: #888888;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
 @media (max-width: 768px) {
     body {
         padding: 15px;
     }
 
     h1 {
-        font-size: 1.8em;
+        font-size: 1.6em;
+        margin-bottom: 15px;
     }
 
     .ui-datatable thead th,
     .ui-datatable tbody td {
-        font-size: 0.9em;
-        padding: 8px;
+        font-size: 0.85em !important;
+        padding: 8px !important;
     }
 
-    .btn-volver,
     .ui-button.btn-rojo,
     .ui-button.btn-oscuro {
         font-size: 0.9em;
-        padding: 8px 15px;
+        padding: 6px 12px !important;
+        min-height: 32px !important;
+    }
+
+    .col-label {
+        width: 100%;
+        text-align: left;
+        padding-right: 0;
+        padding-bottom: 4px;
     }
 }
-
-/* ======== TOPBAR (Menubar) ======== */
-.topbar.ui-menubar {
-    position: sticky;
-    top: 0; z-index: 1000;
-    background: linear-gradient(135deg, #161618, #1f1f23);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    margin-bottom: 18px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-}
-
-/* Enlaces del menú */
-.topbar .ui-menuitem-link {
-    color: #f2f2f2 !important;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
-    padding: .6rem .9rem;
-}
-
-/* Hover/acento rojo */
-.topbar .ui-menuitem-link:hover {
-    background: rgba(225,29,47,0.12);
-    color: #fff !important;
-    box-shadow: 0 0 12px rgba(225,29,47,0.25);
-}
-
-/* Submenús */
-.topbar .ui-submenu .ui-menu-child {
-    background: #1a1a1d;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: .25rem;
-}
-.topbar .ui-menu-child .ui-menuitem-link {
-    border-radius: 6px;
-}
-.topbar .ui-menu-child .ui-menuitem-link:hover {
-    background: rgba(225,29,47,0.12);
-}
-
-/* Iconos */
-.topbar .pi { margin-right: .35rem; font-size: 1rem; }
-
-/* ======== TOPBAR (Menubar PrimeFaces) ======== */
-.topbar.ui-menubar{
-    position: sticky; top: 0; z-index: 1000;
-    background: linear-gradient(135deg, #161618, #1f1f23);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    margin-bottom: 18px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-    padding: .2rem .35rem;
-}
-.topbar .ui-menuitem-link{
-    color: #f2f2f2 !important;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: .6rem .9rem;
-    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
-}
-.topbar .ui-menuitem-link:hover{
-    background: rgba(225,29,47,0.12);
-    color: #fff !important;
-    box-shadow: 0 0 12px rgba(225,29,47,0.25);
-}
-/* Submenús */
-.topbar .ui-submenu .ui-menu-child{
-    background: #1a1a1d;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: .25rem;
-}
-.topbar .ui-menu-child .ui-menuitem-link{ border-radius: 6px; }
-.topbar .ui-menu-child .ui-menuitem-link:hover{
-    background: rgba(225,29,47,0.12);
-}
-/* Íconos */
-.topbar .pi{ margin-right: .35rem; font-size: 1rem; }
-
-/* =========================================================
-   🌲 TREE TABLE (PrimeFaces p:treeTable) — Tema rojo/negro
-   ========================================================= */
-.ui-treetable {
-    width: 100%;
-    margin: 0 auto 25px auto;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #121214;
-    border: 1px solid rgba(255,255,255,0.05);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-}
-.ui-treetable thead th {
-    background: linear-gradient(135deg, #8a0c14, #e11d2f);
-    color: #ffffff;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    font-size: .9em;
-    padding: 12px;
-    text-align: center;
-    border: none;
-}
-.ui-treetable tbody td {
-    background: #1a1a1d;
-    color: #f2f2f2;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 10px;
-    text-align: center;
-    transition: background-color .2s ease;
-}
-/* Columna con expander (alineación a la izquierda para el toggler) */
-.ui-treetable tbody td.ui-treetable-toggler {
-    text-align: left;
-}
-.ui-treetable .ui-treetable-row:hover td {
-    background: rgba(225, 29, 47, 0.10);
-}
-.ui-treetable .ui-state-highlight > td,
-.ui-treetable .ui-treetable-row.ui-state-highlight > td {
-    background: #b30000 !important;
-    color: #fff !important;
-}
-.ui-treetable .ui-treetable-toggler {
-    color: #fff !important;
-}
-/* Paginador del treetable (mismo skin de la datatable) */
-.ui-treetable .ui-paginator {
-    background: #1a1a1d;
-    border: none;
-}
-.ui-treetable .ui-paginator .ui-paginator-page,
-.ui-treetable .ui-paginator .ui-paginator-next,
-.ui-treetable .ui-paginator .ui-paginator-prev {
-    background: #2b2b30;
-    color: #ffffff;
-    border-radius: 50%;
-    border: none;
-    margin: 0 3px;
-    transition: all .3s ease;
-}
-.ui-treetable .ui-paginator .ui-paginator-page:hover {
-    background: #e11d2f;
-}
-
-/* Utilidad para headers oscuros desde headerClass="th-oscuro" */
-.th-oscuro {
-    background: #161618 !important;
-    color: #fff !important;
-    border-color: rgba(255,255,255,0.06) !important;
-}
-
-/* =========================================================
-   🧩 SELECT ONE MENU (combo “Depende de”) — rojo/negro
-   (asignado con styleClass="select-rojo-negro")
-   ========================================================= */
-.select-rojo-negro .ui-selectonemenu-label {
-    background: #0f0f11;
-    color: #ffffff;
-    border: 2px solid #2a2a2e;
-    border-radius: 6px;
-    padding: 8px 10px;
-}
-.select-rojo-negro .ui-selectonemenu-label:focus {
-    border-color: #e11d2f;
-    box-shadow: 0 0 0 2px rgba(225, 29, 47, 0.25);
-}
-.select-rojo-negro .ui-selectonemenu-trigger {
-    background: #232327;
-    color: #fff;
-    border-left: 1px solid #2a2a2e;
-}
-.select-rojo-negro .ui-selectonemenu-panel {
-    background: #1a1a1d;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 22px rgba(0,0,0,0.35);
-}
-.select-rojo-negro .ui-selectonemenu-items .ui-selectonemenu-item {
-    color: #f2f2f2;
-    padding: .6rem .75rem;
-}
-.select-rojo-negro .ui-selectonemenu-items .ui-selectonemenu-item:hover,
-.select-rojo-negro .ui-selectonemenu-items .ui-selectonemenu-item.ui-state-highlight {
-    background: rgba(225,29,47,0.15);
-    color: #fff;
-}
-
-/* =========================================================
-   🗂️ TABS (p:tabView) — línea roja y contraste
-   (asignado con styleClass="tabs-rojo-negro")
-   ========================================================= */
-.tabs-rojo-negro .ui-tabs-nav {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #e11d2f;
-}
-.tabs-rojo-negro .ui-tabs-nav li a {
-    color: #f2f2f2;
-    font-weight: 700;
-}
-.tabs-rojo-negro .ui-tabs-nav li.ui-tabs-selected a,
-.tabs-rojo-negro .ui-tabs-nav li.ui-state-active a {
-    color: #0b5ed7; /* acorde a tu estilo anterior */
-}
-.tabs-rojo-negro .ui-tabs-panel {
-    background: #121214;
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 16px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-}
-
-/* ====== PanelGrid oscuro y sin “bloques” blancos ====== */
-.form-grid-2col .ui-panelgrid-content{
-    background: #121214 !important;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 16px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-}
-.form-grid-2col .ui-panelgrid-cell{
-    background: transparent !important;   /* quita parches blancos */
-    border: none !important;
-    padding: 8px 10px;
-}
-.form-grid-2col .col-label{
-    width: 220px;
-    text-align: right;
-    color: #d8d8d8;
-    font-weight: 600;
-    padding-right: 12px;
-}
-.form-grid-2col .col-field{ width: auto; }
-.inp{ width: 100%; }
-
-/* ====== Inputs HTML (h:inputText / h:inputTextarea) con tu tema ====== */
-.form-grid-2col input[type="text"],
-.form-grid-2col textarea{
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 2px solid #2a2a2e;
-    background: #0f0f11;
-    color: #ffffff;
-    transition: border-color .3s, box-shadow .3s;
-}
-.form-grid-2col input[type="text"]:focus,
-.form-grid-2col textarea:focus{
-    border-color: #e11d2f;
-    box-shadow: 0 0 0 2px rgba(225,29,47,.25);
-    outline: none;
-}
-.form-grid-2col input[disabled]{     /* ID deshabilitado */
-    background: #1b1b1f !important;
-    color: #bbb !important;
-}
-
-/* ====== SelectOneMenu (ya estabas usando la clase) ====== */
-.select-rojo-negro.ui-selectonemenu{ width:100% !important; }
-.select-rojo-negro .ui-selectonemenu-label{
-    background:#0f0f11 !important;
-    color:#fff !important;               /* asegura que se vea el texto */
-    border:2px solid #2a2a2e !important;
-    border-radius:6px; padding:8px 10px;
-}
-.select-rojo-negro .ui-selectonemenu-trigger{
-    background:#232327; color:#fff;
-    border-left:1px solid #2a2a2e;
-}
-.select-rojo-negro .ui-selectonemenu-panel{
-    background:#1a1a1d;
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow:0 8px 22px rgba(0,0,0,.35);
-}
-.select-rojo-negro .ui-selectonemenu-item{
-    color:#f2f2f2; padding:.6rem .75rem;
-}
-.select-rojo-negro .ui-selectonemenu-item.ui-state-highlight,
-.select-rojo-negro .ui-selectonemenu-item:hover{
-    background:rgba(225,29,47,.15); color:#fff;
-}
-
-/* Responsive */
-@media (max-width:768px){
-    .form-grid-2col .col-label{ width:38%; text-align:left; padding-right:8px; }
-}
-
-

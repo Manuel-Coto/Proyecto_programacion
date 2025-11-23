@@ -10,8 +10,9 @@ import jakarta.inject.Named;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.primefaces.event.SelectEvent;
 
@@ -25,65 +26,51 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProducto;
 @Named("productoTipoProductoFrm")
 @ViewScoped
 public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> implements Serializable {
+    private static final Logger LOGGER = Logger.getLogger(ProductoTipoProductoFrm.class.getName());
 
     @EJB
-    ProductoTipoProductoDAO productoTipoProductoDAO;
+    private ProductoTipoProductoDAO productoTipoProductoDAO;
 
     @EJB
-    ProductoDAO productoDAO;
+    private ProductoDAO productoDAO;
 
     @EJB
-    TipoProductoDAO tipoProductoDAO;
+    private TipoProductoDAO tipoProductoDAO;
 
     private List<Producto> listaProductos;
     private List<TipoProducto> listaTipoProductos;
 
-
-    public UUID getIdProductoSeleccionado() {
-        return idProductoSeleccionado;
-    }
-
-    public void setIdProductoSeleccionado(UUID idProductoSeleccionado) {
-        this.idProductoSeleccionado = idProductoSeleccionado;
-    }
-
-    public Long getIdTipoProductoSeleccionado() {
-        return idTipoProductoSeleccionado;
-    }
-
-    public void setIdTipoProductoSeleccionado(Long idTipoProductoSeleccionado) {
-        this.idTipoProductoSeleccionado = idTipoProductoSeleccionado;
-    }
-
-    private UUID idProductoSeleccionado;
-
-
-
+    // ✅ CAMBIO: Ahora es Producto (objeto completo), no UUID
+    private Producto idProductoSeleccionado;
     private Long idTipoProductoSeleccionado;
 
     @PostConstruct
     @Override
     public void inicializar() {
         super.inicializar();
+        this.nombreBean = "Gestión de Producto - Tipo Producto";
         cargarListaProductos();
         cargarListaTipoProductos();
+        LOGGER.log(Level.INFO, "ProductoTipoProductoFrm inicializado correctamente");
     }
 
     private void cargarListaProductos() {
         try {
-            this.listaProductos = productoDAO.findAll();
-            System.out.println("Productos cargados: " + listaProductos.size());
+            this.listaProductos = productoDAO != null ? productoDAO.findAll() : new ArrayList<>();
+            LOGGER.log(Level.INFO, "Productos cargados: {0}", listaProductos.size());
         } catch (Exception e) {
-            System.err.println("Error al cargar productos: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error al cargar productos", e);
+            this.listaProductos = new ArrayList<>();
         }
     }
 
-
     private void cargarListaTipoProductos() {
         try {
-            this.listaTipoProductos = tipoProductoDAO.findAll();
+            this.listaTipoProductos = tipoProductoDAO != null ? tipoProductoDAO.findAll() : new ArrayList<>();
+            LOGGER.log(Level.INFO, "Tipos de producto cargados: {0}", listaTipoProductos.size());
         } catch (Exception e) {
-            System.err.println("Error al cargar tipos de producto: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error al cargar tipos de producto", e);
+            this.listaTipoProductos = new ArrayList<>();
         }
     }
 
@@ -128,7 +115,7 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
             try {
                 return buscarRegistroPorId(UUID.fromString(id));
             } catch (IllegalArgumentException e) {
-                System.err.println("Error al convertir ID: " + e.getMessage());
+                LOGGER.log(Level.WARNING, "Error al convertir ID: " + e.getMessage());
             }
         }
         return null;
@@ -136,24 +123,7 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
 
     @Override
     protected boolean esNombreVacio(ProductoTipoProducto registro) {
-        // ProductoTipoProducto no tiene campo "nombre", así que validamos otros campos
         return registro.getIdProducto() == null || registro.getIdTipoProducto() == null;
-    }
-
-    // Métodos para conversión de fechas (para p:calendar)
-    public Date getFechaCreacionDate() {
-        if (registro != null && registro.getFechaCreacion() != null) {
-            return Date.from(registro.getFechaCreacion().toInstant());
-        }
-        return new Date();
-    }
-
-    public void setFechaCreacionDate(Date date) {
-        if (registro != null && date != null) {
-            registro.setFechaCreacion(
-                    OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
-            );
-        }
     }
 
     @Override
@@ -162,59 +132,76 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
             try {
                 if (idProductoSeleccionado == null || idTipoProductoSeleccionado == null) {
                     getFacesContext().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar Producto y Tipo de Producto"));
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención",
+                                    "Debe seleccionar Producto y Tipo de Producto"));
                     return;
                 }
 
-                // Buscar objetos por ID
-                Producto producto = productoDAO.findById(idProductoSeleccionado);
-                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+                // ✅ idProductoSeleccionado YA ES UN OBJETO Producto (gracias al converter)
+                registro.setIdProducto(idProductoSeleccionado);
 
-                registro.setIdProducto(producto);
+                // Buscar TipoProducto por ID
+                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+                if (tipo == null) {
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",
+                                    "El tipo de producto seleccionado no existe"));
+                    return;
+                }
                 registro.setIdTipoProducto(tipo);
 
                 if (estado == ESTADO_CRUD.CREAR) {
                     getDao().crear(registro);
                     getFacesContext().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro creado correctamente"));
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito",
+                                    "Registro creado correctamente"));
                 } else if (estado == ESTADO_CRUD.MODIFICAR) {
                     getDao().modificar(registro);
                     getFacesContext().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito",
+                                    "Registro modificado correctamente"));
                 }
 
                 registro = null;
                 estado = ESTADO_CRUD.NADA;
                 inicializarRegistros();
+                idProductoSeleccionado = null;
+                idTipoProductoSeleccionado = null;
 
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error al guardar", e);
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar", e.getMessage()));
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar",
+                                e.getMessage()));
             }
         }
     }
+
     @Override
     public void btnModificarHandler(ActionEvent actionEvent) {
         if (this.registro != null) {
             try {
-                // Validación específica: asegurarse que producto y tipo producto estén seleccionados
                 if (idProductoSeleccionado == null || idTipoProductoSeleccionado == null) {
                     getFacesContext().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar Producto y Tipo de Producto"));
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención",
+                                    "Debe seleccionar Producto y Tipo de Producto"));
                     return;
                 }
 
-                // Buscar objetos por ID
-                Producto producto = productoDAO.findById(idProductoSeleccionado);
-                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+                // ✅ idProductoSeleccionado YA ES UN OBJETO Producto
+                registro.setIdProducto(idProductoSeleccionado);
 
-                registro.setIdProducto(producto);
+                TipoProducto tipo = tipoProductoDAO.findById(idTipoProductoSeleccionado);
+                if (tipo == null) {
+                    getFacesContext().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error",
+                                    "El tipo de producto seleccionado no existe"));
+                    return;
+                }
                 registro.setIdTipoProducto(tipo);
 
-                // Llamar al DAO para modificar
                 getDao().modificar(this.registro);
 
-                // Resetear estado y refrescar modelo
                 this.registro = null;
                 this.estado = ESTADO_CRUD.NADA;
                 inicializarRegistros();
@@ -222,35 +209,61 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
                 this.idTipoProductoSeleccionado = null;
 
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito",
+                                "Registro modificado correctamente"));
 
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error al modificar", e);
                 getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", e.getMessage()));
-                e.printStackTrace();
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar",
+                                e.getMessage()));
             }
         }
-
     }
+
     @Override
     public void selectionHandler(SelectEvent<ProductoTipoProducto> r) {
         if (r != null && r.getObject() != null) {
             this.registro = r.getObject();
             this.estado = ESTADO_CRUD.MODIFICAR;
 
-            // Sincronizar los auxiliares para que los combos muestren el valor actual
+            // ✅ Sincronizar los auxiliares para que los combos muestren el valor actual
             if (registro.getIdProducto() != null) {
-                this.idProductoSeleccionado = registro.getIdProducto().getId(); // UUID
+                this.idProductoSeleccionado = registro.getIdProducto();
             }
 
             if (registro.getIdTipoProducto() != null) {
-                this.idTipoProductoSeleccionado = registro.getIdTipoProducto().getId(); // Long
+                this.idTipoProductoSeleccionado = registro.getIdTipoProducto().getId();
             }
         }
     }
 
+    @Override
+    public void btnNuevoHandler(ActionEvent actionEvent) {
+        super.btnNuevoHandler(actionEvent);
+        // Limpiar selectores
+        this.idProductoSeleccionado = null;
+        this.idTipoProductoSeleccionado = null;
+    }
 
-    // Getters y Setters
+    // ✅ Getters y Setters (ACTUALIZADOS)
+
+    public Producto getIdProductoSeleccionado() {
+        return idProductoSeleccionado;
+    }
+
+    public void setIdProductoSeleccionado(Producto idProductoSeleccionado) {
+        this.idProductoSeleccionado = idProductoSeleccionado;
+    }
+
+    public Long getIdTipoProductoSeleccionado() {
+        return idTipoProductoSeleccionado;
+    }
+
+    public void setIdTipoProductoSeleccionado(Long idTipoProductoSeleccionado) {
+        this.idTipoProductoSeleccionado = idTipoProductoSeleccionado;
+    }
+
     public List<Producto> getListaProductos() {
         return listaProductos;
     }
@@ -265,5 +278,9 @@ public class ProductoTipoProductoFrm extends DefaultFrm<ProductoTipoProducto> im
 
     public void setListaTipoProductos(List<TipoProducto> listaTipoProductos) {
         this.listaTipoProductos = listaTipoProductos;
+    }
+
+    public String getNombreBean() {
+        return nombreBean;
     }
 }

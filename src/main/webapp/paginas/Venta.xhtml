@@ -23,7 +23,7 @@
             <h:form id="frmTop">
                 <p:dataTable id="tabla-top"
                              lazy="true"
-                             rendered="#{ventaFrm.estado == 'NADA'}"
+                             rendered="#{ventaFrm.estado.name() eq 'NADA'}"
                              rows="#{ventaFrm.pageSize}"
                              paginator="true"
                              paginatorPosition="bottom"
@@ -40,55 +40,87 @@
                 </p:dataTable>
 
                 <p:commandButton id="btnNuevo" value="Nueva Venta" styleClass="btn-rojo"
-                                 rendered="#{ventaFrm.estado == 'NADA'}"
-                                 actionListener="#{ventaFrm.btnNuevoHandler}" update=":pnlDetalle :pnlTabla"/>
+                                 rendered="#{ventaFrm.estado.name() eq 'NADA'}"
+                                 actionListener="#{ventaFrm.btnNuevoHandler}"
+                                 update=":pnlDetalle :pnlTabla"
+                                 process="@this" immediate="true"/>
 
                 <p:commandButton id="btnCancelar" value="Cancelar Venta" styleClass="btn-oscuro"
-                                 rendered="#{ventaFrm.estado != 'NADA'}"
-                                 actionListener="#{ventaFrm.btnCancelarHandler}" update=":pnlDetalle :pnlTabla"/>
-            </h:form>
+                                 rendered="#{ventaFrm.estado.name() ne 'NADA'}"
+                                 actionListener="#{ventaFrm.btnCancelarHandler}"
+                                 update=":pnlDetalle :pnlTabla"
+                                 process="@this" immediate="true"/>
 
-            <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+                <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+            </h:form>
         </h:panelGrid>
     </h:panelGroup>
 
     <h:panelGroup id="pnlDetalle">
-        <h:form id="frmCrear" rendered="#{ventaFrm.estado != 'NADA'}">
-            <h:panelGrid columns="2">
+        <h:form id="frmCrear" rendered="#{ventaFrm.estado.name() ne 'NADA'}">
+            <h:panelGrid columns="2" columnClasses="col-label,col-field">
+
                 <h:outputLabel for="cmbCliente" value="Cliente:"/>
-                <p:selectOneMenu id="cmbCliente" value="#{ventaFrm.registro.idCliente}" converter="omnifaces.SelectItemsConverter">
-                    <f:selectItem itemLabel="Seleccionar cliente..." itemValue="#{null}"/>
-                    <f:selectItems value="#{ventaFrm.clientesDisponibles}" var="cliente" itemLabel="#{cliente.nombre}" itemValue="#{cliente}"/>
+                <p:selectOneMenu id="cmbCliente"
+                                 value="#{ventaFrm.registro.idCliente}"
+                                 converter="omnifaces.SelectItemsConverter"
+                                 style="width:100%">
+                    <f:selectItem itemLabel="-- Seleccionar cliente --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{ventaFrm.clientesDisponibles}"
+                                   var="cliente"
+                                   itemLabel="#{cliente.nombre}"
+                                   itemValue="#{cliente}"/>
                 </p:selectOneMenu>
 
                 <h:outputLabel for="dtpFecha" value="Fecha:"/>
-                <p:calendar id="dtpFecha" value="#{ventaFrm.registro.fecha}" pattern="dd/MM/yyyy HH:mm"/>
+                <p:calendar id="dtpFecha"
+                            value="#{ventaFrm.registro.fecha}"
+                            pattern="dd/MM/yyyy HH:mm"
+                            showTime="true"
+                            timeZone="America/El_Salvador"
+                            navigator="true"
+                            converter="offsetDateTimeConverter"/>
 
                 <h:outputLabel for="cmbEstado" value="Estado:"/>
-                <p:selectOneMenu id="cmbEstado" value="#{ventaFrm.registro.estado}">
-                    <f:selectItem itemLabel="Seleccionar estado..." itemValue="#{null}"/>
-                    <f:selectItems value="#{ventaFrm.estadosDisponibles}" var="estado" itemLabel="#{estado}" itemValue="#{estado}"/>
+                <p:selectOneMenu id="cmbEstado"
+                                 value="#{ventaFrm.registro.estado}"
+                                 style="width:100%">
+                    <f:selectItem itemLabel="-- Seleccionar estado --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{ventaFrm.estadosDisponibles}"
+                                   var="estado"
+                                   itemLabel="#{estado}"
+                                   itemValue="#{estado}"/>
                 </p:selectOneMenu>
 
                 <h:outputLabel for="txtObservaciones" value="Observaciones:"/>
-                <h:inputText id="txtObservaciones" value="#{ventaFrm.registro.observaciones}" size="80"/>
+                <h:inputText id="txtObservaciones"
+                             value="#{ventaFrm.registro.observaciones}"
+                             style="width:100%"/>
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Crear Venta" styleClass="btn-rojo"
+                <p:commandButton value="Crear Venta"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-save"
                                  actionListener="#{ventaFrm.btnGuardarHandler}"
-                                 rendered="#{ventaFrm.estado == 'CREAR'}"
-                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+                                 rendered="#{ventaFrm.estado.name() eq 'CREAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
 
-                <p:commandButton value="Modificar Venta" styleClass="btn-oscuro"
+                <p:commandButton value="Modificar Venta"
+                                 styleClass="btn-oscuro"
+                                 icon="pi pi-pencil"
                                  actionListener="#{ventaFrm.btnModificarHandler}"
-                                 rendered="#{ventaFrm.estado == 'MODIFICAR'}"
-                                 update="messages :pnlDetalle :pnlTabla" process="@form"/>
+                                 rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"
+                                 process="@form"/>
 
-                <p:commandButton value="Eliminar Venta" styleClass="btn-rojo"
+                <p:commandButton value="Eliminar Venta"
+                                 styleClass="btn-rojo"
+                                 icon="pi pi-trash"
                                  actionListener="#{ventaFrm.btnEliminarHandler}"
-                                 rendered="#{ventaFrm.estado == 'MODIFICAR'}"
-                                 update="messages :pnlDetalle :pnlTabla"/>
+                                 rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :pnlDetalle :pnlTabla"/>
             </h:panelGrid>
         </h:form>
     </h:panelGroup>
