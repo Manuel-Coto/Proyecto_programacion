@@ -195,6 +195,14 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
     // ---------------------- Getters ----------------------
 
+    public boolean isModoLista() {
+        return this.estado == ESTADO_CRUD.NADA;
+    }
+
+    public boolean isModoDetalle() {
+        return this.estado != ESTADO_CRUD.NADA;
+    }
+
     public List<Proveedor> getProveedoresDisponibles() {
         return proveedoresDisponibles;
     }
