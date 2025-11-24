@@ -16,6 +16,10 @@
         <param-name>jakarta.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
     </context-param>
+    <context-param>
+        <param-name>org.omnifaces.CONVERT_EMPTY_STRING_SUBMITTED_VALUES_TO_NULL</param-name>
+        <param-value>true</param-value>
+    </context-param>
     <resource-ref>
         <description />
         <res-ref-name>jdbc/pgdb</res-ref-name>

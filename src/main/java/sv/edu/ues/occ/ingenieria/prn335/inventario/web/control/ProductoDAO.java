@@ -19,25 +19,39 @@ public class ProductoDAO extends InventarioDefaultDataAccess<Producto> {
     @PersistenceContext(unitName = "consolePU")
     private EntityManager em;
 
-    public ProductoDAO() { super(Producto.class); }
+    public ProductoDAO() {
+        super(Producto.class);
+    }
 
     @Override
-    public EntityManager getEntityManager() { return em; }
-
-    // Método adicional específico para Producto
-    public Producto findById(UUID id) { return em.find(Producto.class, id); }
-
-    // Método para buscar productos por nombre con paginación
-    public List<Producto> findByNombreLike(String texto, int first, int max) {
-        if (first < 0 || max < 1) throw new IllegalArgumentException("first>=0 y max>=1");
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Producto> cq = cb.createQuery(Producto.class);
-        Root<Producto> r = cq.from(Producto.class);
-        cq.select(r).where(cb.like(cb.lower(r.get("nombreProducto")), "%" + texto.toLowerCase() + "%"))
-                .orderBy(cb.asc(r.get("nombreProducto")));
-        TypedQuery<Producto> q = em.createQuery(cq);
-        q.setFirstResult(first);
-        q.setMaxResults(max);
-        return q.getResultList();
+    public EntityManager getEntityManager() {
+        return em;
     }
+
+    @Override
+    public void crear(Producto registro) throws IllegalArgumentException {
+        if (registro == null) {
+            throw new IllegalArgumentException("El registro no puede ser nulo");
+        }
+
+        try {
+            EntityManager em = getEntityManager();
+            if (em == null) {
+                throw new IllegalStateException("EntityManager no disponible");
+            }
+
+            if (registro.getId() == null) {
+                registro.setId(UUID.randomUUID());
+            }
+
+            em.persist(registro);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Error al crear el registro", ex);
+        }
+    }
+
+    public Producto findById(UUID id) {
+        return getEntityManager().find(Producto.class, id);
+    }
+
 }

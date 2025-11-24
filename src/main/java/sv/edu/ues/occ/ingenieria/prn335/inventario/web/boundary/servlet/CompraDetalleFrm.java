@@ -3,9 +3,11 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.primefaces.event.SelectEvent;
 
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDetalleDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDAO;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
 @ViewScoped
 public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(CompraDetalleFrm.class.getName());
 
     @Inject
@@ -42,31 +45,32 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     private List<Producto> productosDisponibles;
     private final List<String> estadosDisponibles = List.of("RECIBIDO", "PENDIENTE", "DEVUELTO");
 
-    private boolean modoLista;  // Modo lista
-    private boolean modoDetalle;  // Modo detalle
-
-    // ---------------------- Inicialización ----------------------
+    private boolean modoLista;
+    private boolean modoDetalle;
 
     @PostConstruct
     @Override
     public void inicializar() {
-        super.inicializar();
+        LOGGER.log(Level.INFO, "Inicializando CompraDetalleFrm...");
+        this.nombreBean = "Gestión de Detalles de Compra";
+        this.modoLista = true;
+        this.modoDetalle = false;
+        this.estado = ESTADO_CRUD.NADA;
         inicializarListas();
-        this.nombreBean = "Gestión de Detalle de Compra";
-        this.modoLista = true;  // Modo inicial: lista
-        this.modoDetalle = false;  // Modo inicial: no detalle
+        inicializarRegistros();
         LOGGER.log(Level.INFO, "CompraDetalleFrm inicializado correctamente");
     }
+
     public void inicializarListas() {
         try {
-            comprasDisponibles = compraDao != null ? compraDao.findAll() : new ArrayList<>();
-            productosDisponibles = productoDao != null ? productoDao.findAll() : new ArrayList<>();
-            LOGGER.log(Level.INFO, "Inicializadas {0} compras y {1} productos",
+            this.comprasDisponibles = compraDao != null ? compraDao.findAll() : new ArrayList<>();
+            this.productosDisponibles = productoDao != null ? productoDao.findAll() : new ArrayList<>();
+            LOGGER.log(Level.INFO, "Listas inicializadas: {0} compras, {1} productos",
                     new Object[]{comprasDisponibles.size(), productosDisponibles.size()});
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al inicializar listas", e);
-            comprasDisponibles = new ArrayList<>();
-            productosDisponibles = new ArrayList<>();
+            this.comprasDisponibles = new ArrayList<>();
+            this.productosDisponibles = new ArrayList<>();
         }
     }
 
@@ -87,17 +91,20 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         cd.setCantidad(BigDecimal.ZERO);
         cd.setPrecio(BigDecimal.ZERO);
         cd.setEstado("PENDIENTE");
-        cd.setIdCompra(new Compra());
-        cd.setIdProducto(new Producto());
+        LOGGER.log(Level.INFO, "Nuevo registro creado con ID: {0}", cd.getId());
         return cd;
     }
 
     @Override
     protected CompraDetalle buscarRegistroPorId(Object id) {
-        if (id instanceof UUID) {
-            return compraDetalleDAO.findById((UUID) id);
+        if (id == null) return null;
+        try {
+            UUID uuid = (id instanceof UUID) ? (UUID) id : UUID.fromString(String.valueOf(id));
+            return compraDetalleDAO.findById(uuid);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error buscando CompraDetalle", e);
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -107,143 +114,141 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
 
     @Override
     protected CompraDetalle getIdByText(String id) {
-        try {
-            return compraDetalleDAO.findById(UUID.fromString(id));
-        } catch (Exception e) {
-            return null;
+        if (id != null && this.modelo != null && !this.modelo.getWrappedData().isEmpty()) {
+            try {
+                UUID buscado = UUID.fromString(id);
+                return this.modelo.getWrappedData().stream()
+                        .filter(r -> r.getId() != null && r.getId().equals(buscado))
+                        .findFirst()
+                        .orElse(null);
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.WARNING, "ID no es UUID válido: {0}", id);
+                return null;
+            }
         }
+        return null;
     }
 
     @Override
     protected boolean esNombreVacio(CompraDetalle registro) {
-        boolean error = false;
-
-        Object compraId = registro.getIdCompra() != null ? registro.getIdCompra().getId() : null;
-        if (compraId == null || !isNumericId(compraId)) {
-            mensaje("Debe seleccionar una Compra");
-            error = true;
-        }
-
-        if (registro.getIdProducto() == null || registro.getIdProducto().getId() == null) {
-            mensaje("Debe seleccionar un Producto");
-            error = true;
-        }
-
-        if (registro.getCantidad() == null || registro.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
-            mensaje("La cantidad debe ser mayor a cero");
-            error = true;
-        }
-
-        if (registro.getPrecio() == null || registro.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-            mensaje("Debe ingresar un precio válido");
-            error = true;
-        }
-
-        if (registro.getEstado() == null || registro.getEstado().isBlank()) {
-            mensaje("Debe seleccionar un estado");
-            error = true;
-        }
-
-        return error;
+        return registro == null || registro.getIdCompra() == null || registro.getIdProducto() == null;
     }
 
-    private void mensaje(String m) {
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", m));
+    @Override
+    public void selectionHandler(SelectEvent<CompraDetalle> ev) {
+        super.selectionHandler(ev);
+        if (this.registro != null) {
+            this.modoLista = false;
+            this.modoDetalle = true;
+            LOGGER.log(Level.INFO, "Registro seleccionado: {0}", this.registro.getId());
+        }
     }
 
-    // ---------------------- Guardar / Modificar ----------------------
+    @Override
+    public void btnNuevoHandler(ActionEvent actionEvent) {
+        super.btnNuevoHandler(actionEvent);
+        this.modoLista = false;
+        this.modoDetalle = true;
+        LOGGER.log(Level.INFO, "Modo nuevo registro activado");
+    }
 
-    private Compra obtenerCompraCompleta(Object idObj) {
-        if (idObj == null) return null;
+    @Override
+    public void btnCancelarHandler(ActionEvent actionEvent) {
+        super.btnCancelarHandler(actionEvent);
+        this.modoLista = true;
+        this.modoDetalle = false;
+        this.registro = null;
+        LOGGER.log(Level.INFO, "Operación cancelada");
+    }
+
+    @Override
+    public void btnGuardarHandler(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            agregarMensaje("No hay registro para guardar", FacesMessage.SEVERITY_WARN);
+            return;
+        }
+
         try {
-            long idLong;
-            if (idObj instanceof Long) {
-                idLong = (Long) idObj;
-            } else if (idObj instanceof Integer) {
-                idLong = ((Integer) idObj).longValue();
-            } else if (idObj instanceof Number) {
-                idLong = ((Number) idObj).longValue();
-            } else if (idObj instanceof String) {
-                idLong = Long.parseLong((String) idObj);
-            } else {
-                LOGGER.log(Level.WARNING, "Tipo de id de compra no soportado: {0}", idObj.getClass());
-                return null;
+            if (esNombreVacio(this.registro)) {
+                agregarMensaje("Debe seleccionar compra y producto", FacesMessage.SEVERITY_WARN);
+                return;
             }
-            return compraDao.findCompraById(idLong);  // Llamamos al método de conversión en el DAO
+
+            if (this.registro.getCantidad() == null || this.registro.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
+                agregarMensaje("La cantidad debe ser mayor a cero", FacesMessage.SEVERITY_WARN);
+                return;
+            }
+
+            if (this.registro.getPrecio() == null || this.registro.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
+                agregarMensaje("El precio debe ser válido", FacesMessage.SEVERITY_WARN);
+                return;
+            }
+
+            if (this.estado == ESTADO_CRUD.CREAR) {
+                getDao().crear(this.registro);
+                LOGGER.log(Level.INFO, "Registro creado: {0}", this.registro.getId());
+            } else if (this.estado == ESTADO_CRUD.MODIFICAR) {
+                getDao().modificar(this.registro);
+                LOGGER.log(Level.INFO, "Registro modificado: {0}", this.registro.getId());
+            }
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            this.modoLista = true;
+            this.modoDetalle = false;
+            inicializarRegistros();
+
+            agregarMensaje("Registro guardado exitosamente", FacesMessage.SEVERITY_INFO);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al obtener Compra por id", e);
-            return null;
+            LOGGER.log(Level.SEVERE, "Error al guardar", e);
+            agregarMensaje("Error al guardar: " + e.getMessage(), FacesMessage.SEVERITY_ERROR);
         }
     }
 
-    private Producto obtenerProductoCompleto(UUID id) {
-        return productoDao.findById(id);
+    @Override
+    public void btnModificarHandler(ActionEvent actionEvent) {
+        btnGuardarHandler(actionEvent);
     }
 
     @Override
-    public void btnGuardarHandler(jakarta.faces.event.ActionEvent actionEvent) {
-        if (registro == null || esNombreVacio(registro)) return;
-
-        // Llamamos a obtenerCompraCompleta, que ahora usa findCompraById con la conversión
-        Compra compra = obtenerCompraCompleta(registro.getIdCompra().getId());
-        Producto producto = obtenerProductoCompleto(registro.getIdProducto().getId());
-
-        registro.setIdCompra(compra);
-        registro.setIdProducto(producto);
-
-        getDao().crear(registro);
-
-        mensaje("Guardado correctamente");
-        registro = null;
-        estado = ESTADO_CRUD.NADA;
-        inicializarRegistros();
-    }
-
-    @Override
-    public void btnModificarHandler(jakarta.faces.event.ActionEvent actionEvent) {
-        if (registro == null || esNombreVacio(registro)) return;
-
-        // Llamamos a obtenerCompraCompleta, que ahora usa findCompraById con la conversión
-        Compra compra = obtenerCompraCompleta(registro.getIdCompra().getId());
-        Producto producto = obtenerProductoCompleto(registro.getIdProducto().getId());
-
-        registro.setIdCompra(compra);
-        registro.setIdProducto(producto);
-
-        getDao().modificar(registro);
-
-        mensaje("Modificado correctamente");
-        registro = null;
-        estado = ESTADO_CRUD.NADA;
-        inicializarRegistros();
-    }
-
-    // ---------------------- Helpers ----------------------
-
-    private boolean isNumericId(Object id) {
-        if (id == null) return false;
-        if (id instanceof Number) return true;
-        if (id instanceof String) {
-            try {
-                Long.parseLong((String) id);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
+    public void btnEliminarHandler(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            agregarMensaje("No hay registro para eliminar", FacesMessage.SEVERITY_WARN);
+            return;
         }
-        return false;
+
+        try {
+            getDao().eliminar(this.registro);
+            LOGGER.log(Level.INFO, "Registro eliminado: {0}", this.registro.getId());
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            this.modoLista = true;
+            this.modoDetalle = false;
+            inicializarRegistros();
+
+            agregarMensaje("Registro eliminado exitosamente", FacesMessage.SEVERITY_INFO);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al eliminar", e);
+            agregarMensaje("Error al eliminar: " + e.getMessage(), FacesMessage.SEVERITY_ERROR);
+        }
     }
 
-    // ---------------------- Getters ----------------------
+    private void agregarMensaje(String mensaje, FacesMessage.Severity severity) {
+        getFacesContext().addMessage(null, new FacesMessage(severity, "Información", mensaje));
+    }
 
     public List<Compra> getComprasDisponibles() {
-        if (comprasDisponibles == null) inicializarListas();
+        if (comprasDisponibles == null || comprasDisponibles.isEmpty()) {
+            inicializarListas();
+        }
         return comprasDisponibles;
     }
 
     public List<Producto> getProductosDisponibles() {
-        if (productosDisponibles == null) inicializarListas();
+        if (productosDisponibles == null || productosDisponibles.isEmpty()) {
+            inicializarListas();
+        }
         return productosDisponibles;
     }
 

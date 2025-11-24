@@ -6,11 +6,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Almacen;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.CompraDetalle;
+
 import java.io.Serializable;
+import java.util.UUID;
 
 @Stateless
 @LocalBean
-public class AlmacenDAO extends InventarioDefaultDataAccess<Almacen> implements Serializable {
+public class    AlmacenDAO extends InventarioDefaultDataAccess<Almacen> implements Serializable {
 
     @PersistenceContext(unitName = "consolePU")
     EntityManager em;
@@ -45,4 +48,5 @@ public class AlmacenDAO extends InventarioDefaultDataAccess<Almacen> implements 
             throw new IllegalStateException("Error al crear el almacén", ex);
         }
     }
+
 }

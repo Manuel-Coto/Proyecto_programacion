@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/sv/edu/ues/occ/ingenieria/prn335/inventario/web/control/CompraDAO.java" dialect="GenericSQL" />
+  </component>
+</project>
