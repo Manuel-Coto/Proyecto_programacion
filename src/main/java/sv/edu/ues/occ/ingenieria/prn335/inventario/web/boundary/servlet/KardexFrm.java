@@ -117,11 +117,9 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         kardex.setCantidadActual(BigDecimal.ZERO);
         kardex.setPrecioActual(BigDecimal.ZERO);
 
-        // Inicializar entidades FK para evitar NullPointer en XHTML
         kardex.setIdProducto(new Producto());
         kardex.setIdAlmacen(new Almacen());
 
-        // Limpiar IDs seleccionados
         this.productoSeleccionadoId = null;
         this.almacenSeleccionadoId = null;
         this.compraDetalleSeleccionadaId = null;
@@ -130,6 +128,7 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         LOGGER.log(Level.INFO, "Nuevo registro de kardex creado con ID: {0}", kardex.getId());
         return kardex;
     }
+
 
     @Override
     protected Kardex buscarRegistroPorId(Object id) {
@@ -276,6 +275,15 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
             }
         }
     }
+
+    public List<CompraDetalle> completeCompraDetalle(String consulta) {
+        return compraDetalleDAO.findLikeConsulta(consulta);
+    }
+
+    public List<VentaDetalle> completeVentaDetalle(String consulta) {
+        return ventaDetalleDAO.findLikeConsulta(consulta);
+    }
+
 
     /**
      * Manejador cuando se selecciona una fila en la tabla

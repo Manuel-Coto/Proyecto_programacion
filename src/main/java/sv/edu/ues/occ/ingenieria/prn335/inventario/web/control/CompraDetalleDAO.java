@@ -7,6 +7,8 @@ import jakarta.persistence.PersistenceContext;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.CompraDetalle;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -34,5 +36,31 @@ public class CompraDetalleDAO extends InventarioDefaultDataAccess<CompraDetalle>
         }
         return null;
     }
+
+    public List<CompraDetalle> findLikeConsulta(String consulta) {
+        if (consulta == null || consulta.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        try {
+            try {
+                UUID uuidConsulta = UUID.fromString(consulta.trim());
+                return em.createQuery(
+                                "SELECT cd FROM CompraDetalle cd WHERE cd.id = :uuid",
+                                CompraDetalle.class)
+                        .setParameter("uuid", uuidConsulta)
+                        .getResultList();
+            } catch (IllegalArgumentException e) {
+                return em.createQuery(
+                                "SELECT cd FROM CompraDetalle cd WHERE LOWER(cd.idProducto.nombreProducto) LIKE LOWER(:consulta)",
+                                CompraDetalle.class)
+                        .setParameter("consulta", "%" + consulta + "%")
+                        .getResultList();
+            }
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
 
 }
