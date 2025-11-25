@@ -3,7 +3,9 @@
 
     <featureManager>
         <feature>jakartaee-10.0</feature>
-        <feature>jdbc-4.3</feature>
+        <!-- Para JSON-B (mapeo objetos Java <-> JSON) -->
+        <feature>jsonb-3.0</feature>
+        <feature>microProfile-7.1</feature>
     </featureManager>
 
 

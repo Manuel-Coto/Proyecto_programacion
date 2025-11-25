@@ -74,6 +74,60 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         }
     }
 
+    public void inicializarConCompra(Compra compraSeleccionada) {
+        if (compraSeleccionada != null && compraSeleccionada.getId() != null) {
+            // Si estamos en modo lista, filtrar por la compra seleccionada
+            if (this.modelo != null) {
+                // Aquí filtramos los detalles que pertenecen a esta compra
+                List<CompraDetalle> detallesFiltrados = new ArrayList<>();
+                try {
+                    List<CompraDetalle> todos = compraDetalleDAO.findAll();
+                    for (CompraDetalle detalle : todos) {
+                        if (detalle.getIdCompra() != null &&
+                                detalle.getIdCompra().getId() != null &&
+                                detalle.getIdCompra().getId().equals(compraSeleccionada.getId())) {
+                            detallesFiltrados.add(detalle);
+                        }
+                    }
+                    this.modelo.setWrappedData(detallesFiltrados);
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error filtrando detalles de compra", e);
+                }
+            }
+
+            // Si hay un registro nuevo, asignarle la compra automáticamente
+            if (this.registro != null && this.registro.getIdCompra() == null) {
+                this.registro.setIdCompra(compraSeleccionada);
+            }
+        }
+    }
+
+
+    public List<CompraDetalle> obtenerDetallesPorCompra(Compra compraSeleccionada) {
+        if (compraSeleccionada == null || compraSeleccionada.getId() == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            List<CompraDetalle> todos = compraDetalleDAO.findAll();
+            List<CompraDetalle> filtrados = new ArrayList<>();
+
+            for (CompraDetalle detalle : todos) {
+                if (detalle.getIdCompra() != null &&
+                        detalle.getIdCompra().getId() != null &&
+                        detalle.getIdCompra().getId().equals(compraSeleccionada.getId())) {
+                    filtrados.add(detalle);
+                }
+            }
+
+            return filtrados;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error obteniendo detalles de compra", e);
+            return new ArrayList<>();
+        }
+    }
+
+
     @Override
     protected FacesContext getFacesContext() {
         return FacesContext.getCurrentInstance();

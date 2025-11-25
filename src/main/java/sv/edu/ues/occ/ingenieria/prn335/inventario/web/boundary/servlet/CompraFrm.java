@@ -15,10 +15,7 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -142,6 +139,9 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         LOGGER.log(Level.INFO, "CompraFrm inicializado correctamente");
     }
 
+
+
+
     // ---------------------- Métodos de Guardado y Modificación ----------------------
 
     @Override
@@ -213,24 +213,19 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         }
 
         try {
-            // Validación del proveedor
             if (esNombreVacio(this.registro)) {
                 getFacesContext().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un proveedor"));
                 return;
             }
 
-            // Validación del estado
             if (registro.getEstado() == null || registro.getEstado().isBlank()) {
                 getFacesContext().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un estado"));
                 return;
             }
 
-            // Validar que el proveedor exista antes de modificar
             compraDao.validarProveedor(this.registro.getIdProveedor());
-
-            // Cargar el proveedor completo
             Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
             this.registro.setProveedor(proveedor);
 
@@ -238,7 +233,6 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
             this.registro = null;
             this.estado = ESTADO_CRUD.NADA;
-            inicializarRegistros();
 
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
@@ -265,8 +259,6 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
             this.registro = null;
             this.estado = ESTADO_CRUD.NADA;
-            this.modelo = null;
-            inicializarRegistros();
 
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro eliminado correctamente"));
@@ -277,6 +269,7 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al eliminar", e.getMessage()));
         }
     }
+
 
     // ---------------------- Getters y Setters ----------------------
 

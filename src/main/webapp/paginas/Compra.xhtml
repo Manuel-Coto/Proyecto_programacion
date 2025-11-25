@@ -110,6 +110,7 @@
                                     autoUpdate="true" />
 
                         <p:tabView id="tabView">
+                            <!-- PESTAÑA 1: GENERALIDADES -->
                             <p:tab title="Generalidades" id="tabGeneral">
 
                                 <p:panelGrid columns="2"
@@ -200,6 +201,12 @@
                                 </h:panelGrid>
 
                             </p:tab>
+
+                            <!-- PESTAÑA 2: DETALLES DE COMPRA -->
+                            <p:tab title="Detalles de Compra" id="tabDetalle" rendered="#{not empty compraFrm.registro.id}">
+                                <ui:include src="/WEB-INF/includes/CompraDetalleInclude.xhtml"/>
+                            </p:tab>
+
                         </p:tabView>
                     </h:form>
                 </h:panelGroup>

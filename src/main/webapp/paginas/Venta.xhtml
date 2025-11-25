@@ -58,72 +58,85 @@
 
     <h:panelGroup id="pnlDetalle">
         <h:form id="frmCrear" rendered="#{ventaFrm.estado.name() ne 'NADA'}">
-            <h:panelGrid columns="2" columnClasses="col-label,col-field">
+            <p:tabView id="tabView">
 
-                <h:outputLabel for="cmbCliente" value="Cliente:"/>
-                <p:selectOneMenu id="cmbCliente"
-                                 value="#{ventaFrm.registro.idCliente}"
-                                 converter="omnifaces.SelectItemsConverter"
-                                 style="width:100%">
-                    <f:selectItem itemLabel="-- Seleccionar cliente --" itemValue="#{null}" noSelectionOption="true"/>
-                    <f:selectItems value="#{ventaFrm.clientesDisponibles}"
-                                   var="cliente"
-                                   itemLabel="#{cliente.nombre}"
-                                   itemValue="#{cliente}"/>
-                </p:selectOneMenu>
+                <!-- PESTAÑA 1: GENERALIDADES -->
+                <p:tab title="Generalidades" id="tabGeneral">
+                    <h:panelGrid columns="2" columnClasses="col-label,col-field">
 
-                <h:outputLabel for="dtpFecha" value="Fecha:"/>
-                <p:calendar id="dtpFecha"
-                            value="#{ventaFrm.registro.fecha}"
-                            pattern="dd/MM/yyyy HH:mm"
-                            showTime="true"
-                            timeZone="America/El_Salvador"
-                            navigator="true"
-                            converter="offsetDateTimeConverter"/>
+                        <h:outputLabel for="cmbCliente" value="Cliente:"/>
+                        <p:selectOneMenu id="cmbCliente"
+                                         value="#{ventaFrm.registro.idCliente}"
+                                         converter="omnifaces.SelectItemsConverter"
+                                         style="width:100%">
+                            <f:selectItem itemLabel="-- Seleccionar cliente --" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{ventaFrm.clientesDisponibles}"
+                                           var="cliente"
+                                           itemLabel="#{cliente.nombre}"
+                                           itemValue="#{cliente}"/>
+                        </p:selectOneMenu>
 
-                <h:outputLabel for="cmbEstado" value="Estado:"/>
-                <p:selectOneMenu id="cmbEstado"
-                                 value="#{ventaFrm.registro.estado}"
-                                 style="width:100%">
-                    <f:selectItem itemLabel="-- Seleccionar estado --" itemValue="#{null}" noSelectionOption="true"/>
-                    <f:selectItems value="#{ventaFrm.estadosDisponibles}"
-                                   var="estado"
-                                   itemLabel="#{estado}"
-                                   itemValue="#{estado}"/>
-                </p:selectOneMenu>
+                        <h:outputLabel for="dtpFecha" value="Fecha:"/>
+                        <p:calendar id="dtpFecha"
+                                    value="#{ventaFrm.registro.fecha}"
+                                    pattern="dd/MM/yyyy HH:mm"
+                                    showTime="true"
+                                    timeZone="America/El_Salvador"
+                                    navigator="true"
+                                    converter="offsetDateTimeConverter"/>
 
-                <h:outputLabel for="txtObservaciones" value="Observaciones:"/>
-                <h:inputText id="txtObservaciones"
-                             value="#{ventaFrm.registro.observaciones}"
-                             style="width:100%"/>
-            </h:panelGrid>
+                        <h:outputLabel for="cmbEstado" value="Estado:"/>
+                        <p:selectOneMenu id="cmbEstado"
+                                         value="#{ventaFrm.registro.estado}"
+                                         style="width:100%">
+                            <f:selectItem itemLabel="-- Seleccionar estado --" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{ventaFrm.estadosDisponibles}"
+                                           var="estado"
+                                           itemLabel="#{estado}"
+                                           itemValue="#{estado}"/>
+                        </p:selectOneMenu>
 
-            <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Crear Venta"
-                                 styleClass="btn-rojo"
-                                 icon="pi pi-save"
-                                 actionListener="#{ventaFrm.btnGuardarHandler}"
-                                 rendered="#{ventaFrm.estado.name() eq 'CREAR'}"
-                                 update=":messages :pnlDetalle :pnlTabla"
-                                 process="@form"/>
+                        <h:outputLabel for="txtObservaciones" value="Observaciones:"/>
+                        <h:inputText id="txtObservaciones"
+                                     value="#{ventaFrm.registro.observaciones}"
+                                     style="width:100%"/>
+                    </h:panelGrid>
 
-                <p:commandButton value="Modificar Venta"
-                                 styleClass="btn-oscuro"
-                                 icon="pi pi-pencil"
-                                 actionListener="#{ventaFrm.btnModificarHandler}"
-                                 rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
-                                 update=":messages :pnlDetalle :pnlTabla"
-                                 process="@form"/>
+                    <h:panelGrid columns="3" style="margin-top: 15px;">
+                        <p:commandButton value="Crear Venta"
+                                         styleClass="btn-rojo"
+                                         icon="pi pi-save"
+                                         actionListener="#{ventaFrm.btnGuardarHandler}"
+                                         rendered="#{ventaFrm.estado.name() eq 'CREAR'}"
+                                         update=":messages :pnlDetalle :pnlTabla"
+                                         process="@form"/>
 
-                <p:commandButton value="Eliminar Venta"
-                                 styleClass="btn-rojo"
-                                 icon="pi pi-trash"
-                                 actionListener="#{ventaFrm.btnEliminarHandler}"
-                                 rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
-                                 update=":messages :pnlDetalle :pnlTabla"/>
-            </h:panelGrid>
+                        <p:commandButton value="Modificar Venta"
+                                         styleClass="btn-oscuro"
+                                         icon="pi pi-pencil"
+                                         actionListener="#{ventaFrm.btnModificarHandler}"
+                                         rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
+                                         update=":messages :pnlDetalle :pnlTabla"
+                                         process="@form"/>
+
+                        <p:commandButton value="Eliminar Venta"
+                                         styleClass="btn-rojo"
+                                         icon="pi pi-trash"
+                                         actionListener="#{ventaFrm.btnEliminarHandler}"
+                                         rendered="#{ventaFrm.estado.name() eq 'MODIFICAR'}"
+                                         update=":messages :pnlDetalle :pnlTabla"/>
+                    </h:panelGrid>
+                </p:tab>
+
+                <!-- PESTAÑA 2: DETALLES DE VENTA -->
+                <p:tab title="Detalles de Venta" id="tabDetalle" rendered="#{not empty ventaFrm.registro.id}">
+                    <ui:include src="/WEB-INF/includes/VentaDetalleInclude.xhtml"/>
+                </p:tab>
+
+            </p:tabView>
         </h:form>
     </h:panelGroup>
+
 
 </h:body>
 </html>

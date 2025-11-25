@@ -51,7 +51,7 @@
                                  update=":pnlDetalle :pnlTabla"
                                  process="@this" immediate="true"/>
 
-                <p:commandButton id="btnCancelar" value="Cancelar" styleClass="btn-oscuro"
+                <p:commandButton id="btnCancelar" value="Cancelar Detalle" styleClass="btn-oscuro"
                                  rendered="#{ventaDetalleFrm.estado.name() ne 'NADA'}"
                                  actionListener="#{ventaDetalleFrm.btnCancelarHandler}"
                                  update=":pnlDetalle :pnlTabla"
@@ -121,7 +121,7 @@
             </h:panelGrid>
 
             <h:panelGrid columns="3" style="margin-top: 15px;">
-                <p:commandButton value="Guardar"
+                <p:commandButton value="Guardar Detalle"
                                  styleClass="btn-rojo"
                                  icon="pi pi-save"
                                  actionListener="#{ventaDetalleFrm.btnGuardarHandler}"
@@ -129,7 +129,7 @@
                                  update=":messages :pnlDetalle :pnlTabla"
                                  process="@form"/>
 
-                <p:commandButton value="Modificar"
+                <p:commandButton value="Modificar Detalle"
                                  styleClass="btn-oscuro"
                                  icon="pi pi-pencil"
                                  actionListener="#{ventaDetalleFrm.btnModificarHandler}"
@@ -137,7 +137,7 @@
                                  update=":messages :pnlDetalle :pnlTabla"
                                  process="@form"/>
 
-                <p:commandButton value="Eliminar"
+                <p:commandButton value="Eliminar Detalle"
                                  styleClass="btn-rojo"
                                  icon="pi pi-trash"
                                  actionListener="#{ventaDetalleFrm.btnEliminarHandler}"
