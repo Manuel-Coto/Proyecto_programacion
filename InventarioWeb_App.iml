@@ -6,10 +6,12 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="EclipseLink" />
         <datasource-mapping>
-          <factory-entry name="consolePU" value="22bca3db-1fc1-4af1-ac2c-76fe036e2acf" />
+          <factory-entry name="consolePU" value="fb170462-1dad-44c6-8a24-dc77c3a07411" />
           <factory-entry name="inventarioPU" />
         </datasource-mapping>
-        <naming-strategy-map />
+        <naming-strategy-map>
+          <unit-entry name="consolePU" />
+        </naming-strategy-map>
         <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/resources/META-INF/persistence.xml" />
       </configuration>
     </facet>

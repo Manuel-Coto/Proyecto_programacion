@@ -35,7 +35,7 @@ public class KardexDetalleFrm extends DefaultFrm<KardexDetalle> implements Seria
     @Override
     public void inicializar() {
         super.inicializar();
-        this.nombreBean = "kardexDetalleFrm";
+        this.nombreBean = "Detalle de Kardex";
         this.listaKardex = kardexDAO.findAll();
     }
 

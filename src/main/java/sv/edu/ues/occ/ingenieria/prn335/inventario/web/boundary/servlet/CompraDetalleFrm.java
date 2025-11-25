@@ -52,7 +52,7 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
     @Override
     public void inicializar() {
         LOGGER.log(Level.INFO, "Inicializando CompraDetalleFrm...");
-        this.nombreBean = "Gestión de Detalles de Compra";
+        this.nombreBean = "Detalles de Compra";
         this.modoLista = true;
         this.modoDetalle = false;
         this.estado = ESTADO_CRUD.NADA;

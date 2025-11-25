@@ -10,33 +10,29 @@
 
         <!-- Tipos -->
         <p:submenu label="Tipos" icon="pi pi-box">
-            <p:menuitem value="Tipo Almacén" url="TipoAlmacen.jsf" icon="pi pi-building" />
-            <p:menuitem value="Tipo Producto" url="TipoProducto.jsf" icon="pi pi-tags" />
-            <p:menuitem value="Tipo Unidad de Medida" url="TipoUnidadMedida.jsf" icon="pi pi-balance-scale" />
-            <p:menuitem value="Tipo ProductoCaract" url="TipoProductoCaracteristica.jsf" icon="pi pi-list-ul" />
-            <p:menuitem value="Producto TipoProduct" url="ProductoTipoProducto.jsf" icon="pi pi-boxes" />
+            <p:menuitem value="Tipo Almacén" url="#{request.contextPath}/paginas/TipoAlmacen.jsf" icon="pi pi-building" />
+            <p:menuitem value="Tipo Producto" url="#{request.contextPath}/paginas/TipoProducto.jsf" icon="pi pi-tags" />
+            <p:menuitem value="Tipo Unidad de Medida" url="#{request.contextPath}/paginas/TipoUnidadMedida.jsf" icon="pi pi-balance-scale" />
+            <p:menuitem value="Tipo ProductoCaract" url="#{request.contextPath}/paginas/TipoProductoCaracteristica.jsf" icon="pi pi-list-ul" />
+            <p:menuitem value="Producto TipoProduct" url="#{request.contextPath}/paginas/ProductoTipoProducto.jsf" icon="pi pi-boxes" />
+            <p:menuitem value="ProductoTipoProductoCaract" url="#{request.contextPath}/paginas/ProductoTipoProductoCaracteristica.jsf" icon="pi pi-list" />
         </p:submenu>
 
         <!-- Especificos -->
         <p:submenu label="Especificos" icon="pi pi-chart-bar">
-            <p:menuitem value="Producto" url="Producto.jsf" icon="pi pi-boxes" />
-            <p:menuitem value="Almacén" url="Almacen.jsf" icon="pi pi-warehouse" />
-            <p:menuitem value="Unidad de Medida" url="UnidadMedida.jsf" icon="pi pi-ruler" />
-            <p:menuitem value="Característica" url="Caracteristica.jsf" icon="pi pi-sliders-h" />
-            <p:menuitem value="Clientes" url="Clientes.jsf" icon="pi pi-users" />
-            <p:menuitem value="Proveedores" url="Proveedor.jsf" icon="pi pi-user-plus" />
-            <p:menuitem value="Compra" url="Compra.jsf" icon="pi pi-shopping-cart" />
-            <p:menuitem value="Detalle de Compra" url="CompraDetalle.jsf" icon="pi pi-list" />
-            <p:menuitem value="Venta" url="Venta.jsf" icon="pi pi-dollar" />
-            <p:menuitem value="Detalle de Venta" url="VentaDetalle.jsf" icon="pi pi-list" />
-            <p:menuitem value="Kardex" url="Kardex.jsf" icon="pi pi-book" />
+            <p:menuitem value="Producto" url="#{request.contextPath}/paginas/Producto.jsf" icon="pi pi-boxes" />
+            <p:menuitem value="Almacén" url="#{request.contextPath}/paginas/Almacen.jsf" icon="pi pi-warehouse" />
+            <p:menuitem value="Unidad de Medida" url="#{request.contextPath}/paginas/UnidadMedida.jsf" icon="pi pi-ruler" />
+            <p:menuitem value="Característica" url="#{request.contextPath}/paginas/Caracteristica.jsf" icon="pi pi-sliders-h" />
+            <p:menuitem value="Clientes" url="#{request.contextPath}/paginas/Clientes.jsf" icon="pi pi-users" />
+            <p:menuitem value="Proveedores" url="#{request.contextPath}/paginas/Proveedor.jsf" icon="pi pi-user-plus" />
+            <p:menuitem value="Compra" url="#{request.contextPath}/paginas/Compra.jsf" icon="pi pi-shopping-cart" />
+            <p:menuitem value="Detalle de Compra" url="#{request.contextPath}/paginas/CompraDetalle.jsf" icon="pi pi-list" />
+            <p:menuitem value="Venta" url="#{request.contextPath}/paginas/Venta.jsf" icon="pi pi-dollar" />
+            <p:menuitem value="Detalle de Venta" url="#{request.contextPath}/paginas/VentaDetalle.jsf" icon="pi pi-list" />
+            <p:menuitem value="Kardex" url="#{request.contextPath}/paginas/Kardex.jsf" icon="pi pi-book" />
+            <p:menuitem value="Detalle de Kardex" url="#{request.contextPath}/paginas/KardexDetalle.jsf" icon="pi pi-list" />
         </p:submenu>
-
-        <!-- Compras (Nuevo) -->
-        <!--<p:submenu label="Compras" icon="pi pi-cart-plus">
-            <p:menuitem value="Compra" url="Compra.jsf" icon="pi pi-shopping-cart" />
-            <p:menuitem value="Detalle Compra" url="CompraDetalle.jsf" icon="pi pi-list" />
-        </p:submenu>-->
 
     </p:menubar>
 </h:form>

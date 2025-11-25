@@ -52,7 +52,7 @@ public class VentaDetalleFrm extends DefaultFrm<VentaDetalle> implements Seriali
     @Override
     public void inicializar() {
         LOGGER.log(Level.INFO, "Inicializando VentaDetalleFrm...");
-        this.nombreBean = "Gestión de Detalles de Venta";
+        this.nombreBean = "Detalles de Venta";
         this.modoLista = true;
         this.modoDetalle = false;
         this.estado = ESTADO_CRUD.NADA;

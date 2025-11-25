@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{tipoProductoCaracteristicaFrm.nombreBean}</title>
+
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+    <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+</h:head>
+<h:body>
+
+    <h1>#{tipoProductoCaracteristicaFrm.nombreBean}</h1>
+
+    <!-- PANEL TABLA -->
+    <h:panelGroup id="pnlTabla">
+        <h:panelGrid>
+            <h:form id="frmTop">
+                <p:dataTable id="tablaTop"
+                             lazy="true"
+                             rendered="#{tipoProductoCaracteristicaFrm.estado.name() eq 'NADA'}"
+                             rows="#{tipoProductoCaracteristicaFrm.pageSize}"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             value="#{tipoProductoCaracteristicaFrm.modelo}"
+                             var="reg"
+                             selectionMode="single"
+                             selection="#{tipoProductoCaracteristicaFrm.registro}"
+                             rowKey="#{reg.id}">
+                    <p:ajax event="rowSelect"
+                            listener="#{tipoProductoCaracteristicaFrm.selectionHandler}"
+                            update=":pnlDetalle :frmTop :messages"
+                            process="@this"/>
+                    <p:column headerText="ID">
+                        <h:outputText value="#{reg.id}" />
+                    </p:column>
+                    <p:column headerText="Tipo Producto">
+                        <h:outputText value="#{reg.tipoProducto != null ? reg.tipoProducto.nombre : '-'}" />
+                    </p:column>
+                    <p:column headerText="Característica">
+                        <h:outputText value="#{reg.caracteristica != null ? reg.caracteristica.nombre : '-'}" />
+                    </p:column>
+                    <p:column headerText="Obligatorio">
+                        <h:outputText value="#{reg.obligatorio ? 'Sí' : 'No'}"/>
+                    </p:column>
+                    <p:column headerText="Fecha creación">
+                        <h:outputText value="#{reg.fechaCreacion}" />
+                    </p:column>
+                </p:dataTable>
+
+                <!-- NUEVO -->
+                <p:commandButton id="btnNuevo" value="Nuevo TipoProductoCaracteristica" styleClass="btn-rojo"
+                                 rendered="#{tipoProductoCaracteristicaFrm.estado.name() eq 'NADA'}"
+                                 actionListener="#{tipoProductoCaracteristicaFrm.btnNuevoHandler}"
+                                 update=":pnlDetalle :frmTop :messages"
+                                 process="@this" immediate="true"/>
+
+                <!-- CANCELAR -->
+                <p:commandButton id="btnCancelar" value="Cancelar TipoProductoCaracteristica" styleClass="btn-oscuro"
+                                 rendered="#{tipoProductoCaracteristicaFrm.estado.name() ne 'NADA'}"
+                                 actionListener="#{tipoProductoCaracteristicaFrm.btnCancelarHandler}"
+                                 update=":pnlDetalle :frmTop :messages"
+                                 process="@this" immediate="true"/>
+
+                <p:growl id="messages" showDetail="true" life="5000" sticky="false" />
+            </h:form>
+        </h:panelGrid>
+    </h:panelGroup>
+
+    <!-- PANEL DETALLE -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmCrear" rendered="#{tipoProductoCaracteristicaFrm.estado.name() ne 'NADA'}">
+            <p:panelGrid columns="2" styleClass="form-grid-2col" columnClasses="col-label,col-field">
+
+                <h:outputLabel for="txtIdPanel" value="ID:"/>
+                <h:panelGroup id="txtIdPanel">
+                    <h:outputText rendered="#{empty tipoProductoCaracteristicaFrm.registro.id}"
+                                  value="(Se asignará automáticamente al guardar)"
+                                  styleClass="id-info-text"/>
+                    <h:inputText id="txtId"
+                                 value="#{tipoProductoCaracteristicaFrm.registro.id}"
+                                 rendered="#{not empty tipoProductoCaracteristicaFrm.registro.id}"
+                                 disabled="true"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="selTipoProducto" value="Tipo de producto:"/>
+                <p:selectOneMenu id="selTipoProducto"
+                                 value="#{tipoProductoCaracteristicaFrm.idTipoProductoSeleccionado}"
+                                 panelStyle="width:300px" styleClass="select-rojo-negro">
+                    <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{tipoProductoCaracteristicaFrm.listaTipoProductos}"
+                                   var="tp" itemValue="#{tp.id}" itemLabel="#{tp.nombre}"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="selCaracteristica" value="Característica:"/>
+                <p:selectOneMenu id="selCaracteristica"
+                                 value="#{tipoProductoCaracteristicaFrm.idCaracteristicaSeleccionada}"
+                                 panelStyle="width:300px" styleClass="select-rojo-negro">
+                    <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{tipoProductoCaracteristicaFrm.listaCaracteristicas}"
+                                   var="c" itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="chkObligatorio" value="Obligatorio:"/>
+                <h:selectBooleanCheckbox id="chkObligatorio"
+                                         value="#{tipoProductoCaracteristicaFrm.registro.obligatorio}"/>
+
+                <h:outputLabel for="txtFecha" value="Fecha creación:"/>
+                <h:inputText id="txtFecha"
+                             value="#{tipoProductoCaracteristicaFrm.registro.fechaCreacion}"
+                             disabled="true"/>
+            </p:panelGrid>
+
+            <p:panelGrid columns="3" style="margin-top: 15px;">
+
+                <p:commandButton value="Crear TipoProductoCaracteristica" styleClass="btn-rojo"
+                                 actionListener="#{tipoProductoCaracteristicaFrm.btnGuardarHandler}"
+                                 rendered="#{tipoProductoCaracteristicaFrm.estado.name() eq 'CREAR'}"
+                                 update=":messages :frmTop :pnlDetalle"
+                                 process="@form"/>
+
+                <p:commandButton value="Modificar TipoProductoCaracteristica" styleClass="btn-oscuro"
+                                 actionListener="#{tipoProductoCaracteristicaFrm.btnModificarHandler}"
+                                 rendered="#{tipoProductoCaracteristicaFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :frmTop :pnlDetalle"
+                                 process="@form"/>
+
+                <p:commandButton value="Eliminar TipoProductoCaracteristica" styleClass="btn-rojo"
+                                 actionListener="#{tipoProductoCaracteristicaFrm.btnEliminarHandler}"
+                                 rendered="#{tipoProductoCaracteristicaFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":messages :frmTop :pnlDetalle"
+                                 process="@form"/>
+
+            </p:panelGrid>
+
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
+</html>

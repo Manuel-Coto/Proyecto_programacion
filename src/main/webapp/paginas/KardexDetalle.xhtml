@@ -1,12 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html lang="en"
+<html lang="es"
       xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:f="jakarta.faces.core"
-      xmlns:h="jakarta.faces.html">
-<f:view>
-    <h:head></h:head>
-    <h:body>
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
 
-    </h:body>
-</f:view>
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>#{kardexDetalleFrm.nombreBean}</title>
+    <h:outputStylesheet library="estilos" name="disenoAlmacen.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- TOPBAR -->
+    <ui:include src="/WEB-INF/includes/topbar.xhtml"/>
+
+    <h1>#{kardexDetalleFrm.nombreBean}</h1>
+
+    <!-- ===== PANEL TABLA ===== -->
+    <h:panelGroup id="pnlTabla">
+        <h:form id="frmTabla">
+
+            <!-- BOTONES -->
+            <div style="margin-bottom: 10px;">
+                <p:commandButton id="btnNuevo"
+                                 value="Nuevo Detalle"
+                                 icon="pi pi-plus"
+                                 styleClass="btn-rojo"
+                                 rendered="#{kardexDetalleFrm.estado.name() eq 'NADA'}"
+                                 actionListener="#{kardexDetalleFrm.btnNuevoHandler}"
+                                 process="@this"
+                                 immediate="true"
+                                 update=":pnlTabla :pnlDetalle :frmTabla:messages"/>
+
+                <p:commandButton id="btnCancelar"
+                                 value="Cancelar"
+                                 icon="pi pi-times"
+                                 styleClass="btn-oscuro"
+                                 rendered="#{kardexDetalleFrm.estado.name() ne 'NADA'}"
+                                 actionListener="#{kardexDetalleFrm.btnCancelarHandler}"
+                                 process="@this"
+                                 immediate="true"
+                                 update=":pnlTabla :pnlDetalle :frmTabla:messages"/>
+            </div>
+
+            <!-- TABLA DE REGISTROS -->
+            <p:dataTable id="tablaKardexDetalle"
+                         value="#{kardexDetalleFrm.modelo}"
+                         rendered="#{kardexDetalleFrm.estado.name() == 'NADA'}"
+                         var="detalle"
+                         rows="10"
+                         paginator="true"
+                         paginatorPosition="bottom"
+                         selectionMode="single"
+                         selection="#{kardexDetalleFrm.registro}"
+                         rowKey="#{detalle.id}"
+                         emptyMessage="No hay detalles de kardex registrados">
+
+                <p:ajax event="rowSelect"
+                        listener="#{kardexDetalleFrm.selectionHandler}"
+                        update=":pnlTabla :pnlDetalle :frmTabla:messages"/>
+
+                <p:column headerText="ID" style="width:180px;">
+                    <h:outputText value="#{detalle.id}"/>
+                </p:column>
+
+                <p:column headerText="Kardex" style="width:150px;">
+                    <h:outputText value="#{detalle.idKardex != null ? detalle.idKardex.id : '-'}"/>
+                </p:column>
+
+                <p:column headerText="Lote" style="width:200px;">
+                    <h:outputText value="#{detalle.lote != null ? detalle.lote : '-'}"/>
+                </p:column>
+
+                <p:column headerText="Activo" style="width:100px; text-align:center;">
+                    <h:outputText value="#{detalle.activo ? 'Sí' : 'No'}"/>
+                </p:column>
+
+            </p:dataTable>
+
+            <!-- MENSAJES -->
+            <p:growl id="messages" showDetail="true" life="5000" sticky="false"/>
+
+        </h:form>
+    </h:panelGroup>
+
+    <!-- ===== PANEL DETALLE ===== -->
+    <h:panelGroup id="pnlDetalle">
+        <h:form id="frmDetalle" rendered="#{kardexDetalleFrm.estado.name() != 'NADA'}">
+
+            <p:fieldset legend="Detalle de Kardex" toggleable="false">
+                <h:panelGrid columns="2" columnClasses="label,input" cellpadding="5">
+
+                    <!-- ID (Generado automáticamente) -->
+                    <h:outputText value="ID:"/>
+                    <h:outputText value="#{kardexDetalleFrm.registro.id != null ? kardexDetalleFrm.registro.id : '(Se asignará automáticamente)'}"/>
+
+                    <!-- KARDEX (Obligatorio) -->
+                    <h:outputLabel for="selKardex" value="Kardex: *"/>
+                    <p:selectOneMenu id="selKardex"
+                                     value="#{kardexDetalleFrm.idKardexSeleccionado}"
+                                     required="true"
+                                     requiredMessage="Debe seleccionar un Kardex"
+                                     style="width:100%"
+                                     showClearButton="true"
+                                     filter="true"
+                                     filterMatchMode="contains">
+                        <f:selectItem itemLabel="-- Seleccione Kardex --" itemValue="#{null}"/>
+                        <f:selectItems value="#{kardexDetalleFrm.listaKardex}"
+                                       var="kardex"
+                                       itemLabel="#{kardex.id} - #{kardex.idProducto.nombreProducto}"
+                                       itemValue="#{kardex.id}"/>
+                    </p:selectOneMenu>
+
+                    <!-- LOTE (Obligatorio) -->
+                    <h:outputLabel for="txtLote" value="Lote: *"/>
+                    <h:inputText id="txtLote"
+                                 value="#{kardexDetalleFrm.registro.lote}"
+                                 required="true"
+                                 requiredMessage="El lote es obligatorio"
+                                 maxlength="255"
+                                 style="width:100%"/>
+
+                    <!-- ACTIVO (Checkbox) -->
+                    <h:outputLabel for="chkActivo" value="Activo:"/>
+                    <h:selectBooleanCheckbox id="chkActivo"
+                                             value="#{kardexDetalleFrm.registro.activo}"/>
+
+                </h:panelGrid>
+            </p:fieldset>
+
+            <!-- BOTONES CRUD -->
+            <div style="margin-top: 20px; text-align: center;">
+                <p:commandButton value="Guardar Detalle"
+                                 icon="pi pi-save"
+                                 styleClass="btn-rojo"
+                                 actionListener="#{kardexDetalleFrm.btnGuardarHandler}"
+                                 rendered="#{kardexDetalleFrm.estado.name() eq 'CREAR'}"
+                                 update=":pnlTabla :pnlDetalle :frmTabla:messages"
+                                 process="@form"/>
+
+                <p:spacer width="10" rendered="#{kardexDetalleFrm.estado.name() == 'CREAR'}"/>
+
+                <p:commandButton value="Actualizar Detalle"
+                                 icon="pi pi-save"
+                                 styleClass="btn-rojo"
+                                 actionListener="#{kardexDetalleFrm.btnModificarHandler}"
+                                 rendered="#{kardexDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":pnlTabla :pnlDetalle :frmTabla:messages"
+                                 process="@form"/>
+
+                <p:spacer width="10" rendered="#{kardexDetalleFrm.estado.name() == 'MODIFICAR'}"/>
+
+                <p:commandButton value="Eliminar Detalle"
+                                 icon="pi pi-trash"
+                                 styleClass="btn-rojo"
+                                 actionListener="#{kardexDetalleFrm.btnEliminarHandler}"
+                                 rendered="#{kardexDetalleFrm.estado.name() eq 'MODIFICAR'}"
+                                 update=":pnlTabla :pnlDetalle :frmTabla:messages"/>
+
+                <p:spacer width="10" rendered="#{kardexDetalleFrm.estado.name() == 'MODIFICAR'}"/>
+            </div>
+
+            <!-- MENSAJES -->
+            <p:growl id="messagesDetail" showDetail="true" life="5000" sticky="false"/>
+
+        </h:form>
+    </h:panelGroup>
+
+</h:body>
 </html>

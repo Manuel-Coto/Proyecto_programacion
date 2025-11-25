@@ -134,6 +134,21 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Jackson para serialización JSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
+        <!-- Módulo JAXB para Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

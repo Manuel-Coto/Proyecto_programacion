@@ -158,7 +158,7 @@ public class CompraResource {
                         entity.setProveedor(proveedor);
                     }
 
-                    entity.setId(Math.toIntExact(id));
+                    entity.setId((long) Math.toIntExact(id));
                     compraDao.modificar(entity);
                     return Response.ok(entity).build();
                 }

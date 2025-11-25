@@ -7,6 +7,8 @@ import jakarta.persistence.criteria.*;
 
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.TipoProductoCaracteristica;
 
+import java.util.List;
+
 @Stateless
 public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<TipoProductoCaracteristica> {
 
@@ -35,4 +37,16 @@ public class TipoProductoCaracteristicaDAO extends InventarioDefaultDataAccess<T
         }
     }
 
+    public List<TipoProductoCaracteristica> findCaracteristicasByTipoProductoId(Long idTipoProductoSeleccionado) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<TipoProductoCaracteristica> cq = cb.createQuery(TipoProductoCaracteristica.class);
+        Root<TipoProductoCaracteristica> root = cq.from(TipoProductoCaracteristica.class);
+        Join<Object, Object> joinTipoProducto = root.join("idTipoProducto");
+
+        cq.select(root)
+                .where(cb.equal(joinTipoProducto.get("id"), idTipoProductoSeleccionado))
+                .orderBy(cb.asc(root.get("caracteristica").get("nombre")));
+
+        return em.createQuery(cq).getResultList();
+    }
 }
