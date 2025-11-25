@@ -78,12 +78,27 @@ public class ProductoFrm extends DefaultFrm<Producto> implements Serializable {
 
     @Override
     protected String getIdAsText(Producto r) {
-        return (r != null && r.getId() != null) ? r.getId().toString() : null;
+        if (r != null && r.getId() != null) {
+            return r.getId().toString();
+        }
+        return null;
     }
 
     @Override
     protected Producto getIdByText(String id) {
-        return (id == null || id.isBlank()) ? null : buscarRegistroPorId(id);
+        if (id != null && this.modelo != null && !this.modelo.getWrappedData().isEmpty()) {
+            try {
+                java.util.UUID buscado = java.util.UUID.fromString(id);
+                return this.modelo.getWrappedData().stream()
+                        .filter(r -> r.getId() != null && r.getId().equals(buscado))
+                        .findFirst()
+                        .orElse(null);
+            } catch (IllegalArgumentException e) {
+                System.err.println("ID no es un UUID válido: " + id);
+                return null;
+            }
+        }
+        return null;
     }
 
     /* ==== Botones ==== */
@@ -108,15 +123,5 @@ public class ProductoFrm extends DefaultFrm<Producto> implements Serializable {
 
     public boolean isModoDetalle() { return getEstado() != ESTADO_CRUD.NADA; }
 
-    // Getters y Setters para listas y selecciones
-    @SuppressWarnings("unchecked")
-    public LazyDataModel<Producto> getModeloTipado() {
-        return (LazyDataModel<Producto>) super.getModelo();
-    }
 
-
-    // Mensajito helper si lo necesitas en el futuro
-    private void msg(FacesMessage.Severity s, String sum, String det) {
-        getFacesContext().addMessage(null, new FacesMessage(s, sum, det));
-    }
 }

@@ -2,27 +2,25 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "compra", schema = "public")
 public class Compra {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_compra", nullable = false)
-    private Integer id;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_compra", nullable = false)
+    @Id
+    @Column(name = "id_compra", nullable = false)
+    private Long id;
+
+    @Column(name = "id_proveedor")
+    private Integer idProveedor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proveedor", insertable = false, updatable = false)
     private Proveedor proveedor;
 
     @Column(name = "fecha")
     private OffsetDateTime fecha;
-
-    @Column(name = "id_proveedor")
-    private Integer idProveedor;
 
     @Size(max = 10)
     @Column(name = "estado", length = 10)
@@ -32,11 +30,12 @@ public class Compra {
     @Column(name = "observaciones")
     private String observaciones;
 
-    public Integer getId() {
+    // Getters y Setters
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -46,6 +45,9 @@ public class Compra {
 
     public void setProveedor(Proveedor proveedor) {
         this.proveedor = proveedor;
+        if (proveedor != null) {
+            this.idProveedor = proveedor.getId();
+        }
     }
 
     public OffsetDateTime getFecha() {

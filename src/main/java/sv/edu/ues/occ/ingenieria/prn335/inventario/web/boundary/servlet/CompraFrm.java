@@ -56,15 +56,20 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
     @Override
     protected Compra buscarRegistroPorId(Object id) {
-        if (id instanceof Integer) {
-            try {
-                return compraDao.findById((id));
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error buscando Compra por ID", e);
+        try {
+            if (id instanceof Integer) {
+                return compraDao.findById(((Integer) id).longValue());
+            } else if (id instanceof Long) {
+                return compraDao.findById(id);
+            } else if (id instanceof String) {
+                return compraDao.findById(Long.parseLong((String) id));
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error buscando Compra por ID", e);
         }
         return null;
     }
+
 
     protected void crearEntidad(Compra entidad) throws Exception {
         // Validaciones de campos obligatorios
@@ -98,7 +103,7 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
     @Override
     protected Compra getIdByText(String id) {
         try {
-            return buscarRegistroPorId(Integer.parseInt(id));
+            return buscarRegistroPorId(Long.parseLong(id));
         } catch (NumberFormatException e) {
             LOGGER.log(Level.WARNING, "ID no es un número válido: {0}", id);
             return null;
@@ -242,6 +247,34 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
             LOGGER.log(Level.SEVERE, "Error al modificar compra", e);
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al modificar", e.getMessage()));
+        }
+    }
+
+    @Override
+    public void btnEliminarHandler(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para eliminar"));
+            return;
+        }
+
+        try {
+            LOGGER.log(Level.INFO, "Eliminando compra con ID: {0}", this.registro.getId());
+
+            compraDao.eliminar(this.registro);
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            this.modelo = null;
+            inicializarRegistros();
+
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro eliminado correctamente"));
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al eliminar compra", e);
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al eliminar", e.getMessage()));
         }
     }
 

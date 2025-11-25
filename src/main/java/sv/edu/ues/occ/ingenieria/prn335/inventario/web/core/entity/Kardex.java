@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "kardex", schema = "public")
 public class Kardex {

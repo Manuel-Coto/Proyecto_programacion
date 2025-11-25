@@ -3,7 +3,7 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
-import jakarta.faces.event.ActionEvent;
+import org.primefaces.event.SelectEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.*;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.*;
 
@@ -24,19 +25,20 @@ import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.*;
 @ViewScoped
 public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(KardexFrm.class.getName());
 
     @Inject
-    private KardexDAO kardexDAO;  // CORREGIDO: mayúscula
+    private KardexDAO kardexDAO;
 
     @Inject
-    private ProductoDAO productoDAO;  // CORREGIDO: mayúscula
+    private ProductoDAO productoDAO;
 
     @Inject
-    private AlmacenDAO almacenDAO;  // CORREGIDO: mayúscula
+    private AlmacenDAO almacenDAO;
 
     @Inject
-    private CompraDetalleDAO compraDetalleDAO;  // CORREGIDO: mayúscula
+    private CompraDetalleDAO compraDetalleDAO;
 
     @Inject
     private VentaDetalleDAO ventaDetalleDAO;
@@ -46,6 +48,13 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
     private List<Almacen> almacenesDisponibles;
     private List<CompraDetalle> comprasDetalleDisponibles;
     private List<VentaDetalle> ventasDetalleDisponibles;
+
+    // IDs seleccionados en los selectOneMenu
+    private UUID productoSeleccionadoId;
+    private Integer almacenSeleccionadoId;
+    private UUID compraDetalleSeleccionadaId;
+    private UUID ventaDetalleSeleccionadaId;
+
     private final List<String> tiposMovimiento = List.of(
             "ENTRADA_COMPRA",
             "SALIDA_VENTA",
@@ -57,14 +66,14 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
             "DEVOLUCION_VENTA"
     );
 
-    // ---------------------- Inicialización ----------------------
+    // ===== INICIALIZACIÓN =====
 
     @PostConstruct
     @Override
     public void inicializar() {
         super.inicializar();
-        cargarDatosFiltros();
         this.nombreBean = "Gestión de Kardex";
+        cargarDatosFiltros();
         LOGGER.log(Level.INFO, "KardexFrm inicializado correctamente");
     }
 
@@ -86,7 +95,7 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         }
     }
 
-    // ---------------------- Métodos Abstractos ----------------------
+    // ===== MÉTODOS ABSTRACTOS DE DefaultFrm =====
 
     @Override
     protected FacesContext getFacesContext() {
@@ -95,7 +104,7 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
 
     @Override
     protected InventarioDefaultDataAccess<Kardex> getDao() {
-        return kardexDAO;  // CORREGIDO
+        return kardexDAO;
     }
 
     @Override
@@ -108,18 +117,23 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         kardex.setCantidadActual(BigDecimal.ZERO);
         kardex.setPrecioActual(BigDecimal.ZERO);
 
-        // Inicializar entidades FK para evitar NullPointer en XHTML
         kardex.setIdProducto(new Producto());
         kardex.setIdAlmacen(new Almacen());
+
+        this.productoSeleccionadoId = null;
+        this.almacenSeleccionadoId = null;
+        this.compraDetalleSeleccionadaId = null;
+        this.ventaDetalleSeleccionadaId = null;
 
         LOGGER.log(Level.INFO, "Nuevo registro de kardex creado con ID: {0}", kardex.getId());
         return kardex;
     }
 
+
     @Override
     protected Kardex buscarRegistroPorId(Object id) {
         if (id instanceof UUID) {
-            return kardexDAO.findById((UUID) id);  // CORREGIDO
+            return kardexDAO.findById((UUID) id);
         }
         return null;
     }
@@ -136,7 +150,7 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         }
         try {
             UUID uuid = UUID.fromString(id);
-            return kardexDAO.findById(uuid);  // CORREGIDO
+            return kardexDAO.findById(uuid);
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.WARNING, "ID inválido: {0}", id);
             return null;
@@ -192,12 +206,124 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
         return fallo;
     }
 
-    // ---------------------- Métodos Auxiliares ----------------------
+    // ===== MANEJADORES DE EVENTOS DEL XHTML =====
+
+    /**
+     * Manejador cuando se selecciona un producto en el selectOneMenu
+     */
+    public void onProductoChange() {
+        if (productoSeleccionadoId != null) {
+            Producto producto = obtenerProductoCompleto(productoSeleccionadoId);
+            if (registro != null && producto != null) {
+                registro.setIdProducto(producto);
+                LOGGER.log(Level.INFO, "Producto sincronizado: {0}", producto.getId());
+            }
+        } else {
+            if (registro != null) {
+                registro.setIdProducto(new Producto());
+            }
+        }
+    }
+
+    /**
+     * Manejador cuando se selecciona un almacén en el selectOneMenu
+     */
+    public void onAlmacenChange() {
+        if (almacenSeleccionadoId != null) {
+            Almacen almacen = obtenerAlmacenCompleto(almacenSeleccionadoId);
+            if (registro != null && almacen != null) {
+                registro.setIdAlmacen(almacen);
+                LOGGER.log(Level.INFO, "Almacén sincronizado: {0}", almacen.getId());
+            }
+        } else {
+            if (registro != null) {
+                registro.setIdAlmacen(new Almacen());
+            }
+        }
+    }
+
+    /**
+     * Manejador cuando se selecciona un detalle de compra en el selectOneMenu
+     */
+    public void onCompraChange() {
+        if (compraDetalleSeleccionadaId != null) {
+            CompraDetalle detalle = obtenerCompraDetalleCompleto(compraDetalleSeleccionadaId);
+            if (registro != null) {
+                registro.setIdCompraDetalle(detalle);
+                LOGGER.log(Level.INFO, "CompraDetalle sincronizado: {0}", compraDetalleSeleccionadaId);
+            }
+        } else {
+            if (registro != null) {
+                registro.setIdCompraDetalle(null);
+            }
+        }
+    }
+
+    /**
+     * Manejador cuando se selecciona un detalle de venta en el selectOneMenu
+     */
+    public void onVentaChange() {
+        if (ventaDetalleSeleccionadaId != null) {
+            VentaDetalle detalle = obtenerVentaDetalleCompleto(ventaDetalleSeleccionadaId);
+            if (registro != null) {
+                registro.setIdVentaDetalle(detalle);
+                LOGGER.log(Level.INFO, "VentaDetalle sincronizado: {0}", ventaDetalleSeleccionadaId);
+            }
+        } else {
+            if (registro != null) {
+                registro.setIdVentaDetalle(null);
+            }
+        }
+    }
+
+    public List<CompraDetalle> completeCompraDetalle(String consulta) {
+        return compraDetalleDAO.findLikeConsulta(consulta);
+    }
+
+    public List<VentaDetalle> completeVentaDetalle(String consulta) {
+        return ventaDetalleDAO.findLikeConsulta(consulta);
+    }
+
+
+    /**
+     * Manejador cuando se selecciona una fila en la tabla
+     */
+    public void selectionHandler(SelectEvent<Kardex> event) {
+        this.registro = event.getObject();
+
+        // Sincronizar IDs con los selectOneMenu
+        if (this.registro != null) {
+            if (this.registro.getIdProducto() != null && this.registro.getIdProducto().getId() != null) {
+                this.productoSeleccionadoId = this.registro.getIdProducto().getId();
+                this.registro.setIdProducto(obtenerProductoCompleto(this.productoSeleccionadoId));
+            }
+
+            if (this.registro.getIdAlmacen() != null && this.registro.getIdAlmacen().getId() != null) {
+                this.almacenSeleccionadoId = this.registro.getIdAlmacen().getId();
+                this.registro.setIdAlmacen(obtenerAlmacenCompleto(this.almacenSeleccionadoId));
+            }
+
+            if (this.registro.getIdCompraDetalle() != null && this.registro.getIdCompraDetalle().getId() != null) {
+                this.compraDetalleSeleccionadaId = this.registro.getIdCompraDetalle().getId();
+            }
+
+            if (this.registro.getIdVentaDetalle() != null && this.registro.getIdVentaDetalle().getId() != null) {
+                this.ventaDetalleSeleccionadaId = this.registro.getIdVentaDetalle().getId();
+            }
+        }
+
+        this.estado = ESTADO_CRUD.MODIFICAR;
+        LOGGER.log(Level.INFO, "Kardex seleccionado: {0}", this.registro.getId());
+    }
+
+    // ===== MÉTODOS AUXILIARES =====
 
     private Producto obtenerProductoCompleto(UUID id) {
         if (id == null) return null;
         try {
-            return productoDAO.findById(id);  // CORREGIDO
+            Producto producto = productoDAO.findById(id);
+            LOGGER.log(Level.INFO, "Producto cargado: {0}", id);
+            return producto;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al obtener Producto con ID: " + id, e);
             return null;
@@ -207,7 +333,9 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
     private Almacen obtenerAlmacenCompleto(Integer id) {
         if (id == null) return null;
         try {
-            return almacenDAO.findById(id);  // CORREGIDO
+            Almacen almacen = almacenDAO.findById(id);
+            LOGGER.log(Level.INFO, "Almacén cargado: {0}", id);
+            return almacen;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al obtener Almacén con ID: " + id, e);
             return null;
@@ -217,7 +345,9 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
     private CompraDetalle obtenerCompraDetalleCompleto(UUID id) {
         if (id == null) return null;
         try {
-            return compraDetalleDAO.findById(id);  // CORREGIDO
+            CompraDetalle detalle = compraDetalleDAO.findById(id);
+            LOGGER.log(Level.INFO, "CompraDetalle cargado: {0}", id);
+            return detalle;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al obtener CompraDetalle con ID: " + id, e);
             return null;
@@ -227,7 +357,9 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
     private VentaDetalle obtenerVentaDetalleCompleto(UUID id) {
         if (id == null) return null;
         try {
-            return ventaDetalleDAO.findById(id);  // CORREGIDO
+            VentaDetalle detalle = ventaDetalleDAO.findById(id);
+            LOGGER.log(Level.INFO, "VentaDetalle cargado: {0}", id);
+            return detalle;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al obtener VentaDetalle con ID: " + id, e);
             return null;
@@ -239,8 +371,12 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
      */
     private void calcularValoresActuales(Kardex kardex) {
         try {
-            // Obtener el último movimiento del producto en el almacén
-            Kardex ultimoMovimiento = kardexDAO.findUltimoMovimiento(  // CORREGIDO
+            if (kardex.getIdProducto() == null || kardex.getIdAlmacen() == null) {
+                LOGGER.log(Level.WARNING, "No se pueden calcular valores: Producto o Almacén nulos");
+                return;
+            }
+
+            Kardex ultimoMovimiento = kardexDAO.findUltimoMovimiento(
                     kardex.getIdProducto().getId(),
                     kardex.getIdAlmacen().getId()
             );
@@ -253,35 +389,25 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
                     ? ultimoMovimiento.getPrecioActual()
                     : BigDecimal.ZERO;
 
-            // Calcular según el tipo de movimiento
             String tipoMov = kardex.getTipoMovimiento();
             BigDecimal cantidad = kardex.getCantidad();
             BigDecimal precio = kardex.getPrecio();
 
             if (tipoMov.startsWith("ENTRADA") || tipoMov.equals("DEVOLUCION_VENTA")) {
-                // Entrada: suma cantidad
                 kardex.setCantidadActual(cantidadAnterior.add(cantidad));
-
-                // Precio promedio ponderado
-                if (cantidadAnterior.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal totalAnterior = cantidadAnterior.multiply(precioAnterior);
-                    BigDecimal totalNuevo = cantidad.multiply(precio);
-                    BigDecimal cantidadTotal = cantidadAnterior.add(cantidad);
-                    // CORREGIDO: usar RoundingMode en lugar de constante deprecated
-                    kardex.setPrecioActual(totalAnterior.add(totalNuevo).divide(cantidadTotal, 2, RoundingMode.HALF_UP));
-                } else {
-                    kardex.setPrecioActual(precio);
-                }
-
             } else if (tipoMov.startsWith("SALIDA") || tipoMov.equals("DEVOLUCION_COMPRA")) {
-                // Salida: resta cantidad
                 kardex.setCantidadActual(cantidadAnterior.subtract(cantidad));
-                kardex.setPrecioActual(precioAnterior); // Mantiene el precio anterior
+            } else {
+                kardex.setCantidadActual(cantidadAnterior);
+            }
 
-                // Validar que no quede en negativo
-                if (kardex.getCantidadActual().compareTo(BigDecimal.ZERO) < 0) {
-                    throw new IllegalStateException("No hay suficiente inventario. Disponible: " + cantidadAnterior);
-                }
+            // Calcular precio promedio
+            if (kardex.getCantidadActual().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal totalCosto = precioAnterior.multiply(cantidadAnterior)
+                        .add(precio.multiply(cantidad));
+                kardex.setPrecioActual(totalCosto.divide(kardex.getCantidadActual(), 2, RoundingMode.HALF_UP));
+            } else {
+                kardex.setPrecioActual(BigDecimal.ZERO);
             }
 
             LOGGER.log(Level.INFO, "Valores actuales calculados: Cantidad={0}, Precio={1}",
@@ -289,130 +415,72 @@ public class KardexFrm extends DefaultFrm<Kardex> implements Serializable {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al calcular valores actuales", e);
-            throw new RuntimeException("Error al calcular inventario: " + e.getMessage(), e);
         }
     }
 
-    // ---------------------- Manejo de Guardado ----------------------
-
-    @Override
-    public void btnGuardarHandler(ActionEvent actionEvent) {
-        if (this.registro == null) {
-            getFacesContext().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para guardar"));
-            return;
-        }
-
-        try {
-            // Validar campos
-            if (esNombreVacio(this.registro)) {
-                return;
-            }
-
-            // Sincronizar Entidades FK obligatorias
-            UUID idProductoSeleccionado = this.registro.getIdProducto().getId();
-            Integer idAlmacenSeleccionado = this.registro.getIdAlmacen().getId();
-
-            Producto productoCompleto = obtenerProductoCompleto(idProductoSeleccionado);
-            Almacen almacenCompleto = obtenerAlmacenCompleto(idAlmacenSeleccionado);
-
-            if (productoCompleto == null) {
-                getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se encontró el Producto seleccionado."));
-                return;
-            }
-
-            if (almacenCompleto == null) {
-                getFacesContext().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se encontró el Almacén seleccionado."));
-                return;
-            }
-
-            this.registro.setIdProducto(productoCompleto);
-            this.registro.setIdAlmacen(almacenCompleto);
-
-            // Sincronizar FK opcionales
-            if (this.registro.getIdCompraDetalle() != null && this.registro.getIdCompraDetalle().getId() != null) {
-                CompraDetalle compraDetalle = obtenerCompraDetalleCompleto(this.registro.getIdCompraDetalle().getId());
-                this.registro.setIdCompraDetalle(compraDetalle);
-            } else {
-                this.registro.setIdCompraDetalle(null);
-            }
-
-            if (this.registro.getIdVentaDetalle() != null && this.registro.getIdVentaDetalle().getId() != null) {
-                VentaDetalle ventaDetalle = obtenerVentaDetalleCompleto(this.registro.getIdVentaDetalle().getId());
-                this.registro.setIdVentaDetalle(ventaDetalle);
-            } else {
-                this.registro.setIdVentaDetalle(null);
-            }
-
-            // Calcular valores actuales de inventario
-            calcularValoresActuales(this.registro);
-
-            // Persistir
-            getDao().crear(this.registro);
-
-            // Limpieza y Notificación
-            LOGGER.log(Level.INFO, "Kardex guardado: {0}", this.registro.getId());
-            this.registro = null;
-            this.estado = ESTADO_CRUD.NADA;
-            inicializarRegistros();
-            getFacesContext().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Movimiento de kardex registrado correctamente"));
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al guardar kardex", e);
-            getFacesContext().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al guardar",
-                            "Ocurrió un error: " + e.getMessage()));
-        }
-    }
-
-    @Override
-    public void btnModificarHandler(ActionEvent actionEvent) {
-        getFacesContext().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención",
-                        "No se permite modificar registros de kardex por integridad del inventario"));
-    }
-
-    @Override
-    public void btnEliminarHandler(ActionEvent actionEvent) {
-        getFacesContext().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención",
-                        "No se permite eliminar registros de kardex por integridad del inventario"));
-    }
-
-    // ---------------------- Getters para JSF ----------------------
+    // ===== GETTERS Y SETTERS =====
 
     public List<Producto> getProductosDisponibles() {
         if (productosDisponibles == null) {
-            cargarDatosFiltros();
+            productosDisponibles = new ArrayList<>();
         }
         return productosDisponibles;
     }
 
     public List<Almacen> getAlmacenesDisponibles() {
         if (almacenesDisponibles == null) {
-            cargarDatosFiltros();
+            almacenesDisponibles = new ArrayList<>();
         }
         return almacenesDisponibles;
     }
 
     public List<CompraDetalle> getComprasDetalleDisponibles() {
         if (comprasDetalleDisponibles == null) {
-            cargarDatosFiltros();
+            comprasDetalleDisponibles = new ArrayList<>();
         }
         return comprasDetalleDisponibles;
     }
 
     public List<VentaDetalle> getVentasDetalleDisponibles() {
         if (ventasDetalleDisponibles == null) {
-            cargarDatosFiltros();
+            ventasDetalleDisponibles = new ArrayList<>();
         }
         return ventasDetalleDisponibles;
     }
 
     public List<String> getTiposMovimiento() {
         return tiposMovimiento;
+    }
+
+    public UUID getProductoSeleccionadoId() {
+        return productoSeleccionadoId;
+    }
+
+    public void setProductoSeleccionadoId(UUID productoSeleccionadoId) {
+        this.productoSeleccionadoId = productoSeleccionadoId;
+    }
+
+    public Integer getAlmacenSeleccionadoId() {
+        return almacenSeleccionadoId;
+    }
+
+    public void setAlmacenSeleccionadoId(Integer almacenSeleccionadoId) {
+        this.almacenSeleccionadoId = almacenSeleccionadoId;
+    }
+
+    public UUID getCompraDetalleSeleccionadaId() {
+        return compraDetalleSeleccionadaId;
+    }
+
+    public void setCompraDetalleSeleccionadaId(UUID compraDetalleSeleccionadaId) {
+        this.compraDetalleSeleccionadaId = compraDetalleSeleccionadaId;
+    }
+
+    public UUID getVentaDetalleSeleccionadaId() {
+        return ventaDetalleSeleccionadaId;
+    }
+
+    public void setVentaDetalleSeleccionadaId(UUID ventaDetalleSeleccionadaId) {
+        this.ventaDetalleSeleccionadaId = ventaDetalleSeleccionadaId;
     }
 }

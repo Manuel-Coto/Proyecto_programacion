@@ -58,8 +58,7 @@
                                     listener="#{compraFrm.selectionHandler}"
                                     update=":pnlTabla :pnlDetalle :frmTop:messages" />
 
-                            <p:column headerText="ID"
-                                      style="width:120px; text-align:center;">
+                            <p:column headerText="ID" style="width:120px; text-align:center;">
                                 <h:outputText value="#{n.id}" />
                             </p:column>
 
@@ -79,24 +78,24 @@
                         </p:dataTable>
 
                         <!-- Barra de botones debajo de la tabla -->
-                                <p:commandButton id="btnNuevo"
-                                                 value="Nueva Compra"
-                                                 icon="pi pi-plus"
-                                                 styleClass="btn-rojo"
-                                                 rendered="#{compraFrm.modoLista}"
-                                                 actionListener="#{compraFrm.btnNuevoHandler}"
-                                                 process="@this"
-                                                 immediate="true"
-                                                 update=":pnlDetalle :pnlTabla :frmTop:messages" />
-                                <p:commandButton id="btnCancelar"
-                                                 value="Cancelar Compra"
-                                                 icon="pi pi-times"
-                                                 styleClass="btn-oscuro"
-                                                 rendered="#{compraFrm.modoDetalle}"
-                                                 actionListener="#{compraFrm.btnCancelarHandler}"
-                                                 process="@this"
-                                                 immediate="true"
-                                                 update=":pnlDetalle :pnlTabla :frmTop:messages" />
+                        <p:commandButton id="btnNuevo"
+                                         value="Nueva Compra"
+                                         icon="pi pi-plus"
+                                         styleClass="btn-rojo"
+                                         rendered="#{compraFrm.modoLista}"
+                                         actionListener="#{compraFrm.btnNuevoHandler}"
+                                         process="@this"
+                                         immediate="true"
+                                         update=":pnlDetalle :pnlTabla :frmTop:messages" />
+                        <p:commandButton id="btnCancelar"
+                                         value="Cancelar Compra"
+                                         icon="pi pi-times"
+                                         styleClass="btn-oscuro"
+                                         rendered="#{compraFrm.modoDetalle}"
+                                         actionListener="#{compraFrm.btnCancelarHandler}"
+                                         process="@this"
+                                         immediate="true"
+                                         update=":pnlDetalle :pnlTabla :frmTop:messages" />
 
                     </h:form>
                 </h:panelGroup>
@@ -175,8 +174,7 @@
                                               styleClass="counter-text"
                                               style="margin-top: 0.25rem; display:block;" />
 
-                                <!-- Botones CRUD -->
-                                <h:panelGrid columns="3" style="margin-top: 15px;">
+                                <h:panelGrid columns="1" style="margin-top: 15px;">
                                     <p:commandButton value="Crear Compra"
                                                      icon="pi pi-save"
                                                      styleClass="btn-rojo"
