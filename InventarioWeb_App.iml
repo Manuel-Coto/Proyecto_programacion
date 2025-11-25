@@ -6,7 +6,7 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="EclipseLink" />
         <datasource-mapping>
-          <factory-entry name="consolePU" value="fe6181c8-ed71-4f3c-8230-2e25df0c6ce5" />
+          <factory-entry name="consolePU" value="22bca3db-1fc1-4af1-ac2c-76fe036e2acf" />
           <factory-entry name="inventarioPU" />
         </datasource-mapping>
         <naming-strategy-map />
