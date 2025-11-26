@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html lang="es"
       xmlns="http://www.w3.org/1999/xhtml"
@@ -97,7 +96,8 @@
                                      value="#{compraDetalleFrm.registro.idCompra}"
                                      converter="compraConverter"
                                      required="true"
-                                     requiredMessage="Seleccione compra">
+                                     requiredMessage="Seleccione compra"
+                                     disabled="#{not empty compraDetalleFrm.registro.idCompra}">
                         <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
                         <f:selectItems value="#{compraDetalleFrm.comprasDisponibles}"
                                        var="compra"
@@ -110,7 +110,8 @@
                                      value="#{compraDetalleFrm.registro.idProducto}"
                                      converter="productoConverter"
                                      required="true"
-                                     requiredMessage="Seleccione producto">
+                                     requiredMessage="Seleccione producto"
+                                     disabled="#{not empty compraDetalleFrm.registro.idProducto}">
                         <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
                         <f:selectItems value="#{compraDetalleFrm.productosDisponibles}"
                                        var="prod"

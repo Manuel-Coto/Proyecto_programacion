@@ -4,6 +4,7 @@ public enum EstadoCompra {
     ORDEN,
     CREADA,
     APROBADA,
+    PAGADA,
     RECHAZADA,
     ANULADA
 }

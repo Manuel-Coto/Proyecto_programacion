@@ -1,3 +1,4 @@
+// java
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 
 import jakarta.annotation.PostConstruct;
@@ -9,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.NotificadorKardex;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ProveedorDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Compra;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Proveedor;
@@ -30,6 +32,9 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
 
     @Inject
     private ProveedorDAO proveedorDao;
+
+    @Inject
+    private NotificadorKardex notificadorKardex;
 
     private List<Proveedor> listaProveedores;
     private List<EstadoCompra> estadosDisponibles;
@@ -67,28 +72,20 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         return null;
     }
 
-
     protected void crearEntidad(Compra entidad) throws Exception {
-        // Validaciones de campos obligatorios
         if (entidad.getFecha() == null) {
             throw new Exception("La fecha es obligatoria");
         }
-
         if (entidad.getIdProveedor() == null) {
             throw new Exception("Debe seleccionar un proveedor");
         }
-
         if (entidad.getEstado() == null || entidad.getEstado().isBlank()) {
             throw new Exception("Debe seleccionar un estado");
         }
-
-        // Verifica si el proveedor existe
         Proveedor proveedorEntity = proveedorDao.findById(entidad.getIdProveedor());
         if (proveedorEntity == null) {
             throw new Exception("El proveedor seleccionado no existe.");
         }
-
-        // El DAO se encargará de asignar el proveedor y generar el ID
         compraDao.crear(entidad);
     }
 
@@ -112,20 +109,13 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         return registro == null || registro.getIdProveedor() == null;
     }
 
-    // ---------------------- Inicialización de Listas ----------------------
-
     public void inicializarListas() {
         try {
-            // Inicializamos la lista de proveedores
             this.listaProveedores = proveedorDao != null ? proveedorDao.findAll() : new ArrayList<>();
             this.estadosDisponibles = Arrays.asList(EstadoCompra.values());
-
-            LOGGER.log(Level.INFO, "Listas inicializadas: {0} proveedores",
-                    listaProveedores.size());
-
+            LOGGER.log(Level.INFO, "Listas inicializadas: {0} proveedores", listaProveedores.size());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al inicializar listas", e);
-            // En caso de error, asignamos listas vacías para evitar null pointers
             this.listaProveedores = new ArrayList<>();
             this.estadosDisponibles = Collections.emptyList();
         }
@@ -139,11 +129,6 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         LOGGER.log(Level.INFO, "CompraFrm inicializado correctamente");
     }
 
-
-
-
-    // ---------------------- Métodos de Guardado y Modificación ----------------------
-
     @Override
     public void btnGuardarHandler(ActionEvent actionEvent) {
         if (this.registro == null) {
@@ -151,52 +136,36 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para guardar"));
             return;
         }
-
         try {
-            // Validación del proveedor
             if (esNombreVacio(this.registro)) {
                 getFacesContext().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un proveedor"));
                 return;
             }
-
-            // Validación del estado
             if (registro.getEstado() == null || registro.getEstado().isBlank()) {
                 getFacesContext().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "Debe seleccionar un estado"));
                 return;
             }
-
-            // Validación de la fecha
             if (registro.getFecha() == null) {
                 getFacesContext().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "La fecha es obligatoria"));
                 return;
             }
-
-            // Ejecuta la operación según el estado
             if (this.estado == ESTADO_CRUD.CREAR) {
                 crearEntidad(this.registro);
             } else if (this.estado == ESTADO_CRUD.MODIFICAR) {
-                // Validar que el proveedor exista antes de modificar
                 compraDao.validarProveedor(this.registro.getIdProveedor());
-
-                // Cargar el proveedor completo
                 Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
                 this.registro.setProveedor(proveedor);
-
                 getDao().modificar(this.registro);
             }
-
-            // Limpiar y recargar después de guardar
             this.registro = null;
             this.estado = ESTADO_CRUD.NADA;
             this.modelo = null;
             inicializarRegistros();
-
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro guardado correctamente"));
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al guardar compra", e);
             getFacesContext().addMessage(null,
@@ -229,10 +198,23 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
             Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
             this.registro.setProveedor(proveedor);
 
+            boolean notificar = EstadoCompra.PAGADA.name().equalsIgnoreCase(this.registro.getEstado());
+
             getDao().modificar(this.registro);
+
+            if (notificar) {
+                try {
+                    String mensaje = "Compra PAGADA: " + this.registro.getId();
+                    notificadorKardex.notificarCambioKardex(mensaje);
+                } catch (Exception ne) {
+                    LOGGER.log(Level.WARNING, "Error notificando cambio al Kardex", ne);
+                }
+            }
 
             this.registro = null;
             this.estado = ESTADO_CRUD.NADA;
+            this.modelo = null;
+            inicializarRegistros();
 
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro modificado correctamente"));
@@ -244,6 +226,20 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         }
     }
 
+    /**
+     * Método que marca el registro como PAGADA y delega en btnModificarHandler para persistir y notificar.
+     */
+    public void notificarCambioKardex(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para notificar"));
+            return;
+        }
+        this.registro.setEstado(EstadoCompra.PAGADA.name());
+        // Delegar en el handler de modificación (éste notificará antes de limpiar)
+        btnModificarHandler(actionEvent);
+    }
+
     @Override
     public void btnEliminarHandler(ActionEvent actionEvent) {
         if (this.registro == null) {
@@ -251,18 +247,13 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para eliminar"));
             return;
         }
-
         try {
             LOGGER.log(Level.INFO, "Eliminando compra con ID: {0}", this.registro.getId());
-
             compraDao.eliminar(this.registro);
-
             this.registro = null;
             this.estado = ESTADO_CRUD.NADA;
-
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Registro eliminado correctamente"));
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al eliminar compra", e);
             getFacesContext().addMessage(null,
@@ -271,7 +262,6 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
     }
 
 
-    // ---------------------- Getters y Setters ----------------------
 
     public List<Proveedor> getListaProveedores() {
         if (listaProveedores == null || listaProveedores.isEmpty()) {

@@ -132,7 +132,9 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
             if (em == null) {
                 throw new IllegalStateException("EntityManager no disponible");
             }
-            return em.merge(registro);
+            T merged = em.merge(registro);
+            em.flush();
+            return merged;
         } catch (Exception ex) {
             throw new RuntimeException("Error al modificar el registro", ex);
         }
@@ -153,11 +155,13 @@ public abstract class InventarioDefaultDataAccess<T> implements InventarioDAOInt
                 entity = em.merge(entity);
             }
             em.remove(entity);
+            em.flush();
 
         } catch (Exception ex) {
             throw new RuntimeException("Error al eliminar el registro", ex);
         }
     }
+
 
     public void eliminarPorId(Object id) {
         if (id == null) {

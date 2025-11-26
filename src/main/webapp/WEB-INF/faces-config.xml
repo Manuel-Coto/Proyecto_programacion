@@ -12,7 +12,7 @@
         </locale-config>
 
         <resource-bundle>
-            <base-name>messages</base-name> <!-- Asegúrate que este es el nombre correcto del bundle -->
+            <base-name>messages</base-name>
             <var>msg</var>
         </resource-bundle>
     </application>

@@ -67,6 +67,7 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
     }
 
 
+
     @Override
     public void eliminar(Compra registro) {
         LOGGER.log(Level.INFO, "Eliminando compra con ID: {0}", registro.getId());
@@ -82,6 +83,7 @@ public class CompraDAO extends InventarioDefaultDataAccess<Compra> implements Se
             throw new RuntimeException("Error al eliminar la compra: " + e.getMessage(), e);
         }
     }
+
 
     /**
      * Genera un nuevo ID para compra basándose en el máximo existente

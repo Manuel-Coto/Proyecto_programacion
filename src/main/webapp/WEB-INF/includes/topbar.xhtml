@@ -34,6 +34,11 @@
             <p:menuitem value="Detalle de Kardex" url="#{request.contextPath}/paginas/KardexDetalle.jsf" icon="pi pi-list" />
         </p:submenu>
 
+        <p:submenu label="Kardexes" icon="pi pi-archive">
+            <p:menuitem value="Recepción Kardex" url="#{request.contextPath}/paginas/RecepcionKardex.jsf" icon="pi pi-inbox" />
+            <p:menuitem value="Bodega Kardex" url="#{request.contextPath}/paginas/BodegaKardex.jsf" icon="pi pi-outbox" />
+        </p:submenu>
+
     </p:menubar>
 </h:form>
 

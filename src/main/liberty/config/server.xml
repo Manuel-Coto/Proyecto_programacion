@@ -3,10 +3,15 @@
 
     <featureManager>
         <feature>jakartaee-10.0</feature>
-        <!-- Para JSON-B (mapeo objetos Java <-> JSON) -->
-        <feature>jsonb-3.0</feature>
-        <feature>microProfile-7.1</feature>
+        <feature>jdbc-4.3</feature>
+        <feature>websocket-2.1</feature>
+
     </featureManager>
+
+    <messagingEngine>
+        <queue id="QUEUE1"/>
+    </messagingEngine>
+
 
 
     <library id="postgresLib">
@@ -17,7 +22,11 @@
 
     <jdbcDriver id="postgres-drivers" libraryRef="postgresLib"/>
 
-    <!-- Driver JDBC que usa la librería -->
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="9080"
+                  httpsPort="9443" />
+
 
 
     <!-- DataSource JNDI: jdbc/pgdb -->
@@ -33,5 +42,17 @@
                 user="postgres"
                 password="fran123"/>
     </dataSource>
+
+    <jmsQueueConnectionFactory jndiName="jms/JmsFactory">
+        <properties.wasJms remoteServerAddress="localhost:7276:BootStrapBasicMessaging"/>
+    </jmsQueueConnectionFactory>
+
+    <jmsQueue id="simpleQueue" jndiName="jms/JmsQueue">
+        <properties.wasJms queueName="QUEUE1"/>
+    </jmsQueue>
+
+    <jmsActivationSpec id="InventarioWebAppPRN335-1.0-SNAPSHOT/ReceptorKardex">
+        <properties.wasJms maxConcurrency="200"/>
+    </jmsActivationSpec>
 
 </server>

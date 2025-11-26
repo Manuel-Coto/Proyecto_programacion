@@ -8,7 +8,7 @@
 
 <h:head>
     <meta charset="UTF-8" />
-    <title>#{receptorKardexFrm.nombreBean}</title>
+    <title>#{bodegaKardexFrm.nombreBean}</title>
     <h:outputStylesheet library="estilos" name="disenoAlmacen.css" />
     <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css" />
 </h:head>
@@ -20,7 +20,7 @@
     <div class="page-container">
         <div class="container">
             <div class="header">
-                <h1>#{receptorKardexFrm.nombreBean}</h1>
+                <h1>#{bodegaKardexFrm.nombreBean}</h1>
             </div>
 
             <div class="content">
@@ -32,16 +32,16 @@
                         <!-- RemoteCommand ejecutado por WebSocket -->
                         <p:remoteCommand id="actualizarTablaCmd"
                                          name="actualizarTablaCmd"
-                                         actionListener="#{receptorKardexFrm.actualizarTabla}"
-                                         update="tablaComprasPagadas,wsStatus"
+                                         actionListener="#{bodegaKardexFrm.actualizarTabla}"
+                                         update="tablaVentasFinalizadas,wsStatus"
                                          process="@this"
                                          async="false" />
 
                         <!-- Poll de respaldo (cada 2 seg si WebSocket falla) -->
                         <p:poll id="pollTabla"
                                 interval="2"
-                                listener="#{receptorKardexFrm.actualizarTabla}"
-                                update="tablaComprasPagadas,wsStatus"
+                                listener="#{bodegaKardexFrm.actualizarTabla}"
+                                update="tablaVentasFinalizadas,wsStatus"
                                 global="false"
                                 autoStart="true" />
 
@@ -49,55 +49,55 @@
                                  showDetail="true"
                                  life="5000" />
 
-                        <p:dataTable id="tablaComprasPagadas"
-                                     value="#{receptorKardexFrm.comprasPagadas}"
-                                     var="compra"
+                        <p:dataTable id="tablaVentasFinalizadas"
+                                     value="#{bodegaKardexFrm.ventasFinalizadas}"
+                                     var="venta"
                                      paginator="true"
                                      rows="10"
                                      paginatorPosition="bottom"
                                      rowHover="true"
                                      responsiveLayout="scroll"
-                                     emptyMessage="No hay compras pagadas registradas"
+                                     emptyMessage="No hay ventas finalizadas registradas"
                                      styleClass="tabla-general"
                                      stripedRows="true">
 
                             <f:facet name="header">
-                                <span>Compras con Estado PAGADA (Actualización en Tiempo Real)</span>
+                                <span>Ventas con Estado FINALIZADA (Actualización en Tiempo Real)</span>
                             </f:facet>
 
-                            <p:column headerText="ID Compra"
-                                      sortBy="#{compra.id}"
+                            <p:column headerText="ID Venta"
+                                      sortBy="#{venta.id}"
                                       style="width:150px; text-align:left;">
-                                <h:outputText value="#{compra.id}" />
+                                <h:outputText value="#{venta.id}" />
                             </p:column>
 
-                            <p:column headerText="Proveedor"
-                                      sortBy="#{compra.proveedor.nombre}">
-                                <h:outputText value="#{compra.proveedor.nombre}" />
+                            <p:column headerText="Cliente"
+                                      sortBy="#{venta.idCliente.nombre}">
+                                <h:outputText value="#{venta.idCliente.nombre}" />
                             </p:column>
 
                             <p:column headerText="Estado"
                                       style="width:110px; text-align:center;">
                                 <h:panelGroup style="color: #27ae60; font-weight: bold;">
                                     <i class="pi pi-check-circle"></i>
-                                    <h:outputText value=" #{compra.estado}" />
+                                    <h:outputText value=" #{venta.estado}" />
                                 </h:panelGroup>
                             </p:column>
 
                             <p:column headerText="Fecha"
-                                      sortBy="#{compra.fecha}"
+                                      sortBy="#{venta.fecha}"
                                       style="width:150px; text-align:center;">
-                                <h:outputText value="#{compra.fecha}">
+                                <h:outputText value="#{venta.fecha}">
                                     <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm" />
                                 </h:outputText>
                             </p:column>
 
                             <p:column headerText="Observaciones">
-                                <h:outputText value="#{compra.observaciones}"
-                                              rendered="#{not empty compra.observaciones}"
-                                              title="#{compra.observaciones}" />
+                                <h:outputText value="#{venta.observaciones}"
+                                              rendered="#{not empty venta.observaciones}"
+                                              title="#{venta.observaciones}" />
                                 <h:outputText value="---"
-                                              rendered="#{empty compra.observaciones}"
+                                              rendered="#{empty venta.observaciones}"
                                               style="color: #999;" />
                             </p:column>
 

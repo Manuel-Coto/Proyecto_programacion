@@ -289,12 +289,13 @@ public abstract class DefaultFrm<T> implements Serializable {
     /**
      * Agrega un mensaje a la interfaz
      */
-    protected void addMessage(FacesMessage.Severity severityInfo, String éxito, String registroModificadoCorrectamente) {
+    protected void addMessage(FacesMessage.Severity severity, String titulo, String mensaje) {
         FacesContext context = getFacesContext();
         if (context != null) {
-            context.addMessage(null, new FacesMessage());
+            context.addMessage(null, new FacesMessage(severity, titulo, mensaje));
         }
     }
+
 
     // ===== Getters y Setters =====
 

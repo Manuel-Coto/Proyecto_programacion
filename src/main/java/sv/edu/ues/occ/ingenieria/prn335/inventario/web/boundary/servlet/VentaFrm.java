@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ClienteDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.NotificadorKardex;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.VentaDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Cliente;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Venta;
@@ -35,6 +36,10 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
 
     @Inject
     private VentaDetalleFrm ventaDetalleFrm;
+
+    // Se inyecta para notificar al cerrar la venta (JMS -> ReceptorKardex -> WS)
+    @Inject
+    private NotificadorKardex notificadorKardex;
 
     private List<Cliente> clientesDisponibles;
     private final List<String> estadosDisponibles = List.of("CREADA", "PROCESO", "FINALIZADA", "ANULADA");
@@ -234,6 +239,43 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
         }
     }
 
+    // Nuevo método: marcar como FINALIZADA, persistir y notificar
+    public void notificarCambioKardex(ActionEvent actionEvent) {
+        if (this.registro == null) {
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para notificar"));
+            return;
+        }
+        this.registro.setEstado("FINALIZADA");
+        try {
+            getDao().modificar(this.registro);
+
+            // Notificar vía JMS para que ReceptorKardex difunda por WebSocket
+            try {
+                String mensaje = "Venta FINALIZADA: " + this.registro.getId();
+                notificadorKardex.notificarCambioKardex(mensaje);
+            } catch (Exception ne) {
+                LOGGER.log(Level.WARNING, "Error notificando cambio al Kardex (JMS)", ne);
+            }
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            this.modelo = null;
+            inicializarRegistros();
+
+            if (ventaDetalleFrm != null) {
+                ventaDetalleFrm.inicializar();
+            }
+
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Venta cerrada y notificada correctamente"));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al cerrar/notificar venta", e);
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al cerrar venta", e.getMessage()));
+        }
+    }
+
     @Override
     public void btnEliminarHandler(ActionEvent actionEvent) {
         LOGGER.log(Level.INFO, "Intentando eliminar venta...");
@@ -283,7 +325,7 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
         if (ventaDetalleFrm != null && this.registro != null) {
             ventaDetalleFrm.inicializarConVenta(this.registro);
             this.activeTab = 1;
-            LOGGER.log(Level.INFO, "✅ VentaDetalleFrm inicializado con venta: {0}",
+            LOGGER.log(Level.INFO, "VentaDetalleFrm inicializado con venta: {0}",
                     this.registro.getId());
         }
     }
@@ -301,27 +343,4 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
         return estadosDisponibles;
     }
 
-    public boolean isModoLista() {
-        return modoLista;
-    }
-
-    public void setModoLista(boolean modoLista) {
-        this.modoLista = modoLista;
-    }
-
-    public boolean isModoDetalle() {
-        return modoDetalle;
-    }
-
-    public void setModoDetalle(boolean modoDetalle) {
-        this.modoDetalle = modoDetalle;
-    }
-
-    public int getActiveTab() {
-        return activeTab;
-    }
-
-    public void setActiveTab(int activeTab) {
-        this.activeTab = activeTab;
-    }
 }

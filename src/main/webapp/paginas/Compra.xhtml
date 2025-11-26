@@ -109,10 +109,6 @@
                                     showDetail="true"
                                     autoUpdate="true" />
 
-                        <p:tabView id="tabView">
-                            <!-- PESTAÑA 1: GENERALIDADES -->
-                            <p:tab title="Generalidades" id="tabGeneral">
-
                                 <p:panelGrid columns="2"
                                              styleClass="form-grid-2col"
                                              columnClasses="col-label,col-field">
@@ -185,8 +181,8 @@
                                                      process="@form" />
 
                                     <p:commandButton value="Modificar Compra"
-                                                     icon="pi pi-pencil"
-                                                     styleClass="btn-oscuro"
+                                                     icon="pi pi-save"
+                                                     styleClass="btn-rojo"
                                                      actionListener="#{compraFrm.btnModificarHandler}"
                                                      rendered="#{compraFrm.estado.name() eq 'MODIFICAR'}"
                                                      update=":frmTop:messages :pnlDetalle :pnlTabla"
@@ -194,20 +190,21 @@
 
                                     <p:commandButton value="Eliminar Compra"
                                                      icon="pi pi-trash"
-                                                     styleClass="btn-rojo"
+                                                     styleClass="btn-oscuro"
                                                      actionListener="#{compraFrm.btnEliminarHandler}"
                                                      rendered="#{compraFrm.estado.name() eq 'MODIFICAR'}"
-                                                     update=":frmTop:messages :pnlDetalle :pnlTabla" />
+                                                     update=":frmTop:messages :pnlDetalle :pnlTabla"
+                                                     process="@form"/>
+
+                                    <p:commandButton value="Cerrar Compra"
+                                                     icon="pi pi-check"
+                                                     styleClass="btn-rojo"
+                                                        actionListener="#{compraFrm.notificarCambioKardex}"
+                                                        update=":frmTop:messages :pnlDetalle :pnlTabla"/>
+
                                 </h:panelGrid>
 
-                            </p:tab>
 
-                            <!-- PESTAÑA 2: DETALLES DE COMPRA -->
-                            <p:tab title="Detalles de Compra" id="tabDetalle" rendered="#{not empty compraFrm.registro.id}">
-                                <ui:include src="/WEB-INF/includes/CompraDetalleInclude.xhtml"/>
-                            </p:tab>
-
-                        </p:tabView>
                     </h:form>
                 </h:panelGroup>
 
