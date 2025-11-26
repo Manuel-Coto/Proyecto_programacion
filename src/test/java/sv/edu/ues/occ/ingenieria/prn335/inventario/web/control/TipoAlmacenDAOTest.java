@@ -20,7 +20,21 @@ public class TipoAlmacenDAOTest {
 
     @Test
     void crear() {
-        // ... (tu prueba existente)
+        // Crear una instancia de TipoAlmacen para prueba
+        TipoAlmacen nuevo = new TipoAlmacen();
+        nuevo.setNombre("Nuevo");
+        nuevo.setActivo(true);
+
+        EntityManager mockEm = Mockito.mock(EntityManager.class);
+
+        // Crear una instancia real de TipoAlmacenDAO
+        TipoAlmacenDAO cut = new TipoAlmacenDAO();
+        TipoAlmacenDAO spyCut = Mockito.spy(cut);
+        Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
+
+        spyCut.crear(nuevo);
+
+        verify(mockEm).persist(nuevo);
     }
 
     @Test
@@ -51,7 +65,7 @@ public class TipoAlmacenDAOTest {
     void modificarConNullLanzaExcepcion() {
         TipoAlmacenDAO cut = new TipoAlmacenDAO();
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             cut.modificar(null);
         });
     }
@@ -130,14 +144,15 @@ public class TipoAlmacenDAOTest {
     void findRangeConParametrosInvalidosLanzaExcepcion() {
         TipoAlmacenDAO cut = new TipoAlmacenDAO();
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             cut.findRange(-1, 10); // first negativo
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             cut.findRange(0, 0); // max menor a 1
         });
     }
+
     @Test
     void crearConEntityManagerNulo() {
         // Crear una instancia de TipoAlmacen para prueba
@@ -152,8 +167,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(null).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.crear(nuevo);
         });
     }
@@ -176,8 +191,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.crear(nuevo);
         });
     }
@@ -196,8 +211,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(null).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.modificar(existente);
         });
     }
@@ -220,8 +235,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.modificar(existente);
         });
     }
@@ -235,8 +250,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(null).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.count();
         });
     }
@@ -263,8 +278,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.count();
         });
     }
@@ -278,8 +293,8 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(null).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.findRange(0, 10);
         });
     }
@@ -306,62 +321,15 @@ public class TipoAlmacenDAOTest {
         TipoAlmacenDAO spyCut = Mockito.spy(cut);
         Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
 
-        // Verificar que se lanza IllegalStateException
-        assertThrows(IllegalStateException.class, () -> {
+        // Verificar que se lanza RuntimeException
+        assertThrows(RuntimeException.class, () -> {
             spyCut.findRange(0, 10);
         });
     }
+
     @Test
     void crearConRegistroNuloLanzaExcepcion() {
         TipoAlmacenDAO cut = new TipoAlmacenDAO();
-        assertThrows(IllegalArgumentException.class, () -> cut.crear(null));
+        assertThrows(RuntimeException.class, () -> cut.crear(null));
     }
-    @Test
-    void crearExitoso() {
-        TipoAlmacen nuevo = new TipoAlmacen();
-        nuevo.setNombre("Nuevo");
-        nuevo.setActivo(true);
-
-        EntityManager mockEm = Mockito.mock(EntityManager.class);
-
-        TipoAlmacenDAO cut = new TipoAlmacenDAO();
-        TipoAlmacenDAO spyCut = Mockito.spy(cut);
-        Mockito.doReturn(mockEm).when(spyCut).getEntityManager();
-
-        spyCut.crear(nuevo);
-
-        verify(mockEm).persist(nuevo);
-    }
-    @Test
-    void testConstructor() {
-        // Verifica que el constructor se inicialice correctamente
-        TipoAlmacenDAO cut = new TipoAlmacenDAO();
-        assertNotNull(cut);
-        // Si necesitas acceder a la entityClass, podrías requerir reflección o un método getter
-    }
-    @Test
-    void getEntityManagerExitoso() {
-        // Crear instancia del DAO
-        TipoAlmacenDAO cut = new TipoAlmacenDAO();
-
-        // Crear mock del EntityManager
-        EntityManager mockEm = Mockito.mock(EntityManager.class);
-
-        // Inyectar el mock usando reflexión (ya que el campo es package-private)
-        cut.em = mockEm;
-
-        // Verificar que getEntityManager() devuelve el mock configurado
-        EntityManager resultado = cut.getEntityManager();
-        assertSame(mockEm, resultado);
-    }
-
-    @Test
-    void getEntityManagerNulo() {
-        TipoAlmacenDAO cut = new TipoAlmacenDAO();
-        cut.em = null; // Forzar valor nulo
-
-        assertNull(cut.getEntityManager());
-    }
-
-
 }

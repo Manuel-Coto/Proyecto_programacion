@@ -97,6 +97,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.17</version> <!-- Última versión compatible con Java 24 -->
+        </dependency>
+        <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
             <version>15.0.8</version>
@@ -165,7 +170,7 @@
                 <artifactId>liberty-maven-plugin</artifactId>
                 <version>3.8.2</version>
                 <configuration>
-                    <installDirectory>/home/tztyfrank/wlp_25.0.0.8</installDirectory>
+                    <installDirectory>/usr/local/openliberty/wlp-25.0.0.8/wlp/</installDirectory>
                     <serverName>prn335_2025</serverName>
                 </configuration>
 
