@@ -38,9 +38,9 @@
         <properties.postgresql
                 serverName="localhost"
                 portNumber="5432"
-                databaseName="parcial1_prn335"
+                databaseName="inventarioprn335"
                 user="postgres"
-                password="fran123"/>
+                password="abc123"/>
     </dataSource>
 
     <jmsQueueConnectionFactory jndiName="jms/JmsFactory">
