@@ -141,5 +141,120 @@ public class KardexDAO extends InventarioDefaultDataAccess<Kardex> implements Se
         }
     }
 
+    public void sincronizarDesdeCompra(Compra compra, Integer idAlmacen) {
+        try {
+            if (compra == null || idAlmacen == null) {
+                LOGGER.log(Level.WARNING, "Compra o Almacén nulo");
+                return;
+            }
+
+            Almacen almacen = em.find(Almacen.class, idAlmacen);
+            if (almacen == null) {
+                throw new IllegalArgumentException("Almacén no encontrado: " + idAlmacen);
+            }
+
+            // Obtener detalles de la compra con query
+            TypedQuery<CompraDetalle> queryDetalles = em.createQuery(
+                    "SELECT cd FROM CompraDetalle cd WHERE cd.idCompra.id = :idCompra",
+                    CompraDetalle.class
+            );
+            queryDetalles.setParameter("idCompra", compra.getId());
+            List<CompraDetalle> detalles = queryDetalles.getResultList();
+
+            if (detalles == null || detalles.isEmpty()) {
+                LOGGER.log(Level.WARNING, "Compra sin detalles: {0}", compra.getId());
+                return;
+            }
+
+            for (CompraDetalle detalle : detalles) {
+                Kardex kardex = new Kardex();
+                kardex.setId(UUID.randomUUID());
+                kardex.setIdProducto(detalle.getIdProducto());
+                kardex.setIdAlmacen(almacen);
+                kardex.setFecha(OffsetDateTime.now());
+                kardex.setTipoMovimiento("ENTRADA");
+                kardex.setCantidad(detalle.getCantidad());
+                kardex.setPrecio(detalle.getPrecio());
+                kardex.setIdCompraDetalle(detalle);
+                kardex.setObservaciones("Compra #" + compra.getId());
+
+                em.persist(kardex);
+
+                KardexDetalle kardexDetalle = new KardexDetalle();
+                kardexDetalle.setId(UUID.randomUUID());
+                kardexDetalle.setIdKardex(kardex);
+                kardexDetalle.setLote("LOTE-COMPRA-" + compra.getId());
+                kardexDetalle.setActivo(true);
+
+                em.persist(kardexDetalle);
+            }
+
+            em.flush();
+            LOGGER.log(Level.INFO, "Compra sincronizada a Kardex: {0}", compra.getId());
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error sincronizando compra a Kardex", e);
+            throw new RuntimeException("Error: " + e.getMessage(), e);
+        }
+    }
+
+    public void sincronizarDesdeVenta(Venta venta, Integer idAlmacen) {
+        try {
+            if (venta == null || idAlmacen == null) {
+                LOGGER.log(Level.WARNING, "Venta o Almacén nulo");
+                return;
+            }
+
+            Almacen almacen = em.find(Almacen.class, idAlmacen);
+            if (almacen == null) {
+                throw new IllegalArgumentException("Almacén no encontrado: " + idAlmacen);
+            }
+
+            // Obtener detalles de la venta con query
+            TypedQuery<VentaDetalle> queryDetalles = em.createQuery(
+                    "SELECT vd FROM VentaDetalle vd WHERE vd.idVenta.id = :idVenta",
+                    VentaDetalle.class
+            );
+            queryDetalles.setParameter("idVenta", venta.getId());
+            List<VentaDetalle> detalles = queryDetalles.getResultList();
+
+            if (detalles == null || detalles.isEmpty()) {
+                LOGGER.log(Level.WARNING, "Venta sin detalles: {0}", venta.getId());
+                return;
+            }
+
+            for (VentaDetalle detalle : detalles) {
+                Kardex kardex = new Kardex();
+                kardex.setId(UUID.randomUUID());
+                kardex.setIdProducto(detalle.getIdProducto());
+                kardex.setIdAlmacen(almacen);
+                kardex.setFecha(OffsetDateTime.now());
+                kardex.setTipoMovimiento("SALIDA");
+                kardex.setCantidad(detalle.getCantidad());
+                kardex.setPrecio(detalle.getPrecio());
+                kardex.setIdVentaDetalle(detalle);
+                kardex.setObservaciones("Venta #" + venta.getId());
+
+                em.persist(kardex);
+
+                KardexDetalle kardexDetalle = new KardexDetalle();
+                kardexDetalle.setId(UUID.randomUUID());
+                kardexDetalle.setIdKardex(kardex);
+                kardexDetalle.setLote("LOTE-VENTA-" + venta.getId());
+                kardexDetalle.setActivo(true);
+
+                em.persist(kardexDetalle);
+            }
+
+            em.flush();
+            LOGGER.log(Level.INFO, "Venta sincronizada a Kardex: {0}", venta.getId());
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error sincronizando venta a Kardex", e);
+            throw new RuntimeException("Error: " + e.getMessage(), e);
+        }
+    }
+
+
 
 }

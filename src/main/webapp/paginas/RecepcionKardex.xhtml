@@ -101,10 +101,31 @@
                                               style="color: #999;" />
                             </p:column>
 
+                            <p:column headerText="Acciones" style="width:200px; text-align:center;">
+                                <p:commandButton value="Registrar en Kardex"
+                                                 icon="pi pi-save"
+                                                 action="#{receptorKardexFrm.registrarCompraEnKardex(compra)}"
+                                                 update="messages"
+                                                 styleClass="btn-rojo"
+                                                 process="@this" />
+                            </p:column>
                         </p:dataTable>
-
+                        <h:panelGrid columns="2" style="margin-bottom: 20px;">
+                        <h:outputLabel value="Seleccionar Almacén:" style="font-weight: bold;" />
+                        <p:selectOneMenu value="#{receptorKardexFrm.idAlmacenSeleccionado}"
+                                         converter="jakarta.faces.Integer"
+                                         required="true"
+                                         requiredMessage="Debe seleccionar un almacén">
+                            <f:selectItem itemLabel="-- Seleccione Almacén --" itemValue="#{null}" />
+                            <f:selectItems value="#{receptorKardexFrm.listaAlmacenes}"
+                                           var="almacen"
+                                           itemValue="#{almacen.id}"
+                                           itemLabel="#{almacen.idTipoAlmacen.nombre}" />
+                        </p:selectOneMenu>
+                        </h:panelGrid>
                     </h:form>
                 </h:panelGroup>
+
 
                 <h:panelGroup id="pnlDetalle" layout="block" style="margin-top: 20px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
                     <h:form id="frmInfo">

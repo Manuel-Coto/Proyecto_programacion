@@ -3,18 +3,21 @@ package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.Converte;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-@Converter(autoApply = true)
-public class LongIntegerAttributeConverter implements AttributeConverter<Long, Integer> {
+/**
+ * Conversor seguro para Long <-> Long en BD.
+ * - Desactiva autoApply para evitar aplicarlo globalmente y provocar ClassCastException.
+ * - Maneja nulls de forma segura.
+ */
+@Converter(autoApply = false)
+public class LongIntegerAttributeConverter implements AttributeConverter<Long, Long> {
 
     @Override
-    public Integer convertToDatabaseColumn(Long attribute) {
-        if (attribute == null) return null;
-        return attribute.intValue();  // Convertir Long a Integer para la base de datos
+    public Long convertToDatabaseColumn(Long attribute) {
+        return attribute; // si la BD espera Integer, anotar explícitamente el campo o adaptar según necesidad
     }
 
     @Override
-    public Long convertToEntityAttribute(Integer dbData) {
-        if (dbData == null) return null;
-        return dbData.longValue();  // Convertir Integer a Long para la entidad
+    public Long convertToEntityAttribute(Long dbData) {
+        return dbData;
     }
 }

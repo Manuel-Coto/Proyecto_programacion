@@ -8,6 +8,7 @@ import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.ws.KardexEndPoint;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.NotificadorKardex;
@@ -198,17 +199,12 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
             Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
             this.registro.setProveedor(proveedor);
 
-            boolean notificar = EstadoCompra.PAGADA.name().equalsIgnoreCase(this.registro.getEstado());
-
             getDao().modificar(this.registro);
 
-            if (notificar) {
-                try {
-                    String mensaje = "Compra PAGADA: " + this.registro.getId();
-                    notificadorKardex.notificarCambioKardex(mensaje);
-                } catch (Exception ne) {
-                    LOGGER.log(Level.WARNING, "Error notificando cambio al Kardex", ne);
-                }
+            // Notificar siempre cuando se modifica para que el receptor recargue y filtre
+            if (kardexEndPoint != null) {
+                kardexEndPoint.enviarMensajeBroadcast("actualizar");
+                LOGGER.log(Level.INFO, "Notificación enviada al WebSocket desde btnModificarHandler");
             }
 
             this.registro = null;
@@ -226,19 +222,49 @@ public class CompraFrm extends DefaultFrm<Compra> implements Serializable {
         }
     }
 
+
     /**
      * Método que marca el registro como PAGADA y delega en btnModificarHandler para persistir y notificar.
      */
+    @Inject
+    private transient KardexEndPoint kardexEndPoint;
+
     public void notificarCambioKardex(ActionEvent actionEvent) {
         if (this.registro == null) {
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_WARN, "Atención", "No hay registro para notificar"));
             return;
         }
-        this.registro.setEstado(EstadoCompra.PAGADA.name());
-        // Delegar en el handler de modificación (éste notificará antes de limpiar)
-        btnModificarHandler(actionEvent);
+
+        try {
+            this.registro.setEstado(EstadoCompra.PAGADA.name());
+            compraDao.validarProveedor(this.registro.getIdProveedor());
+            Proveedor proveedor = proveedorDao.findById(this.registro.getIdProveedor());
+            this.registro.setProveedor(proveedor);
+
+            getDao().modificar(this.registro);
+            LOGGER.log(Level.INFO, "Compra marcada como PAGADA: {0}", this.registro.getId());
+
+            // Notificar al WebSocket
+            if (kardexEndPoint != null) {
+                kardexEndPoint.enviarMensajeBroadcast("actualizar");
+                LOGGER.log(Level.INFO, "Notificación enviada al WebSocket desde CompraFrm");
+            }
+
+            this.registro = null;
+            this.estado = ESTADO_CRUD.NADA;
+            this.modelo = null;
+            inicializarRegistros();
+
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Compra cerrada y enviada a Kardex"));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al cerrar compra", e);
+            getFacesContext().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
+        }
     }
+
 
     @Override
     public void btnEliminarHandler(ActionEvent actionEvent) {

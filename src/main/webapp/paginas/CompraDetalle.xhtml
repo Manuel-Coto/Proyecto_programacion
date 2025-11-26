@@ -91,10 +91,10 @@
                     <h:outputText rendered="#{empty compraDetalleFrm.registro.id}"
                                   value="(Automático)"/>
 
+                    <!-- En CompraDetalle.xhtml -->
                     <h:outputLabel for="selCompra" value="Compra:"/>
                     <p:selectOneMenu id="selCompra"
-                                     value="#{compraDetalleFrm.registro.idCompra}"
-                                     converter="compraConverter"
+                                     value="#{compraDetalleFrm.idCompraSeleccionada}"
                                      required="true"
                                      requiredMessage="Seleccione compra"
                                      disabled="#{not empty compraDetalleFrm.registro.idCompra}">
@@ -102,13 +102,12 @@
                         <f:selectItems value="#{compraDetalleFrm.comprasDisponibles}"
                                        var="compra"
                                        itemLabel="Compra #{compra.id}"
-                                       itemValue="#{compra}"/>
+                                       itemValue="#{compra.id}"/>
                     </p:selectOneMenu>
 
                     <h:outputLabel for="selProducto" value="Producto:"/>
                     <p:selectOneMenu id="selProducto"
-                                     value="#{compraDetalleFrm.registro.idProducto}"
-                                     converter="productoConverter"
+                                     value="#{compraDetalleFrm.idProductoSeleccionado}"
                                      required="true"
                                      requiredMessage="Seleccione producto"
                                      disabled="#{not empty compraDetalleFrm.registro.idProducto}">
@@ -116,8 +115,10 @@
                         <f:selectItems value="#{compraDetalleFrm.productosDisponibles}"
                                        var="prod"
                                        itemLabel="#{prod.nombreProducto}"
-                                       itemValue="#{prod}"/>
+                                       itemValue="#{prod.id}"/>
                     </p:selectOneMenu>
+
+
 
                     <h:outputLabel for="txtCantidad" value="Cantidad:"/>
                     <p:inputNumber id="txtCantidad"

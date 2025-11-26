@@ -1,6 +1,7 @@
 package sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.servlet;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
@@ -40,6 +41,8 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
 
     @Inject
     private ProductoDAO productoDao;
+
+
 
     private List<Compra> comprasDisponibles;
     private List<Producto> productosDisponibles;
@@ -305,6 +308,53 @@ public class CompraDetalleFrm extends DefaultFrm<CompraDetalle> implements Seria
         }
         return productosDisponibles;
     }
+
+    private Long idCompraSeleccionada;
+    private String idProductoSeleccionadoString;
+    private UUID idProductoSeleccionado;
+
+    public Long getIdCompraSeleccionada() {
+        if (registro != null && registro.getIdCompra() != null) {
+            return registro.getIdCompra().getId();
+        }
+        return idCompraSeleccionada;
+    }
+
+    public void setIdCompraSeleccionada(Long id) {
+        this.idCompraSeleccionada = id;
+        if (id != null && registro != null) {
+            CompraDAO dao = CDI.current().select(CompraDAO.class).get();
+            Compra compra = dao.findById(id);
+            if (compra != null) {
+                registro.setIdCompra(compra);
+            }
+        }
+    }
+
+    public String getIdProductoSeleccionado() {
+        if (registro != null && registro.getIdProducto() != null) {
+            return registro.getIdProducto().getId().toString();
+        }
+        return idProductoSeleccionadoString;
+    }
+
+    public void setIdProductoSeleccionado(String id) {
+        this.idProductoSeleccionadoString = id;
+        if (id != null && !id.trim().isEmpty() && registro != null) {
+            try {
+                UUID uuid = UUID.fromString(id.trim());
+                ProductoDAO dao = CDI.current().select(ProductoDAO.class).get();
+                Producto producto = dao.findById(uuid);
+                if (producto != null) {
+                    registro.setIdProducto(producto);
+                }
+            } catch (IllegalArgumentException e) {
+                // UUID inválido, ignorar
+            }
+        }
+    }
+
+
 
     public List<String> getEstadosDisponibles() {
         return estadosDisponibles;

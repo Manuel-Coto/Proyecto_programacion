@@ -5,7 +5,10 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.event.ActionEvent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.AlmacenDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.CompraDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.KardexDAO;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Almacen;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.core.entity.Compra;
 
 import java.io.Serializable;
@@ -22,7 +25,7 @@ public class ReceptorKardexFrm implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(ReceptorKardexFrm.class.getName());
 
     @Inject
-    private CompraDAO compraDAO;
+    private transient CompraDAO compraDAO;
 
     private List<Compra> comprasPagadas = new ArrayList<>();
     private String nombreBean = "Monitor de Compras Pagadas";
@@ -31,24 +34,26 @@ public class ReceptorKardexFrm implements Serializable {
     public void init() {
         LOGGER.log(Level.INFO, "Inicializando ReceptorKardexFrm...");
         cargarComprasPagadas();
+        cargarAlmacenes();
     }
 
     public synchronized void cargarComprasPagadas() {
         try {
+            // Limpiar la lista completamente para forzar recarga
+            this.comprasPagadas.clear();
+
             List<Compra> todasLasCompras = compraDAO.findAll();
-            List<Compra> nuevaLista = new ArrayList<>();
 
             if (todasLasCompras != null) {
                 for (Compra compra : todasLasCompras) {
                     if (compra.getEstado() != null &&
                             compra.getEstado().equalsIgnoreCase(EstadoCompra.PAGADA.name())) {
-                        nuevaLista.add(compra);
+                        this.comprasPagadas.add(compra);
                     }
                 }
             }
 
-            this.comprasPagadas = nuevaLista;
-            LOGGER.log(Level.INFO, "Compras pagadas cargadas: {0}", this.comprasPagadas.size());
+            LOGGER.log(Level.INFO, "Compras pagadas recargas: {0}", this.comprasPagadas.size());
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "✗ Error al cargar compras pagadas", e);
@@ -56,19 +61,68 @@ public class ReceptorKardexFrm implements Serializable {
         }
     }
 
-    // Método sin parámetros (para <p:poll>)
     public void actualizarTabla() {
-        LOGGER.log(Level.INFO, "actualizarTabla() EJECUTADO (sin ActionEvent)");
+        LOGGER.log(Level.INFO, "Actualizando tabla desde WebSocket");
         cargarComprasPagadas();
-        LOGGER.log(Level.INFO, "Tabla actualizada con {0} compras pagadas", this.comprasPagadas.size());
     }
 
-    // Método con ActionEvent (para <p:remoteCommand>)
     public void actualizarTabla(ActionEvent actionEvent) {
-        LOGGER.log(Level.INFO, "actualizarTabla() EJECUTADO (con ActionEvent)");
+        LOGGER.log(Level.INFO, "Actualizando tabla desde remoteCommand");
         cargarComprasPagadas();
-        LOGGER.log(Level.INFO, "Tabla actualizada con {0} compras pagadas", this.comprasPagadas.size());
     }
+
+
+
+
+    @Inject
+    private transient KardexDAO kardexDAO;
+
+    @Inject
+    private transient AlmacenDAO almacenDAO;
+
+    private List<Almacen> listaAlmacenes = new ArrayList<>();
+    private Integer idAlmacenSeleccionado;
+
+    private void cargarAlmacenes() {
+        try {
+            this.listaAlmacenes = almacenDAO.findAll();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error cargando almacenes", e);
+            this.listaAlmacenes = new ArrayList<>();
+        }
+    }
+
+
+    public void registrarCompraEnKardex(Compra compra) {
+        if (idAlmacenSeleccionado == null) {
+            LOGGER.log(Level.WARNING, "Almacén no seleccionado");
+            return;
+        }
+
+        try {
+            kardexDAO.sincronizarDesdeCompra(compra, idAlmacenSeleccionado);
+            LOGGER.log(Level.INFO, "Compra registrada en Kardex");
+
+
+            cargarComprasPagadas(); // Opcional: refrescar la tabla local
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error registrando compra en Kardex", e);
+        }
+    }
+
+
+    public List<Almacen> getListaAlmacenes() {
+        return listaAlmacenes != null ? listaAlmacenes : new ArrayList<>();
+    }
+
+    public Integer getIdAlmacenSeleccionado() {
+        return idAlmacenSeleccionado;
+    }
+
+    public void setIdAlmacenSeleccionado(Integer idAlmacenSeleccionado) {
+        this.idAlmacenSeleccionado = idAlmacenSeleccionado;
+    }
+
 
     public List<Compra> getComprasPagadas() {
         return comprasPagadas;

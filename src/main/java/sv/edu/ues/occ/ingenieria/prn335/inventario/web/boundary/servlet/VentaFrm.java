@@ -7,6 +7,7 @@ import jakarta.faces.event.ActionEvent;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import sv.edu.ues.occ.ingenieria.prn335.inventario.web.boundary.ws.KardexEndPoint;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.ClienteDAO;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.InventarioDefaultDataAccess;
 import sv.edu.ues.occ.ingenieria.prn335.inventario.web.control.NotificadorKardex;
@@ -40,6 +41,9 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
     // Se inyecta para notificar al cerrar la venta (JMS -> ReceptorKardex -> WS)
     @Inject
     private NotificadorKardex notificadorKardex;
+
+    @Inject
+    private KardexEndPoint kardexEndPoint;
 
     private List<Cliente> clientesDisponibles;
     private final List<String> estadosDisponibles = List.of("CREADA", "PROCESO", "FINALIZADA", "ANULADA");
@@ -221,6 +225,12 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
                 this.registro.setIdCliente(clienteEntidad);
                 getDao().modificar(this.registro);
 
+                // Notificar siempre cuando se modifica
+                if (kardexEndPoint != null) {
+                    kardexEndPoint.enviarMensajeBroadcast("actualizar");
+                    LOGGER.log(Level.INFO, "Notificación enviada al WebSocket desde btnModificarHandler");
+                }
+
                 this.registro = null;
                 this.estado = ESTADO_CRUD.NADA;
                 inicializarRegistros();
@@ -239,6 +249,7 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
         }
     }
 
+
     // Nuevo método: marcar como FINALIZADA, persistir y notificar
     public void notificarCambioKardex(ActionEvent actionEvent) {
         if (this.registro == null) {
@@ -250,12 +261,10 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
         try {
             getDao().modificar(this.registro);
 
-            // Notificar vía JMS para que ReceptorKardex difunda por WebSocket
-            try {
-                String mensaje = "Venta FINALIZADA: " + this.registro.getId();
-                notificadorKardex.notificarCambioKardex(mensaje);
-            } catch (Exception ne) {
-                LOGGER.log(Level.WARNING, "Error notificando cambio al Kardex (JMS)", ne);
+            // Notificar al WebSocket
+            if (kardexEndPoint != null) {
+                kardexEndPoint.enviarMensajeBroadcast("actualizar");
+                LOGGER.log(Level.INFO, "Notificación enviada al WebSocket desde VentaFrm");
             }
 
             this.registro = null;
@@ -268,13 +277,14 @@ public class VentaFrm extends DefaultFrm<Venta> implements Serializable {
             }
 
             getFacesContext().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Venta cerrada y notificada correctamente"));
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Venta cerrada y enviada a Kardex"));
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al cerrar/notificar venta", e);
+            LOGGER.log(Level.SEVERE, "Error al cerrar venta", e);
             getFacesContext().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error al cerrar venta", e.getMessage()));
         }
     }
+
 
     @Override
     public void btnEliminarHandler(ActionEvent actionEvent) {
