@@ -5,8 +5,23 @@
         <feature>jakartaee-10.0</feature>
         <feature>jdbc-4.3</feature>
         <feature>websocket-2.1</feature>
-
+        <feature>messaging-3.1</feature>
+        <feature>messagingClient-3.0</feature>
+        <feature>messagingSecurity-3.0</feature>
     </featureManager>
+
+    <keyStore id="defaultKeyStore" password="Liberty" />
+    <basicRegistry id="basic" realm="BasicRealm" />
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="9080"
+                  httpsPort="9443" />
+    <applicationManager autoExpand="true"/>
+
+    <ssl id="defaultSSLConfig"
+         keyStoreRef="defaultKeyStore"
+         trustDefaultCerts="true" />
 
     <messagingEngine>
         <queue id="QUEUE1"/>
@@ -21,13 +36,6 @@
     </library>
 
     <jdbcDriver id="postgres-drivers" libraryRef="postgresLib"/>
-
-    <httpEndpoint id="defaultHttpEndpoint"
-                  host="*"
-                  httpPort="9080"
-                  httpsPort="9443" />
-
-
 
     <!-- DataSource JNDI: jdbc/pgdb -->
     <dataSource id="InventarioDataSource"
