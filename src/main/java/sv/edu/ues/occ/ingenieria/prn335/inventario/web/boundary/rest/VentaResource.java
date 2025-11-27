@@ -189,3 +189,4 @@ public class VentaResource {
                 .build();
     }
 }
+//finalizando proyecto de inventario
